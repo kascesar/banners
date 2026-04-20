@@ -23,12 +23,14 @@ Cover(
 
 from .slide import Slide
 from .slides import Cover, Intro, Section, Closing
-from .content import Text, Image, Graph
+from .content import Text, Image, Graph, AnimatedGraph, Table, Plot
 from .palette import Palette, SectionPalette, ORANGE, BLUE, GREEN, PURPLE, GRAY
+from .config import configure
 
 __all__ = [
+    "configure",
     "Slide",
     "Cover", "Intro", "Section", "Closing",
-    "Text", "Image", "Graph",
+    "Text", "Image", "Graph", "AnimatedGraph", "Table", "Plot", "Manim",
     "Palette", "SectionPalette", "ORANGE", "BLUE", "GREEN", "PURPLE", "GRAY",
 ]

@@ -4,8 +4,7 @@ import marimo as mo
 
 from ..slide import Slide
 from ..palette import Palette
-
-_TEAM_LINE = "team"
+from .. import config as _cfg
 
 
 class Cover(Slide):
@@ -56,13 +55,14 @@ class Cover(Slide):
         content=None,
         palette: Palette | None = None,
         content_kind: "str | None" = None,
-        team: str = _TEAM_LINE,
+        footer: str = "",
+        team: str = "",
         icon: "dict | None" = None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette, content_kind)
-        self.date = date
-        self.team = team
-        self.icon = icon
+        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer)
+        self.date = date or _cfg.get("date", "")
+        self.team = team or _cfg.get("team", "")
+        self.icon = icon if icon is not None else _cfg.get("icon")
 
     def _render_banner(self) -> mo.Html:
         p = self.palette

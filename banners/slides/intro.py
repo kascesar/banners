@@ -4,8 +4,7 @@ import marimo as mo
 
 from ..slide import Slide
 from ..palette import Palette
-
-_TEAM_LINE = "team"
+from .. import config as _cfg
 
 
 class Intro(Slide):
@@ -65,15 +64,14 @@ class Intro(Slide):
         tag: str = "",
         summary: str = "",
         footer: str = "",
-        team: str = _TEAM_LINE,
+        team: str = "",
         icon: "dict | None" = None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette, content_kind)
+        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer)
         self.tag = tag
         self.summary = summary
-        self.footer = footer
-        self.team = team
-        self.icon = icon
+        self.team = team or _cfg.get("team", "")
+        self.icon = icon if icon is not None else _cfg.get("icon")
 
     def render(self) -> mo.Html:
         """Assemble banner, summary callout, content, and footer.
@@ -85,8 +83,7 @@ class Intro(Slide):
         if self.summary:
             parts.append(mo.callout(mo.md(self.summary), kind="warn"))
         parts.extend(self._render_content())
-        if self.footer:
-            parts.append(mo.md(f"> {self.footer}"))
+        parts.extend(self._render_footer())
         return mo.vstack(parts)
 
     def _render_banner(self) -> mo.Html:

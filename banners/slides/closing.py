@@ -4,8 +4,7 @@ import marimo as mo
 
 from ..slide import Slide
 from ..palette import Palette
-
-_TEAM_LINE = "team"
+from .. import config as _cfg
 
 
 class Closing(Slide):
@@ -56,16 +55,15 @@ class Closing(Slide):
         content=None,
         palette: Palette | None = None,
         content_kind: "str | None" = None,
-        team: str = _TEAM_LINE,
-        stats: "list[tuple[str, str, str]] | None" = None,
         footer: str = "",
+        team: str = "",
+        stats: "list[tuple[str, str, str]] | None" = None,
         icon: "dict | None" = None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette, content_kind)
-        self.team = team
+        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer)
+        self.team = team or _cfg.get("team", "")
         self.stats = stats
-        self.footer = footer
-        self.icon = icon
+        self.icon = icon if icon is not None else _cfg.get("icon")
 
     def render(self) -> mo.Html:
         """Assemble banner, content, stats row, and footer.
@@ -82,8 +80,7 @@ class Closing(Slide):
                     justify="space-around",
                 )
             )
-        if self.footer:
-            parts.append(mo.md(f"> {self.footer}"))
+        parts.extend(self._render_footer())
         return mo.vstack(parts)
 
     def _render_banner(self) -> mo.Html:

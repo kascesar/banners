@@ -9,7 +9,13 @@ Each slide is a Python object. Content is declared with dedicated classes and th
 
 * Installation
 
-The package is not yet published to PyPI. Install it locally in editable mode:
+The package is not yet published to PyPI. Install directly from GitHub:
+
+#+begin_src bash
+uv pip install git+https://github.com/kascesar/banners.git
+#+end_src
+
+For local development in editable mode:
 
 #+begin_src bash
 uv venv
@@ -25,15 +31,20 @@ uv pip install -e ".[dev]"
 * Quick start
 
 #+begin_src python
-from banners.slides import Cover, Intro, Section, Closing
+from banners import configure, Cover, Intro, Section, Closing
 from banners.content import Text, Image, Graph
 from banners.palette import BLUE
+
+# Set shared values once — all slides inherit them automatically.
+configure(
+    team="Analytics Team",
+    date="April 2026",
+    icon={"src": "img/logo.png"},
+)
 
 Cover(
     title="Churn Prediction v2",
     subtitle="Model migration and deployment.",
-    date="April 2026",
-    palette=BLUE,
     content=[
         Text("**Accuracy** — 91% AUC on holdout."),
         Text("**Latency** — p99 under 30 ms."),
@@ -43,40 +54,89 @@ Cover(
 ).render()
 #+end_src
 
+* Global configuration
+
+=configure()= sets values shared across all slides. Call it once at the top of the notebook.
+
+| Parameter | Used by                     | Description                        |
+|-----------+-----------------------------+------------------------------------|
+| =team=      | =Cover=, =Intro=, =Closing=       | Label shown in the banner          |
+| =date=      | =Cover=                       | Date line at the bottom of the banner |
+| =palette=   | =Cover=, =Intro=, =Closing=       | Color palette (=BLUE=, =GREEN=, etc.)  |
+| =icon=      | All slides                  | Logo/icon placed on the banner     |
+
+Calling =configure()= also resets the =Section= auto-number counter to zero.
+
+Any slide parameter passed explicitly overrides the global value.
+
 * Slides
 
-| Class   | Purpose                              | Typical position |
-|---------+--------------------------------------+------------------|
-| =Cover=   | Large centered banner                | First slide      |
-| =Intro=   | Context or problem statement         | Slides 2–3       |
-| =Section= | Intermediate slide with left border  | Middle slides    |
-| =Closing= | Closing banner with optional metrics | Last slide       |
+| Class     | Purpose                              | Typical position |
+|-----------+--------------------------------------+------------------|
+| =Cover=     | Large centered banner                | First slide      |
+| =Intro=     | Context or problem statement         | Slides 2–3       |
+| =Section=   | Intermediate slide with left border  | Middle slides    |
+| =Closing=   | Closing banner with optional metrics | Last slide       |
+
+All slides share these parameters:
+
+| Parameter      | Description                                                   |
+|----------------+---------------------------------------------------------------|
+| =title=          | Main heading                                                  |
+| =subtitle=       | Support phrase shown inside the banner                        |
+| =content=        | Content element(s) displayed below the banner                 |
+| =palette=        | Color palette. Defaults to orange                             |
+| =content_kind=   | Box style for =Text= lists: =neutral=, =info=, =success=, =warn=, =danger= |
+| =footer=         | Quote rendered as a blockquote at the bottom of the slide     |
+| =icon=           | Banner icon. Falls back to the global =configure()= value       |
+
+** Section — auto-numbering
+
+=Section= slides assign their number automatically, starting from =01= and
+incrementing with each new instance. The counter resets when =configure()= is
+called.
+
+#+begin_src python
+configure(team="My Team")   # counter resets to 0
+
+Section(title="Context")    # number = "01"
+Section(title="Results")    # number = "02"
+Section(title="Conclusions") # number = "03"
+
+# Override:
+Section(title="Appendix", number="A1")
+
+# Suppress:
+Section(title="No number", number="")
+#+end_src
 
 * Content elements
 
-| Class       | Renders                              |
-|-------------+--------------------------------------|
-| =Text(body)=  | Markdown — paragraphs, lists, tables |
-| =Image(src)=  | Image from file path, bytes, or URL  |
-| =Graph(code)= | Mermaid diagram                      |
+| Class         | Renders                              |
+|---------------+--------------------------------------|
+| =Text(body)=    | Markdown — paragraphs, lists, tables |
+| =Image(src)=    | Image from file path, bytes, or URL  |
+| =Graph(code)=   | Mermaid diagram                      |
+| =Table(df)=     | pandas DataFrame                     |
+| =Plot(fig)=     | matplotlib or plotly figure (auto-detected) |
 
 Content is passed to the =content= parameter of any slide. Layout is resolved automatically:
 
 - *Single item* → full width.
-- *List of =Text= only* → equal columns; pass =content_kind= to add a styled box around each column.
-- *List with any =Image= or =Graph=* → equal-width CSS grid, no extra parameter needed.
+- *List of =Text= only* → equal columns; pass =content_kind= to add a styled box.
+- *List with any other element* → equal-width CSS grid, one column per item.
 
 * Palettes
 
 All slides accept a =palette= parameter. The default is orange.
 
-| Constant | Colors                      |
-|----------+-----------------------------|
-| =ORANGE=   | =#7c2d12= → =#c2410c= → =#ea580c= |
-| =BLUE=     | =#1e3a5f= → =#1d4ed8= → =#3b82f6= |
-| =GREEN=    | =#14532d= → =#15803d= → =#22c55e= |
-| =PURPLE=   | =#3b0764= → =#7e22ce= → =#a855f7= |
-| =GRAY=     | =#111827= → =#374151= → =#6b7280= |
+| Constant   | Colors                              |
+|------------+-------------------------------------|
+| =ORANGE=     | =#7c2d12= → =#c2410c= → =#ea580c=       |
+| =BLUE=       | =#1e3a5f= → =#1d4ed8= → =#3b82f6=       |
+| =GREEN=      | =#14532d= → =#15803d= → =#22c55e=       |
+| =PURPLE=     | =#3b0764= → =#7e22ce= → =#a855f7=       |
+| =GRAY=       | =#111827= → =#374151= → =#6b7280=       |
 
 Custom palettes: =Palette(start, mid, end)= for full-banner slides, =SectionPalette(border, bg_start, bg_end)= for =Section=.
 

@@ -43,6 +43,22 @@ class Palette:
         """CSS linear-gradient string built from start, mid and end stops."""
         return f"linear-gradient(135deg, {self.start} 0%, {self.mid} 50%, {self.end} 100%)"
 
+    def to_section_palette(self) -> "SectionPalette":
+        """Derive a SectionPalette from this palette.
+
+        Uses `end` as the border accent and a darkened `start` for the background.
+        """
+        def _darken(hex_color: str, factor: float) -> str:
+            h = hex_color.lstrip("#")
+            r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+            return f"#{int(r * factor):02x}{int(g * factor):02x}{int(b * factor):02x}"
+
+        return SectionPalette(
+            border=self.end,
+            bg_start=_darken(self.start, 0.30),
+            bg_end=_darken(self.start, 0.42),
+        )
+
 
 @dataclass
 class SectionPalette:

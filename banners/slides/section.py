@@ -4,6 +4,7 @@ import marimo as mo
 
 from ..slide import Slide
 from ..palette import SectionPalette
+from .. import config as _cfg
 
 
 class Section(Slide):
@@ -58,14 +59,16 @@ class Section(Slide):
         content=None,
         palette: SectionPalette | None = None,
         content_kind: "str | None" = None,
-        number: str = "",
+        number: "str | None" = None,
         footer: str = "",
         icon: "dict | None" = None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette or SectionPalette(), content_kind)
-        self.number = number
-        self.footer = footer
-        self.icon = icon
+        if palette is None:
+            global_palette = _cfg.get("palette")
+            palette = global_palette.to_section_palette() if global_palette is not None else SectionPalette()
+        super().__init__(title, subtitle, content, palette, content_kind, footer)
+        self.number = number if number is not None else _cfg._next_section_number()
+        self.icon = icon if icon is not None else _cfg.get("icon")
 
     def render(self) -> mo.Html:
         """Assemble banner, content, and footer.
@@ -75,8 +78,7 @@ class Section(Slide):
         """
         parts = [self._render_banner()]
         parts.extend(self._render_content())
-        if self.footer:
-            parts.append(mo.md(f"> {self.footer}"))
+        parts.extend(self._render_footer())
         return mo.vstack(parts)
 
     def _render_banner(self) -> mo.Html:

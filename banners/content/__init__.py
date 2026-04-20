@@ -6,12 +6,15 @@ Clases disponibles:
     Graph  — Diagrama Mermaid.
     Table  — Tabla desde un pandas DataFrame.
     Plot   — Figura de matplotlib o plotly.
+    Manim  — Animación renderizada con Manim (requiere `banners[manim]`).
 """
 
 from .text import Text
 from .image import Image
 from .graph import Graph
+from .animated_graph import AnimatedGraph
 from .table import Table
 from .plot import Plot
+from .manim import Manim
 
-__all__ = ["Text", "Image", "Graph", "Table", "Plot"]
+__all__ = ["Text", "Image", "Graph", "AnimatedGraph", "Table", "Plot", "Manim"]

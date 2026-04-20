@@ -67,12 +67,14 @@ class Slide:
         content: "list[ContentItem] | ContentItem | None" = None,
         palette: Palette | None = None,
         content_kind: "str | None" = None,
+        footer: str = "",
     ) -> None:
         self.title = title
         self.subtitle = subtitle
         self.content = content
         self.palette = palette or Palette()
         self.content_kind = content_kind
+        self.footer = footer
 
     def render(self) -> mo.Html:
         """Assemble and return the complete slide as a marimo component.
@@ -83,7 +85,13 @@ class Slide:
         """
         parts: list = [self._render_banner()]
         parts.extend(self._render_content())
+        parts.extend(self._render_footer())
         return mo.vstack(parts)
+
+    def _render_footer(self) -> list:
+        if self.footer:
+            return [mo.md(f"> {self.footer}")]
+        return []
 
     def _display_(self):
         return self.render()
