@@ -1,5 +1,7 @@
 """Text content element."""
 
+import textwrap
+
 import marimo as mo
 
 
@@ -32,7 +34,10 @@ class Text:
     def render(self) -> mo.Html:
         """Render the Markdown body as a marimo HTML component.
 
+        The body is dedented automatically, so Python indentation in
+        triple-quoted strings does not affect the rendered output.
+
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
         """
-        return mo.md(self.body)
+        return mo.md(textwrap.dedent(self.body))

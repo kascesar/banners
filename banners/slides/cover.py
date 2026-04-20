@@ -5,7 +5,7 @@ import marimo as mo
 from ..slide import Slide
 from ..palette import Palette
 
-_TEAM_LINE = "BancoEstado · Analítica Avanzada · Modelos"
+_TEAM_LINE = "team"
 
 
 class Cover(Slide):

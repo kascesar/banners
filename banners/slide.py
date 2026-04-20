@@ -30,10 +30,9 @@ class Slide:
     Content layout is resolved automatically based on what is passed:
 
     - **Single item** — rendered at full width.
-    - **List of `Text` only** — rendered as equal columns via `mo.hstack`.
-      Pass `content_kind` to wrap each column in a `mo.callout` box.
-    - **List with any `Image` or `Graph`** — rendered as an equal-width CSS
-      grid (`1fr` per column) automatically, no extra parameter needed.
+    - **List of N items** — rendered as an equal-width CSS grid (`1fr` per
+      column) regardless of type. Pass `content_kind` to wrap `Text` items
+      in a `mo.callout` box.
 
     Args:
         title: Main heading of the slide.
@@ -111,17 +110,12 @@ class Slide:
         if len(items) == 1:
             return [self._render_item(items[0])]
 
-        from .content.text import Text as _Text
-        has_non_text = any(not isinstance(i, (_Text, str)) for i in items)
-
         rendered = [
             self._render_item(item, wrap_kind=self.content_kind)
             for item in items
         ]
 
-        if has_non_text:
-            return [self._css_grid(rendered)]
-        return [mo.hstack(rendered, justify="space-between")]
+        return [self._css_grid(rendered)]
 
     def _render_item(self, item: ContentItem, wrap_kind: "str | None" = None):
         """Render a single content item into a marimo component.

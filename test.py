@@ -403,12 +403,20 @@ def _(BLUE, Cover, Text):
 def _(Section, Text):
     Section(
         title="Pipeline evidence",
-        content=Text("""
-    ## Flow description
+        content=[
+            Text("""
+            ## Ultimos periodos disponibles por tabla
 
-    Each stage runs independently
-    with automatic end-to-end traceability.
-    """)
+            Aquí se van a mostrar los ultimos periodos disponibles por tabla en ambas Bases de Datos
+            """),
+            Text(
+                """
+                |bd_in_modelos | aa_modelos|
+                |--------------|-----------|
+                |              |           |
+                """
+            ),
+        ]
     ).render()
     return
 
