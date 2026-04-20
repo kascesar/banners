@@ -1,0 +1,95 @@
+#+AUTHOR: Cesar Muñoz
+#+TITLE: Banners
+
+* Overview
+
+=banners= is a Python package for building composable slide presentations inside [[https://marimo.io][marimo]] notebooks.
+
+Each slide is a Python object. Content is declared with dedicated classes and the layout adjusts automatically depending on what you pass.
+
+* Installation
+
+The package is not yet published to PyPI. Install it locally in editable mode:
+
+#+begin_src bash
+uv venv
+uv pip install -e .
+#+end_src
+
+For development tools (docs, etc.):
+
+#+begin_src bash
+uv pip install -e ".[dev]"
+#+end_src
+
+* Quick start
+
+#+begin_src python
+from banners.slides import Cover, Intro, Section, Closing
+from banners.content import Text, Image, Graph
+from banners.palette import BLUE
+
+Cover(
+    title="Churn Prediction v2",
+    subtitle="Model migration and deployment.",
+    date="April 2026",
+    palette=BLUE,
+    content=[
+        Text("**Accuracy** — 91% AUC on holdout."),
+        Text("**Latency** — p99 under 30 ms."),
+        Text("**Coverage** — All active segments."),
+    ],
+    content_kind="neutral",
+).render()
+#+end_src
+
+* Slides
+
+| Class   | Purpose                              | Typical position |
+|---------+--------------------------------------+------------------|
+| =Cover=   | Large centered banner                | First slide      |
+| =Intro=   | Context or problem statement         | Slides 2–3       |
+| =Section= | Intermediate slide with left border  | Middle slides    |
+| =Closing= | Closing banner with optional metrics | Last slide       |
+
+* Content elements
+
+| Class       | Renders                              |
+|-------------+--------------------------------------|
+| =Text(body)=  | Markdown — paragraphs, lists, tables |
+| =Image(src)=  | Image from file path, bytes, or URL  |
+| =Graph(code)= | Mermaid diagram                      |
+
+Content is passed to the =content= parameter of any slide. Layout is resolved automatically:
+
+- *Single item* → full width.
+- *List of =Text= only* → equal columns; pass =content_kind= to add a styled box around each column.
+- *List with any =Image= or =Graph=* → equal-width CSS grid, no extra parameter needed.
+
+* Palettes
+
+All slides accept a =palette= parameter. The default is orange.
+
+| Constant | Colors                      |
+|----------+-----------------------------|
+| =ORANGE=   | =#7c2d12= → =#c2410c= → =#ea580c= |
+| =BLUE=     | =#1e3a5f= → =#1d4ed8= → =#3b82f6= |
+| =GREEN=    | =#14532d= → =#15803d= → =#22c55e= |
+| =PURPLE=   | =#3b0764= → =#7e22ce= → =#a855f7= |
+| =GRAY=     | =#111827= → =#374151= → =#6b7280= |
+
+Custom palettes: =Palette(start, mid, end)= for full-banner slides, =SectionPalette(border, bg_start, bg_end)= for =Section=.
+
+* Documentation
+
+#+begin_src bash
+make docs
+#+end_src
+
+Generated HTML is written to =docs/=.
+
+* Running the reference notebook
+
+#+begin_src bash
+uv run marimo edit test.py
+#+end_src
