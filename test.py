@@ -13,10 +13,24 @@ app = marimo.App(width="full")
 def _():
     import marimo as mo
     from banners.slides import Cover, Intro, Section, Closing
-    from banners.content import Text, Image, Graph
+    from banners.content import Text, Image, Graph, Table, Plot
     from banners.palette import Palette, BLUE, GREEN, PURPLE, GRAY
 
-    return BLUE, Closing, Cover, Graph, Image, Intro, Section, Text, mo
+    import pandas as pd
+
+    return (
+        BLUE,
+        Closing,
+        Cover,
+        Graph,
+        Image,
+        Intro,
+        Section,
+        Table,
+        Text,
+        mo,
+        pd,
+    )
 
 
 @app.cell(hide_code=True)
@@ -400,7 +414,14 @@ def _(BLUE, Cover, Text):
 
 
 @app.cell
-def _(Section, Text):
+def _():
+    return
+
+
+@app.cell
+def _(Section, Table, Text, pd):
+
+
     Section(
         title="Pipeline evidence",
         content=[
@@ -409,13 +430,7 @@ def _(Section, Text):
 
             Aquí se van a mostrar los ultimos periodos disponibles por tabla en ambas Bases de Datos
             """),
-            Text(
-                """
-                |bd_in_modelos | aa_modelos|
-                |--------------|-----------|
-                |              |           |
-                """
-            ),
+            Table(pd.DataFrame({'a': [1, 2, 3]}))
         ]
     ).render()
     return

@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["hatch", "pdoc"]
+dev = ["hatch", "pdoc", "pandas"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["banners"]
