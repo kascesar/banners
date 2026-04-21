@@ -14,7 +14,7 @@ def _():
     import marimo as mo
     from banners import configure
     from banners.slides import Cover, Intro, Section, Closing
-    from banners.content import Text, Image, Graph, AnimatedGraph, Table, Plot, Manim
+    from banners.content import Text, Image, Graph, AnimatedGraph, Table, Plot, Manim, FlowAnimation
     from banners.palette import Palette, BLUE, GREEN, PURPLE, GRAY
 
     return (
@@ -22,6 +22,7 @@ def _():
         BLUE,
         Closing,
         Cover,
+        FlowAnimation,
         GRAY,
         Graph,
         Image,
@@ -782,7 +783,7 @@ def _(mo):
     Each section becomes a frame — click the image to advance to the next step.
 
     ### Standard GIF
-
+    ]
     ```python
     from manim import Scene, Circle, Create
     from banners.content import Manim
@@ -831,23 +832,87 @@ def _(mo):
 
 @app.cell
 def _(Manim, Section):
-    from manim import Scene, Circle, Square, Create, Transform
-    # from banners.content import Manim
+    from manim import (
+        Scene, RoundedRectangle, Arrow, Dot,
+        Write, FadeIn, FadeOut, GrowArrow, Flash, Indicate,
+        UP, DOWN, LEFT, RIGHT,
+        WHITE as MW, YELLOW as MY, GRAY as MG,
+        Text as MText,
+    )
 
-    class MyScene(Scene):
+    class ETLPipelineScene(Scene):
+        STAGES = [
+            ("S3\nRaw",           "#3b82f6"),
+            ("Glue\nJob",         "#8b5cf6"),
+            ("Athena\nQuery",     "#f59e0b"),
+            ("SageMaker\nTrain",  "#10b981"),
+            ("Redshift\nLoad",    "#ef4444"),
+        ]
+        BG = "#0f172a"
+
         def construct(self):
-            self.next_section("step_1")
-            self.play(Create(Circle()))
+            self.camera.background_color = self.BG
 
-            self.next_section("step_2")
-            self.play(Transform(Circle(), Square()))
+            title = MText("Data & ML Pipeline", font_size=32, color=MW, weight="BOLD")
+            title.to_edge(UP, buff=0.35)
+            self.play(Write(title), run_time=0.5)
 
-    Section(title="My animation", content=Manim(MyScene, interactive=True)).render()
+            n = len(self.STAGES)
+            spacing = 2.4
+            xs = [(i - (n - 1) / 2) * spacing for i in range(n)]
+
+            boxes, labels = [], []
+            for x, (name, color) in zip(xs, self.STAGES):
+                rect = RoundedRectangle(
+                    width=1.9, height=1.0, corner_radius=0.15,
+                    fill_color=color, fill_opacity=0.18,
+                    stroke_color=color, stroke_width=2,
+                ).move_to([x, -0.3, 0])
+                lbl = MText(name, font_size=16, color=color, weight="BOLD")
+                lbl.move_to(rect)
+                boxes.append(rect)
+                labels.append(lbl)
+
+            arrows = [
+                Arrow(boxes[i].get_right(), boxes[i + 1].get_left(),
+                      buff=0.08, color=MG, stroke_width=2,
+                      max_tip_length_to_length_ratio=0.18)
+                for i in range(n - 1)
+            ]
+
+            for i, (rect, lbl) in enumerate(zip(boxes, labels)):
+                self.play(FadeIn(rect, scale=0.85), Write(lbl), run_time=0.35)
+                if i < len(arrows):
+                    self.play(GrowArrow(arrows[i]), run_time=0.25)
+
+            self.wait(0.3)
+
+            for _ in range(2):
+                dot = Dot(color=MY, radius=0.13).move_to(boxes[0].get_center())
+                self.play(FadeIn(dot, scale=2.0), run_time=0.2)
+                for box in boxes[1:]:
+                    self.play(dot.animate.move_to(box.get_center()), run_time=0.3)
+                    self.play(Flash(dot, color=MY, line_length=0.18, num_lines=8,
+                                   flash_radius=0.28), run_time=0.25)
+                self.play(FadeOut(dot, scale=0.3), run_time=0.2)
+
+            self.play(
+                *[Indicate(b, color=MY, scale_factor=1.08) for b in boxes],
+                run_time=0.6,
+            )
+            self.wait(0.4)
+
+    Section(title="ETL & ML pipeline", content=Manim(ETLPipelineScene, format="gif", quality="low")).render()
     return
 
 
 @app.cell
-def _():
+def _(FlowAnimation, Section):
+
+    Section(
+        title="ETL & ML pipeline",
+        content=FlowAnimation(["S3", "Glue", "Athena", "SageMaker", "Redshift"])
+    ).render()
     return
 
 

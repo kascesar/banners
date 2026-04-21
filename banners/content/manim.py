@@ -1,59 +1,127 @@
-"""Manim content element — renders a Scene and embeds it in a slide."""
+"""Manim content element -- renders a Scene and embeds it in a slide."""
 
+import base64
 import tempfile
-import uuid
 from pathlib import Path
 
+import anywidget
 import marimo as mo
+import traitlets
 
-_MERMAID_JS = (Path(__file__).parent.parent / "static" / "mermaid.min.js").read_text()
+
+class _ManimInteractiveWidget(anywidget.AnyWidget):
+    _esm = r"""
+function render({ model, el }) {
+    const srcs = model.get("srcs");
+    let idx = 0;
+    let busy = false;
+
+    el.style.cssText = "text-align:center;user-select:none;";
+
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "display:block;width:100%;max-width:640px;margin:0 auto;cursor:pointer;";
+
+    const stage = document.createElement("div");
+    stage.style.cssText = "position:relative;width:100%;overflow:hidden;border-radius:0.5rem;background:#000;";
+    wrap.appendChild(stage);
+
+    const label = document.createElement("div");
+    label.style.cssText = "margin-top:0.5rem;font-size:0.8rem;color:#9ca3af;";
+    label.textContent = "1 / " + srcs.length + " -click to advance";
+
+    function makeVideo() {
+        const v = document.createElement("video");
+        v.muted = true;
+        v.setAttribute("playsinline", "");
+        v.loop = false;
+        v.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;display:block;";
+        return v;
+    }
+
+    const buf = [makeVideo(), makeVideo()];
+    buf[0].style.zIndex = "1";
+    buf[1].style.zIndex = "0";
+    buf[0].src = srcs[0];
+    buf[0].autoplay = true;
+    stage.appendChild(buf[0]);
+    stage.appendChild(buf[1]);
+
+    buf[0].addEventListener("loadedmetadata", function onMeta() {
+        buf[0].removeEventListener("loadedmetadata", onMeta);
+        stage.style.aspectRatio = buf[0].videoWidth + " / " + buf[0].videoHeight;
+    });
+
+    function whenReady(video, cb) {
+        let done = false;
+        function fire() {
+            if (done) return;
+            done = true;
+            video.removeEventListener("canplay", fire);
+            cb();
+        }
+        video.addEventListener("canplay", fire);
+        if (video.readyState >= 3) fire();
+    }
+
+    function preloadNext() {
+        const next = idx + 1;
+        if (next < srcs.length) { buf[1].src = srcs[next]; buf[1].load(); }
+    }
+    preloadNext();
+
+    function transition(nextSrc, nextIdx) {
+        busy = true;
+        idx = nextIdx;
+        const hint = idx >= srcs.length - 1 ? "click to restart" : "click to advance";
+        label.textContent = (idx + 1) + " / " + srcs.length + " -" + hint;
+        buf[1].src = nextSrc;
+        buf[1].load();
+        whenReady(buf[1], function () {
+            buf[1].play();
+            buf[0].style.zIndex = "0";
+            buf[1].style.zIndex = "1";
+            buf.reverse();
+            busy = false;
+            preloadNext();
+        });
+    }
+
+    wrap.addEventListener("click", function () {
+        if (busy) return;
+        if (idx < srcs.length - 1) {
+            transition(srcs[idx + 1], idx + 1);
+        } else {
+            transition(srcs[0], 0);
+        }
+    });
+
+    el.appendChild(wrap);
+    el.appendChild(label);
+}
+export default { render };
+"""
+    srcs = traitlets.List(traitlets.Unicode()).tag(sync=True)
 
 
 class Manim:
     """Renders a Manim Scene and embeds the result inside a slide.
 
-    Requires the optional `manim` dependency:
+    Requires the optional ``manim`` dependency::
 
-    ```bash
-    uv pip install "banners[manim]"
-    ```
+        uv pip install "banners[manim]"
 
-    The scene is rendered on the first `render()` call and the result is
-    cached — subsequent calls return the same component without re-rendering.
+    The scene is rendered on the first ``render()`` call and cached --
+    subsequent calls return the same component without re-rendering.
 
     Args:
-        scene: A Manim `Scene` subclass (pass the class, not an instance).
-        format: Output format. `"gif"` and `"png"` embed as `mo.image`;
-            `"mp4"` embeds as `mo.video`. Defaults to `"gif"`.
-        quality: Render quality. One of `"low"`, `"medium"`, `"high"`.
-            Defaults to `"low"`.
-        interactive: When `True`, the scene is rendered section by section
-            (using `self.next_section()` markers) and a click-to-advance
-            HTML component is returned. Each click shows the next section.
-            The scene must define sections with `self.next_section("name")`.
-
-    Example — standard GIF:
-        ```python
-        from manim import Scene, Circle, Create
-        from banners.content import Manim
-
-        class CircleScene(Scene):
-            def construct(self):
-                self.play(Create(Circle()))
-
-        Section(title="Demo", content=Manim(CircleScene)).render()
-        ```
-
-    Example — click-to-advance (requires `next_section()` in the scene):
-        ```python
-        from banners.content import Manim
-        from banners.scenes import PipelineScene
-
-        Section(
-            title="Pipeline",
-            content=Manim(PipelineScene, interactive=True),
-        ).render()
-        ```
+        scene: A Manim ``Scene`` subclass (pass the class, not an instance).
+        format: Output format. ``"gif"`` and ``"png"`` embed as ``mo.image``;
+            ``"mp4"`` embeds as ``mo.video``. Defaults to ``"gif"``.
+        quality: Render quality. One of ``"low"``, ``"medium"``, ``"high"``.
+            Defaults to ``"low"``.
+        interactive: When ``True``, the scene is rendered section by section
+            and a click-to-advance widget is returned. The scene must define
+            steps with ``self.next_section("name")``.
     """
 
     _QUALITY_MAP = {
@@ -73,14 +141,10 @@ class Manim:
         self.format = format
         self.quality = quality
         self.interactive = interactive
-        self._cached: "mo.Html | None" = None
+        self._cached = None
 
-    def render(self) -> mo.Html:
-        """Render the scene and return a marimo component.
-
-        Returns:
-            A `mo.Html` component ready to display in a marimo cell.
-        """
+    def render(self):
+        """Render the scene and return a marimo component."""
         if self._cached is not None:
             return self._cached
 
@@ -99,7 +163,7 @@ class Manim:
 
         return self._cached
 
-    def _render_static(self, tempconfig) -> mo.Html:
+    def _render_static(self, tempconfig):
         quality = self._QUALITY_MAP.get(self.quality, "low_quality")
         with tempfile.TemporaryDirectory() as tmpdir:
             with tempconfig({
@@ -108,7 +172,7 @@ class Manim:
                 "quality": quality,
                 "disable_caching": True,
             }):
-                scene_cls = self.scene() if callable(self.scene) and not isinstance(self.scene, type) else self.scene
+                scene_cls = self.scene if isinstance(self.scene, type) else self.scene
                 instance = scene_cls()
                 instance.render()
                 data = self._find_output(tmpdir, self.format)
@@ -118,11 +182,10 @@ class Manim:
 
         return mo.image(data) if self.format in ("gif", "png") else mo.video(data)
 
-    def _render_interactive(self, tempconfig) -> mo.Html:
-        """Render each section as mp4 and build a click-to-advance component."""
+    def _render_interactive(self, tempconfig):
+        """Render each section as mp4 and return a click-to-advance anywidget."""
         quality = self._QUALITY_MAP.get(self.quality, "low_quality")
         frames: list[bytes] = []
-        frame_fmt = "mp4"
 
         with tempfile.TemporaryDirectory() as tmpdir:
             with tempconfig({
@@ -131,12 +194,11 @@ class Manim:
                 "quality": quality,
                 "disable_caching": True,
             }):
-                scene_cls = self.scene() if callable(self.scene) and not isinstance(self.scene, type) else self.scene
+                scene_cls = self.scene if isinstance(self.scene, type) else self.scene
                 instance = scene_cls()
                 instance.render()
 
             section_dir = self._find_sections_dir(Path(tmpdir))
-
             if section_dir and section_dir.exists():
                 for path in sorted(section_dir.glob("*.mp4")):
                     frames.append(path.read_bytes())
@@ -147,48 +209,11 @@ class Manim:
                 kind="warn",
             )
 
-        return self._build_interactive_html(frames)
-
-    @staticmethod
-    def _build_interactive_html(frames: list[bytes]) -> mo.Html:
-        import base64
-        uid = uuid.uuid4().hex[:10]
-        b64_frames = [
+        srcs = [
             f"data:video/mp4;base64,{base64.b64encode(f).decode()}"
             for f in frames
         ]
-
-        sources_html = "\n".join(
-            f'<source data-src="{u}" type="video/mp4">' for u in b64_frames
-        )
-
-        html = f"""
-<div style="text-align:center;user-select:none;">
-  <video id="manim-vid-{uid}"
-         src="{b64_frames[0]}"
-         autoplay loop muted playsinline
-         style="max-width:100%;border-radius:0.5rem;cursor:pointer;">
-  </video>
-  <div style="margin-top:0.5rem;font-size:0.8rem;color:#9ca3af;">
-    <span id="manim-step-{uid}">1</span> / {len(frames)} &mdash; click to advance
-  </div>
-</div>
-<script>
-(function() {{
-    var srcs  = [{",".join(f'"{u}"' for u in b64_frames)}];
-    var idx   = 0;
-    var vid   = document.getElementById("manim-vid-{uid}");
-    var label = document.getElementById("manim-step-{uid}");
-    vid.addEventListener("click", function() {{
-        idx = (idx + 1) % srcs.length;
-        vid.src = srcs[idx];
-        vid.play();
-        label.textContent = idx + 1;
-    }});
-}})();
-</script>
-"""
-        return mo.Html(html)
+        return _ManimInteractiveWidget(srcs=srcs)
 
     @staticmethod
     def _find_output(directory: str, fmt: str) -> "bytes | None":

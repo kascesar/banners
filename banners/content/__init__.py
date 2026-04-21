@@ -16,5 +16,6 @@ from .animated_graph import AnimatedGraph
 from .table import Table
 from .plot import Plot
 from .manim import Manim
+from .flow_animation import FlowAnimation
 
-__all__ = ["Text", "Image", "Graph", "AnimatedGraph", "Table", "Plot", "Manim"]
+__all__ = ["Text", "Image", "Graph", "AnimatedGraph", "Table", "Plot", "Manim", "FlowAnimation"]
