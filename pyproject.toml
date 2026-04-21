@@ -10,11 +10,10 @@ requires-python = ">=3.10"
 dependencies = [
     "marimo>=0.9.0",
     "anywidget>=0.9.0",
-    "manim>=0.19.1",
 ]
 
 [project.optional-dependencies]
 dev   = ["hatch", "pdoc", "pandas", "manim"]
-
+manim = ["manim"]
 [tool.hatch.build.targets.wheel]
 packages = ["banners"]
