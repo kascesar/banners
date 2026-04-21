@@ -127,8 +127,8 @@ def _build_svg(nodes, edges, pos, node_w, node_h, uid):
     svg_h = max(ys) + node_h + pad * 2
 
     parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{svg_w}" height="{svg_h}" '
-        f'style="font-family:sans-serif;font-size:13px;overflow:visible;">',
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {svg_w} {svg_h}" '
+        f'width="100%" style="font-family:sans-serif;font-size:13px;max-width:{svg_w}px;display:block;margin:0 auto;">',
         '<defs>',
         f'  <marker id="arr-{uid}" markerWidth="10" markerHeight="7" '
         f'refX="9" refY="3.5" orient="auto">',
