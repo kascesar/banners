@@ -160,7 +160,7 @@ class Slide:
         cols = " ".join(["1fr"] * len(items))
         parts = []
         for item in items:
-            html = item.text if hasattr(item, "text") else str(item)
+            html = mo.as_html(item).text
             parts.append(f'<div style="min-width:0;">{html}</div>')
         inner = "".join(parts)
         return mo.Html(

@@ -1,6 +1,9 @@
 """Manim content element -- renders a Scene and embeds it in a slide."""
 
 import base64
+import contextlib
+import io
+import os
 import tempfile
 from pathlib import Path
 
@@ -19,7 +22,8 @@ function render({ model, el }) {
     el.style.cssText = "text-align:center;user-select:none;";
 
     const wrap = document.createElement("div");
-    wrap.style.cssText = "display:block;width:100%;max-width:640px;margin:0 auto;cursor:pointer;";
+    const maxW = model.get("width") || "100%";
+    wrap.style.cssText = "display:block;width:100%;max-width:" + maxW + ";margin:0 auto;cursor:pointer;";
 
     const stage = document.createElement("div");
     stage.style.cssText = "position:relative;width:100%;overflow:hidden;border-radius:0.5rem;background:#000;";
@@ -101,6 +105,7 @@ function render({ model, el }) {
 export default { render };
 """
     srcs = traitlets.List(traitlets.Unicode()).tag(sync=True)
+    width = traitlets.Unicode("100%").tag(sync=True)
 
 
 class Manim:
@@ -136,11 +141,13 @@ class Manim:
         format: str = "gif",
         quality: str = "low",
         interactive: bool = False,
+        width: str = "100%",
     ) -> None:
         self.scene = scene
         self.format = format
         self.quality = quality
         self.interactive = interactive
+        self.width = width
         self._cached = None
 
     def render(self):
@@ -163,6 +170,20 @@ class Manim:
 
         return self._cached
 
+    @staticmethod
+    @contextlib.contextmanager
+    def _quiet():
+        """Suppress all Manim console output."""
+        import logging
+        sink = io.StringIO()
+        with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
+            old_level = logging.root.manager.loggerDict.copy()
+            logging.disable(logging.CRITICAL)
+            try:
+                yield
+            finally:
+                logging.disable(logging.NOTSET)
+
     def _render_static(self, tempconfig):
         quality = self._QUALITY_MAP.get(self.quality, "low_quality")
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -170,11 +191,13 @@ class Manim:
                 "media_dir": tmpdir,
                 "format": self.format,
                 "quality": quality,
+                "verbosity": "CRITICAL",
                 "disable_caching": True,
             }):
                 scene_cls = self.scene if isinstance(self.scene, type) else self.scene
-                instance = scene_cls()
-                instance.render()
+                with self._quiet():
+                    instance = scene_cls()
+                    instance.render()
                 data = self._find_output(tmpdir, self.format)
 
         if data is None:
@@ -192,11 +215,13 @@ class Manim:
                 "media_dir": tmpdir,
                 "save_sections": True,
                 "quality": quality,
+                "verbosity": "CRITICAL",
                 "disable_caching": True,
             }):
                 scene_cls = self.scene if isinstance(self.scene, type) else self.scene
-                instance = scene_cls()
-                instance.render()
+                with self._quiet():
+                    instance = scene_cls()
+                    instance.render()
 
             section_dir = self._find_sections_dir(Path(tmpdir))
             if section_dir and section_dir.exists():
@@ -213,7 +238,7 @@ class Manim:
             f"data:video/mp4;base64,{base64.b64encode(f).decode()}"
             for f in frames
         ]
-        return _ManimInteractiveWidget(srcs=srcs)
+        return _ManimInteractiveWidget(srcs=srcs, width=self.width)
 
     @staticmethod
     def _find_output(directory: str, fmt: str) -> "bytes | None":
