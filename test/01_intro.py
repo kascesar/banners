@@ -12,7 +12,7 @@ Run with: uv run marimo edit test/01_intro.py
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App(width="full")
+app = marimo.App(width="full", layout_file="layouts/01_intro.slides.json")
 
 
 @app.cell
@@ -22,7 +22,19 @@ def _():
     from banners.slides import Cover, Intro, Section, Closing
     from banners.content import Text
     from banners.palette import Palette, ORANGE, BLUE, GREEN, PURPLE, GRAY
-    return Closing, Cover, BLUE, GREEN, GRAY, Intro, ORANGE, Palette, PURPLE, Section, Text, configure, mo
+
+    return (
+        BLUE,
+        Closing,
+        Cover,
+        GRAY,
+        Intro,
+        Palette,
+        Section,
+        Text,
+        configure,
+        mo,
+    )
 
 
 @app.cell
@@ -88,7 +100,9 @@ def _(BLUE, configure):
 
 @app.cell
 def _(mo):
-    mo.md("## Cover")
+    mo.md("""
+    ## Cover
+    """)
     return
 
 
@@ -127,7 +141,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md("## Intro")
+    mo.md("""
+    ## Intro
+    """)
     return
 
 
@@ -165,7 +181,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md("## Section")
+    mo.md("""
+    ## Section
+    """)
     return
 
 
@@ -203,7 +221,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md("## Closing")
+    mo.md("""
+    ## Closing
+    """)
     return
 
 
@@ -302,7 +322,7 @@ def _(Cover, GRAY, Text, configure):
 
 
 @app.cell
-def _(Cover, Palette, Section, Text, configure):
+def _(Cover, Palette, Text, configure):
     teal = Palette(start="#042f2e", mid="#0f766e", end="#2dd4bf")
     configure(palette=teal, team="Analytics Team", date="April 2026")
     Cover(
@@ -324,10 +344,10 @@ def _(Section, Text):
         title="Section with teal palette",
         subtitle="Border and background derived automatically from the custom palette.",
         content=Text("""
-The border takes the `end` color and the background is a darkened
-version of `start` — consistent with the overall scheme without any
-extra configuration.
-"""),
+    The border takes the `end` color and the background is a darkened
+    version of `start` — consistent with the overall scheme without any
+    extra configuration.
+    """),
     ).render()
     return
 

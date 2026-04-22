@@ -58,8 +58,9 @@ class Cover(Slide):
         footer: str = "",
         team: str = "",
         icon: "dict | None" = None,
+        slide_bg=None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer)
+        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer, slide_bg=slide_bg)
         self.date = date or _cfg.get("date", "")
         self.team = team or _cfg.get("team", "")
         self.icon = icon if icon is not None else _cfg.get("icon")

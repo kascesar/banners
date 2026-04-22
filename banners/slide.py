@@ -68,6 +68,7 @@ class Slide:
         palette: Palette | None = None,
         content_kind: "str | None" = None,
         footer: str = "",
+        slide_bg=None,
     ) -> None:
         self.title = title
         self.subtitle = subtitle
@@ -75,6 +76,7 @@ class Slide:
         self.palette = palette or Palette()
         self.content_kind = content_kind
         self.footer = footer
+        self.slide_bg = slide_bg
 
     def render(self) -> mo.Html:
         """Assemble and return the complete slide as a marimo component.
@@ -83,10 +85,39 @@ class Slide:
             A `mo.Html` component (via `mo.vstack`) ready to display in a
             marimo cell.
         """
-        parts: list = [self._render_banner()]
-        parts.extend(self._render_content())
-        parts.extend(self._render_footer())
-        return mo.vstack(parts)
+        banner = self._render_banner()
+        content_parts = self._render_content() + self._render_footer()
+        return self._wrap_slide(banner, content_parts)
+
+    def _wrap_slide(self, banner, content_parts: list):
+        if self.slide_bg is None:
+            return mo.vstack([banner] + content_parts)
+        bg_css = self.slide_bg.css if hasattr(self.slide_bg, "css") else str(self.slide_bg)
+        banner_html = mo.as_html(banner).text
+        if content_parts:
+            content_inner = mo.as_html(mo.vstack(content_parts)).text
+            tc = self.slide_bg.text_color() if (
+                self.content_kind is None and hasattr(self.slide_bg, "text_color")
+            ) else None
+            if tc is not None:
+                uid = f"sbg{id(self):x}"
+                tags = (
+                    f".{uid} h1,.{uid} h2,.{uid} h3,.{uid} h4,.{uid} h5,.{uid} h6,"
+                    f".{uid} p,.{uid} li,.{uid} blockquote,.{uid} code,.{uid} pre,"
+                    f".{uid} em,.{uid} strong,.{uid} td,.{uid} th"
+                )
+                content_html = (
+                    f"<style>{tags}{{color:{tc}!important;}}</style>"
+                    f'<div class="{uid}" style="color:{tc};">{content_inner}</div>'
+                )
+            else:
+                content_html = content_inner
+        else:
+            content_html = ""
+        return mo.Html(
+            f'<div style="background:{bg_css};padding:1rem;border-radius:0.75rem;">'
+            f"{banner_html}{content_html}</div>"
+        )
 
     def _render_footer(self) -> list:
         if self.footer:

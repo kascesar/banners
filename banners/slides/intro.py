@@ -66,8 +66,9 @@ class Intro(Slide):
         footer: str = "",
         team: str = "",
         icon: "dict | None" = None,
+        slide_bg=None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer)
+        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer, slide_bg=slide_bg)
         self.tag = tag
         self.summary = summary
         self.team = team or _cfg.get("team", "")
@@ -79,12 +80,13 @@ class Intro(Slide):
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
         """
-        parts = [self._render_banner()]
+        banner = self._render_banner()
+        content_parts = []
         if self.summary:
-            parts.append(mo.callout(mo.md(self.summary), kind="warn"))
-        parts.extend(self._render_content())
-        parts.extend(self._render_footer())
-        return mo.vstack(parts)
+            content_parts.append(mo.callout(mo.md(self.summary), kind="warn"))
+        content_parts.extend(self._render_content())
+        content_parts.extend(self._render_footer())
+        return self._wrap_slide(banner, content_parts)
 
     def _render_banner(self) -> mo.Html:
         p = self.palette

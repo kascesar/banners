@@ -59,8 +59,9 @@ class Closing(Slide):
         team: str = "",
         stats: "list[tuple[str, str, str]] | None" = None,
         icon: "dict | None" = None,
+        slide_bg=None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer)
+        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer, slide_bg=slide_bg)
         self.team = team or _cfg.get("team", "")
         self.stats = stats
         self.icon = icon if icon is not None else _cfg.get("icon")
@@ -71,17 +72,17 @@ class Closing(Slide):
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
         """
-        parts = [self._render_banner()]
-        parts.extend(self._render_content())
+        banner = self._render_banner()
+        content_parts = self._render_content()
         if self.stats:
-            parts.append(
+            content_parts.append(
                 mo.hstack(
                     [mo.stat(v, label=l, caption=c, bordered=True) for v, l, c in self.stats],
                     justify="space-around",
                 )
             )
-        parts.extend(self._render_footer())
-        return mo.vstack(parts)
+        content_parts.extend(self._render_footer())
+        return self._wrap_slide(banner, content_parts)
 
     def _render_banner(self) -> mo.Html:
         p = self.palette

@@ -25,6 +25,7 @@ from .slide import Slide
 from .slides import Cover, Intro, Section, Closing
 from .content import Text, Image, Graph, AnimatedGraph, Table, Plot, FlowAnimation
 from .palette import Palette, SectionPalette, ORANGE, BLUE, GREEN, PURPLE, GRAY
+from .background import Background
 from .config import configure
 
 __all__ = [
@@ -33,4 +34,5 @@ __all__ = [
     "Cover", "Intro", "Section", "Closing",
     "Text", "Image", "Graph", "AnimatedGraph", "Table", "Plot", "Manim", "FlowAnimation",
     "Palette", "SectionPalette", "ORANGE", "BLUE", "GREEN", "PURPLE", "GRAY",
+    "Background",
 ]

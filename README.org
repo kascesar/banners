@@ -22,7 +22,7 @@ uv venv
 uv pip install -e .
 #+end_src
 
-For development tools (docs, etc.):
+For animated diagrams (=FlowAnimation=, =Manim=):
 
 #+begin_src bash
 uv pip install -e ".[dev]"
@@ -89,6 +89,7 @@ All slides share these parameters:
 | =content_kind=   | Box style for =Text= lists: =neutral=, =info=, =success=, =warn=, =danger= |
 | =footer=         | Quote rendered as a blockquote at the bottom of the slide     |
 | =icon=           | Banner icon. Falls back to the global =configure()= value       |
+| =slide_bg=       | Custom slide background (see [[*Slide backgrounds]])              |
 
 ** Section — auto-numbering
 
@@ -99,8 +100,8 @@ called.
 #+begin_src python
 configure(team="My Team")   # counter resets to 0
 
-Section(title="Context")    # number = "01"
-Section(title="Results")    # number = "02"
+Section(title="Context")     # number = "01"
+Section(title="Results")     # number = "02"
 Section(title="Conclusions") # number = "03"
 
 # Override:
@@ -112,19 +113,76 @@ Section(title="No number", number="")
 
 * Content elements
 
-| Class         | Renders                              |
-|---------------+--------------------------------------|
-| =Text(body)=    | Markdown — paragraphs, lists, tables |
-| =Image(src)=    | Image from file path, bytes, or URL  |
-| =Graph(code)=   | Mermaid diagram                      |
-| =Table(df)=     | pandas DataFrame                     |
-| =Plot(fig)=     | matplotlib or plotly figure (auto-detected) |
+| Class              | Renders                                         |
+|--------------------+-------------------------------------------------|
+| =Text(body)=         | Markdown — paragraphs, lists, tables            |
+| =Image(src)=         | Image from file path, bytes, or URL             |
+| =Graph(code)=        | Static Mermaid diagram                          |
+| =AnimatedGraph(code)= | Interactive Mermaid diagram — click to highlight nodes |
+| =Table(df)=          | pandas DataFrame                                |
+| =Plot(fig)=          | matplotlib or plotly figure (auto-detected)     |
+| =FlowAnimation(...)= | Click-to-advance animated pipeline diagram      |
+| =Manim(scene)=       | Custom Manim =Scene= subclass (static or interactive) |
 
 Content is passed to the =content= parameter of any slide. Layout is resolved automatically:
 
 - *Single item* → full width.
 - *List of =Text= only* → equal columns; pass =content_kind= to add a styled box.
 - *List with any other element* → equal-width CSS grid, one column per item.
+
+** AnimatedGraph
+
+Accepts =graph LR= / =graph TD= Mermaid syntax. Clicking a node toggles a highlight color.
+
+#+begin_src python
+from banners.content import AnimatedGraph
+
+AnimatedGraph("""
+graph LR
+    A[Ingest] --> B[Validate]
+    B --> C[Transform]
+    C --> D[Load]
+""", highlight_color="#3b82f6")
+#+end_src
+
+** FlowAnimation
+
+Step-by-step pipeline animation. Each node appears on click. Requires the =manim= dependency.
+
+Three input formats:
+
+#+begin_src python
+from banners.content import FlowAnimation
+
+# Flat list — linear chain
+FlowAnimation(["S3", "Glue", "Athena"])
+
+# Nested list — layered topology
+FlowAnimation([
+    ["Ingest"],
+    [{"name": "Transform A", "detail": "features"},
+     {"name": "Transform B", "detail": "filters"}],
+    ["Load"],
+])
+
+# Explicit graph — arbitrary connections
+FlowAnimation(
+    nodes=["Ingest A", "Ingest B", "Validate", "Train"],
+    edges=[
+        ("Ingest A", "Validate"),
+        ("Ingest B", "Validate"),
+        ("Validate", "Train"),
+    ],
+)
+#+end_src
+
+| Parameter   | Default       | Description                                     |
+|-------------+---------------+-------------------------------------------------|
+| =direction=   | ="LR"= / ="TD"= | Flow direction — left-right or top-down         |
+| =quality=     | ="low"=         | Render quality: ="low"=, ="medium"=, ="high"=       |
+| =width=       | ="100%"=        | Player width — any CSS value                    |
+
+Default direction: ="LR"= for flat lists and graphs, ="TD"= for nested lists.
 
 * Palettes
 
@@ -140,6 +198,31 @@ All slides accept a =palette= parameter. The default is orange.
 
 Custom palettes: =Palette(start, mid, end)= for full-banner slides, =SectionPalette(border, bg_start, bg_end)= for =Section=.
 
+* Slide backgrounds
+
+The =slide_bg= parameter paints the full slide area (banner + content) with a custom background. Use the =Background= factory class:
+
+#+begin_src python
+from banners import Background
+
+# Solid color
+Cover(title="Dark slide", slide_bg=Background.color("#0f172a"))
+
+# Custom gradient
+Section(title="Gradient", slide_bg=Background.gradient("#0d1b2a", "#4a1a6e"))
+Section(title="3-stop",   slide_bg=Background.gradient("#0d1b2a", "#4a1a6e",
+                                                        mid="#1a2a5e", angle=45))
+
+# Image — dark overlay applied automatically for legibility
+Cover(title="Photo", slide_bg=Background.image("assets/photo.jpg"))
+Cover(title="URL",   slide_bg=Background.image("https://...", overlay="rgba(0,0,0,0.7)"))
+Cover(title="Raw",   slide_bg=Background.image(raw_bytes, overlay=None))
+#+end_src
+
+When =slide_bg= is set and =content_kind= is not, the content text color is chosen automatically
+based on the background luminance (white for dark backgrounds, dark for light ones).
+Passing =content_kind= explicitly disables this — the callout boxes handle their own colors.
+
 * Documentation
 
 #+begin_src bash
@@ -148,8 +231,25 @@ make docs
 
 Generated HTML is written to =docs/=.
 
-* Running the reference notebook
+* Reference notebooks
+
+Each element and feature has its own notebook inside =test/=:
+
+| Notebook              | Content                                      |
+|-----------------------+----------------------------------------------|
+| =test/01_intro.py=      | =configure()=, all slide types, all palettes  |
+| =test/02_text.py=       | =Text=, =content_kind=, columns, tables        |
+| =test/03_image.py=      | =Image= — path, bytes, URL, grid layout        |
+| =test/04_graph.py=      | Static =Graph= (Mermaid)                       |
+| =test/05_animated_graph.py= | =AnimatedGraph= — interactive highlight    |
+| =test/06_table.py=      | =Table= with pandas DataFrames                |
+| =test/07_plot.py=       | =Plot= — matplotlib and plotly                |
+| =test/08_manim.py=      | =Manim= — static and interactive              |
+| =test/09_flow_animation.py= | =FlowAnimation= — all three input formats  |
+| =test/10_background.py= | =Background= — color, gradient, image         |
+
+Run any notebook with:
 
 #+begin_src bash
-uv run marimo edit test.py
+uv run marimo edit test/01_intro.py
 #+end_src

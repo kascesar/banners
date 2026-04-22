@@ -62,11 +62,12 @@ class Section(Slide):
         number: "str | None" = None,
         footer: str = "",
         icon: "dict | None" = None,
+        slide_bg=None,
     ) -> None:
         if palette is None:
             global_palette = _cfg.get("palette")
             palette = global_palette.to_section_palette() if global_palette is not None else SectionPalette()
-        super().__init__(title, subtitle, content, palette, content_kind, footer)
+        super().__init__(title, subtitle, content, palette, content_kind, footer, slide_bg=slide_bg)
         self.number = number if number is not None else _cfg._next_section_number()
         self.icon = icon if icon is not None else _cfg.get("icon")
 
@@ -76,10 +77,9 @@ class Section(Slide):
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
         """
-        parts = [self._render_banner()]
-        parts.extend(self._render_content())
-        parts.extend(self._render_footer())
-        return mo.vstack(parts)
+        banner = self._render_banner()
+        content_parts = self._render_content() + self._render_footer()
+        return self._wrap_slide(banner, content_parts)
 
     def _render_banner(self) -> mo.Html:
         p = self.palette
