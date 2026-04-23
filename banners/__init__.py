@@ -23,7 +23,7 @@ Cover(
 
 from .slide import Slide
 from .slides import Cover, Intro, Section, Closing
-from .content import Text, Image, Graph, AnimatedGraph, Table, Plot, FlowAnimation
+from .content import Text, Image, Graph, AnimatedGraph, Table, Plot, Manim, FlowAnimation
 from .palette import Palette, SectionPalette, ORANGE, BLUE, GREEN, PURPLE, GRAY
 from .background import Background
 from .config import configure
