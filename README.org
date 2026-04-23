@@ -7,6 +7,10 @@
 
 Each slide is a Python object. Content is declared with dedicated classes and the layout adjusts automatically depending on what you pass.
 
+#+begin_quote
+*Personal note:* This project is a personal initiative to explore the capabilities of generative AI for developing complete, production-quality software projects — from architecture decisions to implementation, testing, and documentation — using [[https://claude.ai/code][Claude Code]] as the primary development partner.
+#+end_quote
+
 * Installation
 
 The package is not yet published to PyPI. Install directly from GitHub:
@@ -26,6 +30,12 @@ For animated diagrams (=FlowAnimation=, =Manim=):
 
 #+begin_src bash
 uv pip install -e ".[dev]"
+#+end_src
+
+=FlowAnimation= and =Manim= depend on system libraries for text rendering. Install them before running any animated content:
+
+#+begin_src bash
+sudo apt install python3-dev libpango1.0-dev pkg-config
 #+end_src
 
 * Quick start
