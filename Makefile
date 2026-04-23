@@ -7,3 +7,9 @@ docs:
 
 uv-dev:
 	$(UV) pip install -e ".[dev]"
+
+.PHONY: publish
+publish:
+	rm -rf dist/
+	$(UV) build
+	$(UV) publish

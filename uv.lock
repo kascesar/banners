@@ -311,41 +311,6 @@ wheels = [
 ]
 
 [[package]]
-name = "banners"
-version = "0.1.3"
-source = { editable = "." }
-dependencies = [
-    { name = "anywidget" },
-    { name = "marimo" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "hatch" },
-    { name = "manim", version = "0.19.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "manim", version = "0.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "pandas", version = "3.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pdoc" },
-]
-manim = [
-    { name = "manim", version = "0.19.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "manim", version = "0.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anywidget", specifier = ">=0.9.0" },
-    { name = "hatch", marker = "extra == 'dev'" },
-    { name = "manim", marker = "extra == 'dev'" },
-    { name = "manim", marker = "extra == 'manim'" },
-    { name = "marimo", specifier = ">=0.9.0" },
-    { name = "pandas", marker = "extra == 'dev'" },
-    { name = "pdoc", marker = "extra == 'dev'" },
-]
-provides-extras = ["dev", "manim"]
-
-[[package]]
 name = "beautifulsoup4"
 version = "4.14.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1328,6 +1293,41 @@ sdist = { url = "https://files.pythonhosted.org/packages/d5/95/b7bb0fd8f00fc7b56
 wheels = [
     { url = "https://files.pythonhosted.org/packages/db/b4/53ca91d287b52ae1806ce947659a4357472cd4ab1f54ae5638cff8cc8a25/marimo-0.23.1-py3-none-any.whl", hash = "sha256:fb2546fdd669fcba5cf3b1aaaa8fd84196c292935bc2dce457cf8077ae2e8608", size = 38696007, upload-time = "2026-04-10T23:14:00.126Z" },
 ]
+
+[[package]]
+name = "marimo-banners"
+version = "0.1.6"
+source = { editable = "." }
+dependencies = [
+    { name = "anywidget" },
+    { name = "marimo" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "hatch" },
+    { name = "manim", version = "0.19.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "manim", version = "0.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pandas", version = "3.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pdoc" },
+]
+manim = [
+    { name = "manim", version = "0.19.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "manim", version = "0.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anywidget", specifier = ">=0.9.0" },
+    { name = "hatch", marker = "extra == 'dev'" },
+    { name = "manim", marker = "extra == 'dev'" },
+    { name = "manim", marker = "extra == 'manim'" },
+    { name = "marimo", specifier = ">=0.9.0" },
+    { name = "pandas", marker = "extra == 'dev'" },
+    { name = "pdoc", marker = "extra == 'dev'" },
+]
+provides-extras = ["dev", "manim"]
 
 [[package]]
 name = "markdown"
