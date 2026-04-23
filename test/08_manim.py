@@ -6,7 +6,7 @@ Run with: uv run marimo edit test/08_manim.py
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App(width="full")
+app = marimo.App(width="full", layout_file="layouts/08_manim.slides.json")
 
 
 @app.cell
@@ -17,7 +17,7 @@ def _():
     from banners.content import Manim, Text
     from banners.palette import BLUE
     configure(team="Analytics Team", date="April 2026", palette=BLUE)
-    return Manim, Section, Text, configure, mo
+    return Manim, Section, Text, mo
 
 
 @app.cell
@@ -55,7 +55,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md("## Static GIF — basic scene")
+    mo.md("""
+    ## Static GIF — basic scene
+    """)
     return
 
 
@@ -80,12 +82,14 @@ def _(Manim, Section):
         subtitle="Static GIF — format='gif', quality='low'.",
         content=Manim(ShapeScene, format="gif", quality="low"),
     ).render()
-    return
+    return (Scene,)
 
 
 @app.cell
 def _(mo):
-    mo.md("## Interactive — click to advance")
+    mo.md("""
+    ## Interactive — click to advance
+    """)
     return
 
 
@@ -109,9 +113,9 @@ def _(mo):
 
 
 @app.cell
-def _(Manim, Section):
+def _(Manim, Scene, Section):
     from manim import (
-        Scene, RoundedRectangle, Arrow, Dot,
+        RoundedRectangle, Arrow, Dot,
         Write, FadeIn, FadeOut as MFO, GrowArrow, Flash,
         UP as MUP, DOWN as MDN, LEFT as ML, RIGHT as MR,
         WHITE as MW2, YELLOW as MY, GRAY as MG2,
@@ -167,14 +171,16 @@ def _(Manim, Section):
     Section(
         title="ETL & ML pipeline",
         subtitle="Click to reveal each stage.",
-        content=Manim(ETLScene, interactive=True, quality="low"),
+        content=Manim(ETLScene, interactive=True, quality="low", width="500px"),
     ).render()
     return
 
 
 @app.cell
 def _(mo):
-    mo.md("## Interactive — width control")
+    mo.md("""
+    ## Interactive — width control
+    """)
     return
 
 
@@ -206,9 +212,14 @@ def _(Manim, Section, Text):
         title="Shapes — constrained width",
         content=[
             Text("Use `width=` to control the player size.\nClick to advance between shapes."),
-            Manim(ColorScene, interactive=True, quality="low", width="500px"),
+            Manim(ColorScene, interactive=True, quality="low", width="800px"),
         ],
     ).render()
+    return
+
+
+@app.cell
+def _():
     return
 
 

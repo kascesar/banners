@@ -17,7 +17,7 @@ def _():
     from banners.content import FlowAnimation, Text
     from banners.palette import BLUE
     configure(team="Analytics Team", date="April 2026", palette=BLUE)
-    return FlowAnimation, Section, Text, configure, mo
+    return FlowAnimation, Section, Text, mo
 
 
 @app.cell
@@ -74,7 +74,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md("## Flat list — left to right (default)")
+    mo.md("""
+    ## Flat list — left to right (default)
+    """)
     return
 
 
@@ -90,7 +92,9 @@ def _(FlowAnimation, Section):
 
 @app.cell
 def _(mo):
-    mo.md("## Flat list — top down")
+    mo.md("""
+    ## Flat list — top down
+    """)
     return
 
 
@@ -108,7 +112,9 @@ def _(FlowAnimation, Section):
 
 @app.cell
 def _(mo):
-    mo.md("## With detail text")
+    mo.md("""
+    ## With detail text
+    """)
     return
 
 
@@ -128,7 +134,9 @@ def _(FlowAnimation, Section):
 
 @app.cell
 def _(mo):
-    mo.md("## Nested list — layered topology (TD)")
+    mo.md("""
+    ## Nested list — layered topology (TD)
+    """)
     return
 
 
@@ -154,7 +162,9 @@ def _(FlowAnimation, Section):
 
 @app.cell
 def _(mo):
-    mo.md("## Nested list — LR direction")
+    mo.md("""
+    ## Nested list — LR direction
+    """)
     return
 
 
@@ -180,7 +190,9 @@ def _(FlowAnimation, Section):
 
 @app.cell
 def _(mo):
-    mo.md("## Explicit graph — parallel branches")
+    mo.md("""
+    ## Explicit graph — parallel branches
+    """)
     return
 
 
@@ -214,7 +226,9 @@ def _(FlowAnimation, Section):
 
 @app.cell
 def _(mo):
-    mo.md("## Explicit graph — top down")
+    mo.md("""
+    ## Explicit graph — top down
+    """)
     return
 
 
@@ -242,7 +256,9 @@ def _(FlowAnimation, Section):
 
 @app.cell
 def _(mo):
-    mo.md("## FlowAnimation alongside Text")
+    mo.md("""
+    ## FlowAnimation alongside Text
+    """)
     return
 
 
@@ -252,11 +268,11 @@ def _(FlowAnimation, Section, Text):
         title="Pipeline overview",
         content=[
             Text("""
-**Three ingestion sources** feed into a shared validation layer.
+    **Three ingestion sources** feed into a shared validation layer.
 
-Each source is cleaned independently before joining in the
-training stage, allowing partial failures without blocking the pipeline.
-"""),
+    Each source is cleaned independently before joining in the
+    training stage, allowing partial failures without blocking the pipeline.
+    """),
             FlowAnimation(
                 nodes=["Source A", "Source B", "Source C",
                        "Validate", "Train", "Deploy"],
@@ -276,7 +292,9 @@ training stage, allowing partial failures without blocking the pipeline.
 
 @app.cell
 def _(mo):
-    mo.md("## Width control")
+    mo.md("""
+    ## Width control
+    """)
     return
 
 

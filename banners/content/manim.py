@@ -23,15 +23,11 @@ function render({ model, el }) {
 
     const wrap = document.createElement("div");
     const maxW = model.get("width") || "100%";
-    wrap.style.cssText = "display:block;width:100%;max-width:" + maxW + ";margin:0 auto;cursor:pointer;";
+    wrap.style.cssText = "display:block;width:100%;max-width:" + maxW + ";margin:0 auto;";
 
     const stage = document.createElement("div");
-    stage.style.cssText = "position:relative;width:100%;overflow:hidden;border-radius:0.5rem;background:#000;";
+    stage.style.cssText = "position:relative;width:100%;overflow:hidden;border-radius:0.5rem;background:#000;cursor:pointer;";
     wrap.appendChild(stage);
-
-    const label = document.createElement("div");
-    label.style.cssText = "margin-top:0.5rem;font-size:0.8rem;color:#9ca3af;";
-    label.textContent = "1 / " + srcs.length + " -click to advance";
 
     function makeVideo() {
         const v = document.createElement("video");
@@ -73,12 +69,47 @@ function render({ model, el }) {
     }
     preloadNext();
 
-    function transition(nextSrc, nextIdx) {
+    // Controls bar: [←]  "2 / 5"  [→]  [▶]
+    const controls = document.createElement("div");
+    controls.style.cssText = "display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:0.5rem;";
+
+    function makeBtn(text) {
+        const b = document.createElement("button");
+        b.textContent = text;
+        b.style.cssText = "background:#1f2937;color:#9ca3af;border:1px solid #374151;"
+            + "border-radius:0.375rem;padding:0.2rem 0.7rem;cursor:pointer;font-size:0.85rem;";
+        return b;
+    }
+
+    const btnPrev = makeBtn("←");
+    const label = document.createElement("span");
+    label.style.cssText = "font-size:0.8rem;color:#9ca3af;min-width:4rem;display:inline-block;";
+    label.textContent = "1 / " + srcs.length;
+    const btnNext = makeBtn("→");
+    const btnAuto = makeBtn("▶");
+    controls.append(btnPrev, label, btnNext, btnAuto);
+
+    function updateLabel() {
+        label.textContent = (idx + 1) + " / " + srcs.length;
+    }
+
+    // Autoplay state (may be pre-enabled via model)
+    let autoplay = model.get("autoplay");
+
+    function onEnded() {
+        if (autoplay) goForward();
+    }
+
+    function attachAutoEnded() {
+        buf[0].addEventListener("ended", onEnded, { once: true });
+    }
+
+    function transition(nextIdx) {
+        if (busy) return;
         busy = true;
         idx = nextIdx;
-        const hint = idx >= srcs.length - 1 ? "click to restart" : "click to advance";
-        label.textContent = (idx + 1) + " / " + srcs.length + " -" + hint;
-        buf[1].src = nextSrc;
+        updateLabel();
+        buf[1].src = srcs[idx];
         buf[1].load();
         whenReady(buf[1], function () {
             buf[1].play();
@@ -87,25 +118,44 @@ function render({ model, el }) {
             buf.reverse();
             busy = false;
             preloadNext();
+            if (autoplay) attachAutoEnded();
         });
     }
 
-    wrap.addEventListener("click", function () {
-        if (busy) return;
-        if (idx < srcs.length - 1) {
-            transition(srcs[idx + 1], idx + 1);
+    function goForward() { transition((idx + 1) % srcs.length); }
+    function goBack()    { transition(idx === 0 ? srcs.length - 1 : idx - 1); }
+
+    stage.addEventListener("click", goForward);
+    btnNext.addEventListener("click", goForward);
+    btnPrev.addEventListener("click", goBack);
+
+    btnAuto.addEventListener("click", function () {
+        autoplay = !autoplay;
+        if (autoplay) {
+            btnAuto.style.color = "#60a5fa";
+            btnAuto.style.borderColor = "#3b82f6";
+            if (buf[0].ended) { goForward(); } else { attachAutoEnded(); }
         } else {
-            transition(srcs[0], 0);
+            btnAuto.style.color = "#9ca3af";
+            btnAuto.style.borderColor = "#374151";
         }
     });
 
+    wrap.appendChild(controls);
     el.appendChild(wrap);
-    el.appendChild(label);
+
+    // Apply initial autoplay state
+    if (autoplay) {
+        btnAuto.style.color = "#60a5fa";
+        btnAuto.style.borderColor = "#3b82f6";
+        attachAutoEnded();
+    }
 }
 export default { render };
 """
     srcs = traitlets.List(traitlets.Unicode()).tag(sync=True)
     width = traitlets.Unicode("100%").tag(sync=True)
+    autoplay = traitlets.Bool(False).tag(sync=True)
 
 
 class Manim:
@@ -142,12 +192,14 @@ class Manim:
         quality: str = "low",
         interactive: bool = False,
         width: str = "100%",
+        autoplay: bool = False,
     ) -> None:
         self.scene = scene
         self.format = format
         self.quality = quality
         self.interactive = interactive
         self.width = width
+        self.autoplay = autoplay
         self._cached = None
 
     def render(self):
@@ -238,7 +290,7 @@ class Manim:
             f"data:video/mp4;base64,{base64.b64encode(f).decode()}"
             for f in frames
         ]
-        return _ManimInteractiveWidget(srcs=srcs, width=self.width)
+        return _ManimInteractiveWidget(srcs=srcs, width=self.width, autoplay=self.autoplay)
 
     @staticmethod
     def _find_output(directory: str, fmt: str) -> "bytes | None":

@@ -73,9 +73,11 @@ class FlowAnimation:
         direction: str = None,
         quality: str = "low",
         width: str = "100%",
+        autoplay: bool = False,
     ) -> None:
         self.quality = quality
         self.width = width
+        self.autoplay = autoplay
         self._cached = None
 
         if edges is not None:
@@ -103,7 +105,7 @@ class FlowAnimation:
         if self._cached is not None:
             return self._cached
         self._cached = Manim(
-            self._build_scene(), interactive=True, quality=self.quality, width=self.width
+            self._build_scene(), interactive=True, quality=self.quality, width=self.width, autoplay=self.autoplay
         ).render()
         return self._cached
 
