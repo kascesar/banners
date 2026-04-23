@@ -59,9 +59,10 @@ class Closing(Slide):
         team: str = "",
         stats: "list[tuple[str, str, str]] | None" = None,
         icon: "dict | None" = None,
-        slide_bg=None,
+        background=None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer, slide_bg=slide_bg)
+        background = background if background is not None else _cfg.get("background")
+        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer, background=background)
         self.team = team or _cfg.get("team", "")
         self.stats = stats
         self.icon = icon if icon is not None else _cfg.get("icon")

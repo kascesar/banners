@@ -12,19 +12,20 @@ Run with: uv run marimo edit test/01_intro.py
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App(width="full", layout_file="layouts/01_intro.slides.json")
+app = marimo.App(width="full")
 
 
 @app.cell
 def _():
     import marimo as mo
-    from banners import configure
+    from banners import configure, Background
     from banners.slides import Cover, Intro, Section, Closing
     from banners.content import Text
     from banners.palette import Palette, ORANGE, BLUE, GREEN, PURPLE, GRAY
 
     return (
         BLUE,
+        Background,
         Closing,
         Cover,
         GRAY,
@@ -93,8 +94,8 @@ def _(mo):
 
 
 @app.cell
-def _(BLUE, configure):
-    configure(team="Analytics Team", date="April 2026", palette=BLUE)
+def _(BLUE, Background, configure):
+    configure(team="Analytics Team", date="April 2026", palette=BLUE, background=Background.gradient(start="#2929A8", end="#E8A1DD", angle=15))
     return
 
 
@@ -116,7 +117,7 @@ def _(Cover, Text):
             Text("**Key point 2** — The concrete result achieved."),
             Text("**Key point 3** — The impact for the team."),
         ],
-        content_kind="neutral",
+        content_kind="warn",
     ).render()
     return
 

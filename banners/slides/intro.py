@@ -66,9 +66,10 @@ class Intro(Slide):
         footer: str = "",
         team: str = "",
         icon: "dict | None" = None,
-        slide_bg=None,
+        background=None,
     ) -> None:
-        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer, slide_bg=slide_bg)
+        background = background if background is not None else _cfg.get("background")
+        super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer, background=background)
         self.tag = tag
         self.summary = summary
         self.team = team or _cfg.get("team", "")

@@ -68,7 +68,7 @@ class Slide:
         palette: Palette | None = None,
         content_kind: "str | None" = None,
         footer: str = "",
-        slide_bg=None,
+        background=None,
     ) -> None:
         self.title = title
         self.subtitle = subtitle
@@ -76,7 +76,7 @@ class Slide:
         self.palette = palette or Palette()
         self.content_kind = content_kind
         self.footer = footer
-        self.slide_bg = slide_bg
+        self.background = background
 
     def render(self) -> mo.Html:
         """Assemble and return the complete slide as a marimo component.
@@ -90,14 +90,14 @@ class Slide:
         return self._wrap_slide(banner, content_parts)
 
     def _wrap_slide(self, banner, content_parts: list):
-        if self.slide_bg is None:
+        if self.background is None:
             return mo.vstack([banner] + content_parts)
-        bg_css = self.slide_bg.css if hasattr(self.slide_bg, "css") else str(self.slide_bg)
+        bg_css = self.background.css if hasattr(self.background, "css") else str(self.background)
         banner_html = mo.as_html(banner).text
         if content_parts:
             content_inner = mo.as_html(mo.vstack(content_parts)).text
-            tc = self.slide_bg.text_color() if (
-                self.content_kind is None and hasattr(self.slide_bg, "text_color")
+            tc = self.background.text_color() if (
+                self.content_kind is None and hasattr(self.background, "text_color")
             ) else None
             if tc is not None:
                 uid = f"sbg{id(self):x}"

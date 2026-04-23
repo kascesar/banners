@@ -89,7 +89,7 @@ All slides share these parameters:
 | =content_kind=   | Box style for =Text= lists: =neutral=, =info=, =success=, =warn=, =danger= |
 | =footer=         | Quote rendered as a blockquote at the bottom of the slide     |
 | =icon=           | Banner icon. Falls back to the global =configure()= value       |
-| =slide_bg=       | Custom slide background (see [[*Slide backgrounds]])              |
+| =background=       | Custom slide background (see [[*Slide backgrounds]])              |
 
 ** Section — auto-numbering
 
@@ -200,26 +200,26 @@ Custom palettes: =Palette(start, mid, end)= for full-banner slides, =SectionPale
 
 * Slide backgrounds
 
-The =slide_bg= parameter paints the full slide area (banner + content) with a custom background. Use the =Background= factory class:
+The =background= parameter paints the full slide area (banner + content) with a custom background. Use the =Background= factory class:
 
 #+begin_src python
 from banners import Background
 
 # Solid color
-Cover(title="Dark slide", slide_bg=Background.color("#0f172a"))
+Cover(title="Dark slide", background=Background.color("#0f172a"))
 
 # Custom gradient
-Section(title="Gradient", slide_bg=Background.gradient("#0d1b2a", "#4a1a6e"))
-Section(title="3-stop",   slide_bg=Background.gradient("#0d1b2a", "#4a1a6e",
+Section(title="Gradient", background=Background.gradient("#0d1b2a", "#4a1a6e"))
+Section(title="3-stop",   background=Background.gradient("#0d1b2a", "#4a1a6e",
                                                         mid="#1a2a5e", angle=45))
 
 # Image — dark overlay applied automatically for legibility
-Cover(title="Photo", slide_bg=Background.image("assets/photo.jpg"))
-Cover(title="URL",   slide_bg=Background.image("https://...", overlay="rgba(0,0,0,0.7)"))
-Cover(title="Raw",   slide_bg=Background.image(raw_bytes, overlay=None))
+Cover(title="Photo", background=Background.image("assets/photo.jpg"))
+Cover(title="URL",   background=Background.image("https://...", overlay="rgba(0,0,0,0.7)"))
+Cover(title="Raw",   background=Background.image(raw_bytes, overlay=None))
 #+end_src
 
-When =slide_bg= is set and =content_kind= is not, the content text color is chosen automatically
+When =background= is set and =content_kind= is not, the content text color is chosen automatically
 based on the background luminance (white for dark backgrounds, dark for light ones).
 Passing =content_kind= explicitly disables this — the callout boxes handle their own colors.
 

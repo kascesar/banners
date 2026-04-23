@@ -1,5 +1,5 @@
 """
-10_background.py — slide_bg: color sólido, gradiente e imagen de fondo.
+10_background.py — background: color sólido, gradiente e imagen de fondo.
 Run with: uv run marimo edit test/10_background.py
 """
 
@@ -24,17 +24,17 @@ def _():
 @app.cell
 def _(mo):
     mo.md(r"""
-    # `slide_bg` — Fondo por diapositiva
+    # `background` — Fondo por diapositiva
 
-    El parámetro `slide_bg` acepta un objeto `Background` que pinta el fondo
+    El parámetro `background` acepta un objeto `Background` que pinta el fondo
     del contenedor completo del slide (banner + contenido).
 
     ```python
     from banners import Background
 
-    Cover(title="Demo", slide_bg=Background.color("#0f172a"))
-    Cover(title="Demo", slide_bg=Background.gradient("#0d1b2a", "#4a1a6e"))
-    Cover(title="Demo", slide_bg=Background.image("assets/photo.jpg"))
+    Cover(title="Demo", background=Background.color("#0f172a"))
+    Cover(title="Demo", background=Background.gradient("#0d1b2a", "#4a1a6e"))
+    Cover(title="Demo", background=Background.image("assets/photo.jpg"))
     ```
 
     ## Tres modos
@@ -133,8 +133,8 @@ def _(mo):
 def _(Background, Cover, content):
     Cover(
         title="Color sólido",
-        subtitle="slide_bg=Background.color('#0f172a')",
-        slide_bg=Background.color("#0f172a"),
+        subtitle="background=Background.color('#0f172a')",
+        background=Background.color("#0f172a"),
         content=content
     ).render()
     return
@@ -145,7 +145,7 @@ def _(Background, Section, content):
     Section(
         title="Color sólido en Section",
         subtitle="Fondo oscuro neutro",
-        slide_bg=Background.color("#111827"),
+        background=Background.color("#111827"),
         content=content,
         content_kind="success"
     ).render()
@@ -165,7 +165,7 @@ def _(Background, Cover, content):
     Cover(
         title="Gradiente 2 colores",
         subtitle="angle=135 (default)",
-        slide_bg=Background.gradient("#0d1b2a", "#4a1a6e"),
+        background=Background.gradient("#0d1b2a", "#4a1a6e"),
         content=content,
     ).render()
     return
@@ -176,7 +176,7 @@ def _(Background, Intro, content):
     Intro(
         title="Gradiente 3 colores",
         subtitle="Con mid-stop a 50%",
-        slide_bg=Background.gradient("#0d1b2a", "#1b4332", mid="#1a3a2a", angle=45),
+        background=Background.gradient("#0d1b2a", "#1b4332", mid="#1a3a2a", angle=45),
         content=content,
     ).render()
     return
@@ -187,7 +187,7 @@ def _(Background, Section, content):
     Section(
         title="Gradiente horizontal",
         subtitle="angle=90",
-        slide_bg=Background.gradient("#1a0533", "#0d1b4a", angle=90),
+        background=Background.gradient("#1a0533", "#0d1b4a", angle=90),
         content=content,
     ).render()
     return
@@ -216,7 +216,7 @@ def _(Background, Cover, IMAGE_PATH, content):
     Cover(
         title="Imagen local",
         subtitle="Overlay por defecto: rgba(0,0,0,0.55)",
-        slide_bg=Background.image(IMAGE_PATH),
+        background=Background.image(IMAGE_PATH),
         content=content,
     ).render()
     return
@@ -227,7 +227,7 @@ def _(Background, Cover, IMAGE_PATH, content):
     Cover(
         title="Imagen — overlay más oscuro",
         subtitle="overlay='rgba(.5,0,.5,0.2)'",
-        slide_bg=Background.image(IMAGE_PATH, overlay="rgba(.5,0,.5,0.2)"),
+        background=Background.image(IMAGE_PATH, overlay="rgba(.5,0,.5,0.2)"),
         content=content
     ).render()
     return
@@ -238,7 +238,7 @@ def _(Background, Closing, IMAGE_PATH, content):
     Closing(
         title="Sin overlay",
         subtitle="overlay=None — imagen a full",
-        slide_bg=Background.image(IMAGE_PATH, overlay=None),
+        background=Background.image(IMAGE_PATH, overlay=None),
         content=content,
     ).render()
     return
@@ -247,7 +247,7 @@ def _(Background, Closing, IMAGE_PATH, content):
 @app.cell
 def _(mo):
     mo.md("""
-    ## Sin `slide_bg` — sin regresión
+    ## Sin `background` — sin regresión
     """)
     return
 
@@ -256,7 +256,7 @@ def _(mo):
 def _(Cover, PURPLE, content):
     Cover(
         title="Palette por defecto",
-        subtitle="Sin slide_bg — usa palette normal",
+        subtitle="Sin background — usa palette normal",
         palette=PURPLE,
         content=content,
     ).render()
@@ -266,16 +266,11 @@ def _(Cover, PURPLE, content):
 @app.cell
 def _(Background, Section, content):
     Section(
-        title="Section sin slide_bg",
+        title="Section sin background",
         subtitle="Comportamiento original sin cambios",
         content=content,
-        slide_bg=Background.color("#B3AFC7")
+        background=Background.color("#B3AFC7")
     ).render()
-    return
-
-
-@app.cell
-def _():
     return
 
 

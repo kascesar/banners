@@ -62,12 +62,13 @@ class Section(Slide):
         number: "str | None" = None,
         footer: str = "",
         icon: "dict | None" = None,
-        slide_bg=None,
+        background=None,
     ) -> None:
         if palette is None:
             global_palette = _cfg.get("palette")
             palette = global_palette.to_section_palette() if global_palette is not None else SectionPalette()
-        super().__init__(title, subtitle, content, palette, content_kind, footer, slide_bg=slide_bg)
+        background = background if background is not None else _cfg.get("background")
+        super().__init__(title, subtitle, content, palette, content_kind, footer, background=background)
         self.number = number if number is not None else _cfg._next_section_number()
         self.icon = icon if icon is not None else _cfg.get("icon")
 

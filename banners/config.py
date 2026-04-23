@@ -5,6 +5,7 @@ _state: dict = {
     "date": "",
     "icon": None,
     "palette": None,
+    "background": None,
     "_section_counter": 0,
 }
 
@@ -16,6 +17,7 @@ def configure(
     date: str = _UNSET,
     icon=_UNSET,
     palette=_UNSET,
+    background=_UNSET,
 ) -> None:
     """Set global defaults shared by all slides and reset the section counter.
 
@@ -31,10 +33,14 @@ def configure(
         palette: Color palette applied to `Cover`, `Intro`, and `Closing`.
             Pass any `Palette` instance or predefined constant
             (`BLUE`, `GREEN`, `PURPLE`, `GRAY`).
+        background: Background applied to all slides. Pass a `Background`
+            instance (`Background.color()`, `Background.gradient()`, or
+            `Background.image()`). Individual slides can override this with
+            their own `background` argument.
 
     Example:
         ```python
-        from banners import configure
+        from banners import configure, Background
         from banners.palette import BLUE
 
         configure(
@@ -42,6 +48,7 @@ def configure(
             date="April 2026",
             palette=BLUE,
             icon={"src": "img/logo.png"},
+            background=Background.gradient("#0f172a", "#1e3a5f"),
         )
         ```
     """
@@ -53,6 +60,8 @@ def configure(
         _state["icon"] = icon
     if palette is not _UNSET:
         _state["palette"] = palette
+    if background is not _UNSET:
+        _state["background"] = background
     _state["_section_counter"] = 0
 
 
