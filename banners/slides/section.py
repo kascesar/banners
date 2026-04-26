@@ -3,7 +3,7 @@
 import marimo as mo
 
 from ..slide import Slide
-from ..palette import SectionPalette
+from ..palette import Palette, SectionPalette
 from .. import config as _cfg
 
 
@@ -67,6 +67,8 @@ class Section(Slide):
         if palette is None:
             global_palette = _cfg.get("palette")
             palette = global_palette.to_section_palette() if global_palette is not None else SectionPalette()
+        elif isinstance(palette, Palette) and not isinstance(palette, SectionPalette):
+            palette = palette.to_section_palette()
         background = background if background is not None else _cfg.get("background")
         super().__init__(title, subtitle, content, palette, content_kind, footer, background=background)
         self.number = number if number is not None else _cfg._next_section_number()
