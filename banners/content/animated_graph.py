@@ -5,9 +5,13 @@ import re
 import uuid
 from collections import defaultdict
 
+from pathlib import Path
+
 import anywidget
 import traitlets
 import marimo as mo
+
+_HERE = Path(__file__).parent
 
 
 # ---------------------------------------------------------------------------
@@ -181,23 +185,7 @@ def _build_svg(nodes, edges, pos, node_w, node_h, uid):
 # ---------------------------------------------------------------------------
 
 class _GraphWidget(anywidget.AnyWidget):
-    _esm = """
-function render({ model, el }) {
-    const color = model.get("color");
-    el.innerHTML = model.get("svg");
-
-    el.querySelectorAll(".ag-node").forEach(function(g) {
-        g.addEventListener("click", function() {
-            const r = g.querySelector("rect");
-            const on = g.dataset.hl === "1";
-            r.style.fill   = on ? "" : color;
-            r.style.filter = on ? "" : "brightness(1.15)";
-            g.dataset.hl   = on ? "0" : "1";
-        });
-    });
-}
-export default { render };
-"""
+    _esm = _HERE / "_graph_widget.js"
     _css = """
 .ag-node { cursor: pointer; }
 """
