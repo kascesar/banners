@@ -185,7 +185,7 @@ def _build_svg(nodes, edges, pos, node_w, node_h, uid):
 # ---------------------------------------------------------------------------
 
 class _GraphWidget(anywidget.AnyWidget):
-    _esm = _HERE / "_graph_widget.js"
+    _esm = (_HERE / "_graph_widget.js").read_text()
     _css = """
 .ag-node { cursor: pointer; }
 """

@@ -5,21 +5,13 @@ import contextlib
 import hashlib
 import inspect
 import io
+import json
 import tempfile
 from pathlib import Path
 
 _HERE = Path(__file__).parent
 
-import anywidget
 import marimo as mo
-import traitlets
-
-
-class _ManimInteractiveWidget(anywidget.AnyWidget):
-    _esm = _HERE / "_manim_widget.js"
-    srcs = traitlets.List(traitlets.Unicode()).tag(sync=True)
-    width = traitlets.Unicode("100%").tag(sync=True)
-    autoplay = traitlets.Bool(False).tag(sync=True)
 
 
 class Manim:
@@ -186,7 +178,38 @@ class Manim:
             f"data:video/mp4;base64,{base64.b64encode(f).decode()}"
             for f in frames
         ]
-        return _ManimInteractiveWidget(srcs=srcs, width=self.width, autoplay=self.autoplay)
+        return self._build_iframe_player(srcs, self.width, self.autoplay)
+
+    @staticmethod
+    def _build_iframe_player(srcs: list, width: str, autoplay: bool) -> mo.Html:
+        js = (_HERE / "_manim_widget.js").read_text()
+        srcs_json = json.dumps(srcs)
+        autoplay_json = json.dumps(autoplay)
+        html = f"""<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<style>*{{margin:0;padding:0;box-sizing:border-box;}}body{{background:#000;}}</style>
+</head><body>
+<div id="root"></div>
+<script type="module">
+const srcs = {srcs_json};
+const autoplay = {autoplay_json};
+const model = {{
+    get(k) {{
+        if (k === "srcs") return srcs;
+        if (k === "width") return "100%";
+        if (k === "autoplay") return autoplay;
+    }}
+}};
+{js.replace("export default { render };", "")}
+render({{ model, el: document.getElementById("root") }});
+</script>
+</body></html>"""
+        data_url = "data:text/html;base64," + base64.b64encode(html.encode()).decode()
+        return mo.Html(
+            f'<iframe src="{data_url}" '
+            f'style="width:{width};aspect-ratio:16/9;border:none;display:block;" '
+            f'allowfullscreen></iframe>'
+        )
 
     @staticmethod
     def _find_output(directory: str, fmt: str) -> "bytes | None":
