@@ -274,7 +274,7 @@ def _(Manim, Section):
             Manim(
                 MaxwellDerivationScene,
                 interactive=True,
-                quality="medium",
+                quality="low",
                 width="78%",
             ),
         ],

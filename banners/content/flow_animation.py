@@ -1,5 +1,8 @@
 """FlowAnimation -- click-to-advance pipeline animation built on top of Manim."""
 
+import hashlib
+import json
+
 from .manim import Manim
 
 _COLORS = [
@@ -100,12 +103,25 @@ class FlowAnimation:
         else:
             self._direction = direction.upper()
 
+    def _data_key(self) -> str:
+        if self._mode == "graph":
+            data = {"nodes": list(self._node_specs.values()), "edges": self._edges}
+        else:
+            data = {"rows": self._rows}
+        raw = json.dumps(data, sort_keys=True)
+        return hashlib.sha256(raw.encode()).hexdigest()[:24]
+
     def render(self):
         """Build the scene and delegate rendering to Manim."""
         if self._cached is not None:
             return self._cached
         self._cached = Manim(
-            self._build_scene(), interactive=True, quality=self.quality, width=self.width, autoplay=self.autoplay
+            self._build_scene(),
+            interactive=True,
+            quality=self.quality,
+            width=self.width,
+            autoplay=self.autoplay,
+            _extra_key=self._data_key(),
         ).render()
         return self._cached
 

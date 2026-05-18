@@ -49,6 +49,7 @@ class Manim:
         interactive: bool = False,
         width: str = "100%",
         autoplay: bool = False,
+        _extra_key: str = "",
     ) -> None:
         self.scene = scene
         self.format = format
@@ -56,6 +57,7 @@ class Manim:
         self.interactive = interactive
         self.width = width
         self.autoplay = autoplay
+        self._extra_key = _extra_key
         self._cached = None
 
     def _cache_key(self) -> str:
@@ -63,7 +65,7 @@ class Manim:
             src = inspect.getsource(self.scene)
         except OSError:
             src = self.scene.__qualname__
-        raw = f"{src}|{self.quality}|{self.format}|{self.interactive}"
+        raw = f"{src}|{self.quality}|{self.format}|{self.interactive}|{self._extra_key}"
         return hashlib.sha256(raw.encode()).hexdigest()[:24]
 
     @staticmethod
