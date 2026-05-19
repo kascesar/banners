@@ -44,10 +44,16 @@ For animated diagrams (`FlowAnimation`, `Manim`):
 uv pip install "marimo-banners[manim]"
 ```
 
-`FlowAnimation` and `Manim` depend on system libraries for text rendering:
+`FlowAnimation` and `Manim` depend on system libraries for rendering. Install the appropriate set for your OS:
 
+**Ubuntu / Debian**
 ```bash
-sudo apt install python3-dev libpango1.0-dev pkg-config
+sudo apt install python3-dev libpango1.0-dev pkg-config libcairo2-dev libx11-dev libgl1-mesa-dev ffmpeg
+```
+
+**Fedora / RHEL**
+```bash
+sudo dnf install gcc-c++ python3-devel pkgconf-pkg-config cairo-devel pango-devel libX11-devel mesa-libGL-devel ffmpeg
 ```
 
 # Quick start
