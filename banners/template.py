@@ -424,9 +424,11 @@ BECH = Template(
     logo_on_light=_COMMONS + "Logo_BancoEstado.svg",
     mark=_COMMONS + "Logo_BancoEstado_(cropped).svg",
 )
-"""BancoEstado corporate template (colors, font and layout of its 16:9 deck).
+"""Template inspired by BancoEstado's 16:9 decks (colors, font and layout).
 
-Logos are linked from Wikimedia Commons (public domain) and loaded by the
+This is not an official BancoEstado template and is not endorsed by BancoEstado.
+
+Logos are linked from Wikimedia Commons and loaded by the
 browser, so no brand files live in this repository. On dark slides the logo is
 shown in solid white. Photos are not included: pass your own with
 `Cover(image=...)` / `Section(image=...)`. To add more images, copy the preset:

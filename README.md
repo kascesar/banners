@@ -343,8 +343,9 @@ Image fields accept a URL (loaded by the browser, nothing is embedded), a
 path, or bytes. When `logo_on_dark` is not set, dark slides show
 `logo_on_light` in white with the `mark` kept in color.
 
-A BancoEstado preset is included; its logos are linked from Wikimedia Commons
-(public domain) and it ships no photos:
+A preset inspired by BancoEstado's decks is included. It is not an official
+BancoEstado template; its logos are linked from Wikimedia Commons and it ships
+no photos:
 
 ```python
 from banners.template import BECH
