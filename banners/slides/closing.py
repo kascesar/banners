@@ -81,6 +81,11 @@ class Closing(Slide):
         return self._wrap_slide(banner, content_parts)
 
     def _render_stats(self) -> mo.Html:
+        """Render `stats` as a typographic row separated by thin vertical rules.
+
+        Returns:
+            A `mo.Html` grid with one cell per `(value, label, caption)` tuple.
+        """
         ink, muted, rule = self._ink()
         cells = []
         for i, (value, label, caption) in enumerate(self.stats):
@@ -106,13 +111,17 @@ class Closing(Slide):
             f'margin:1rem 0 0;max-width:50ch;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
+        icon_html = self._icon_inline_html(self.icon, default_size="40px", style="flex-shrink:0;")
+        # The team line and the icon share the bottom row, so the icon never
+        # sits on top of the hairline or the text.
         team_html = (
-            f'<div style="font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;'
+            f'font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;'
             f'color:{p.text_muted};margin-top:2.5rem;padding-top:0.9rem;'
-            f'border-top:1px solid rgba(255,255,255,0.16);">{self.team}</div>'
-            if self.team else ""
+            f'border-top:1px solid rgba(255,255,255,0.16);">'
+            f'<span>{self.team}</span>{icon_html}</div>'
+            if self.team or icon_html else ""
         )
-        icon_html = self._icon_corner_html(self.icon, bottom="1.25rem", right="2.5rem", default_size="40px")
         return mo.Html(f"""
         <div style="position:relative;background:{p.start};color:{p.text_main};
                     padding:3rem 2.75rem 1.5rem;border-radius:3px;margin-bottom:1.75rem;">
@@ -121,6 +130,5 @@ class Closing(Slide):
                        margin:0;max-width:24ch;color:{p.text_main};">{self.title}</h1>
             {subtitle_html}
             {team_html}
-            {icon_html}
         </div>
         """)

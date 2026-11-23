@@ -97,19 +97,25 @@ class Intro(Slide):
     def _render_banner(self) -> mo.Html:
         ink, muted, rule = self._ink()
         label = self.tag if self.tag else self.team
-        kicker_html = self._kicker(label, self._accent()) if label else ""
+        kicker_html = self._kicker(label, self._accent_text()) if label else ""
         subtitle_html = (
             f'<p style="font-size:1.1rem;line-height:1.45;color:{muted};margin:0.5rem 0 0;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
-        icon_html = self._icon_corner_html(self.icon, bottom="1.75rem", right="0", default_size="32px")
+        icon_html = self._icon_inline_html(
+            self.icon, default_size="32px", style="flex-shrink:0;align-self:flex-end;"
+        )
         return mo.Html(f"""
-        <div style="position:relative;padding-top:0.5rem;">
-            {kicker_html}
-            <h2 style="font-size:2.25rem;font-weight:600;letter-spacing:-0.015em;line-height:1.15;
-                       margin:0.5rem 0 0;color:{ink};">{self.title}</h2>
-            {subtitle_html}
-            {icon_html}
+        <div style="padding-top:0.5rem;">
+            <div style="display:flex;gap:1.5rem;">
+                <div style="flex:1;min-width:0;">
+                    {kicker_html}
+                    <h2 style="font-size:2.25rem;font-weight:600;letter-spacing:-0.015em;line-height:1.15;
+                               margin:0.5rem 0 0;color:{ink};">{self.title}</h2>
+                    {subtitle_html}
+                </div>
+                {icon_html}
+            </div>
             {self._accent_rule(rule, margin="1.25rem 0 1.5rem")}
         </div>
         """)

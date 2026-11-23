@@ -87,7 +87,7 @@ class Section(Slide):
     def _render_banner(self) -> mo.Html:
         ink, muted, rule = self._ink()
         number_html = (
-            f'<div style="font-size:1rem;font-weight:600;letter-spacing:0.04em;color:{self._accent()};'
+            f'<div style="font-size:1rem;font-weight:600;letter-spacing:0.04em;color:{self._accent_text()};'
             f'font-variant-numeric:tabular-nums;min-width:2ch;flex-shrink:0;">{self.number}</div>'
             if self.number else ""
         )

@@ -83,15 +83,23 @@ class Cover(Slide):
             f'margin:1.1rem 0 0;max-width:46ch;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
-        icon_html = self._icon_corner_html(self.icon, bottom="1.75rem", right="2.5rem", default_size="40px")
+        # The icon sits in its own flex column, so a long title or subtitle wraps
+        # before reaching it instead of running underneath.
+        icon_html = self._icon_inline_html(
+            self.icon, default_size="40px", style="flex-shrink:0;align-self:flex-end;"
+        )
         return mo.Html(f"""
-        <div style="position:relative;background:{p.start};color:{p.text_main};
+        <div style="background:{p.start};color:{p.text_main};
                     padding:1.5rem 2.75rem 3rem;border-radius:3px;margin-bottom:1.75rem;">
             {meta_html}
-            <div style="width:40px;height:3px;background:{p.end};margin:3.5rem 0 1.25rem;"></div>
-            <h1 style="font-size:3rem;font-weight:600;letter-spacing:-0.02em;line-height:1.1;
-                       margin:0;max-width:22ch;color:{p.text_main};">{self.title}</h1>
-            {subtitle_html}
-            {icon_html}
+            <div style="display:flex;gap:2rem;">
+                <div style="flex:1;min-width:0;">
+                    <div style="width:40px;height:3px;background:{p.end};margin:3.5rem 0 1.25rem;"></div>
+                    <h1 style="font-size:3rem;font-weight:600;letter-spacing:-0.02em;line-height:1.1;
+                               margin:0;max-width:22ch;color:{p.text_main};">{self.title}</h1>
+                    {subtitle_html}
+                </div>
+                {icon_html}
+            </div>
         </div>
         """)
