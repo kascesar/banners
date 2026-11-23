@@ -39,8 +39,8 @@ make publish
 
 - `test/` holds **marimo notebooks** for visual validation, not pytest tests.
   Every notebook ends with `if __name__ == "__main__": app.run()`.
-- Automated tests (pytest) live in `tests/` once milestone M2 is done.
-  Run them with `uv run pytest`.
+- Automated tests (pytest) live in `tests/`. Run them with `uv run pytest`;
+  `tests/conftest.py` restores `banners.config._state` after every test.
 - Anything that requires manim or system libraries (cairo, pango, ffmpeg) must be
   marked `@pytest.mark.manim` and is skipped by default.
 
@@ -122,8 +122,10 @@ All content elements live in `banners/content/`. Each class must expose a `.rend
 ### `AnimatedGraph` internals
 
 Uses a custom pipeline instead of mermaid.js to avoid marimo's shadow DOM (which blocks `<script>` execution from `mo.Html`):
-1. `_parse()` — regex-based Mermaid `graph LR/TD` parser → `{nodes, edges, direction}`
-2. `_layout()` — BFS level assignment with `max_level = len(nodes)` cycle guard → `{node: (x,y)}`
+1. `_parse()` — regex-based Mermaid `graph LR/TD` parser → tuple `(nodes, edges, direction)`:
+   `nodes` is `{id: label}`, `edges` is `[(src, dst, edge_label)]`
+2. `_layout()` — BFS level assignment with `max_level = len(nodes)` cycle guard → tuple `(pos, node_w, node_h)`,
+   where `pos` is `{id: (x, y)}`
 3. `_build_svg()` — generates SVG with `.ag-node` class on each node group
 4. `_GraphWidget(anywidget.AnyWidget)` — `_esm` JS attaches click listeners that toggle fill color
 
