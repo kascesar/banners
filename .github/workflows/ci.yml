@@ -1,0 +1,40 @@
+# Integración continua: ejecuta el linter (ruff) y las pruebas unitarias (pytest)
+# en cada push y en cada pull request.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      # false: si falla una versión de Python, las demás siguen corriendo y se ve
+      # el resultado de cada una.
+      fail-fast: false
+      matrix:
+        # Versión mínima soportada (requires-python = ">=3.10") y una reciente.
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      # Instala uv y fija la versión de Python de la matriz para los pasos siguientes.
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Instala solo las dependencias base desde uv.lock, sin extras. El extra `dev`
+      # incluye manim, que necesita librerías del sistema (cairo, pango) y no se usa
+      # aquí. --locked falla si uv.lock no corresponde a pyproject.toml.
+      - name: Instalar dependencias
+        run: uv sync --locked
+
+      # ruff se agrega solo para este comando con --with, sin tocar uv.lock.
+      - name: Ruff
+        run: uv run --with ruff ruff check banners tests
+
+      # pytest se agrega igual que ruff. Omite las pruebas marcadas `manim`
+      # (addopts en pyproject.toml).
+      - name: Pytest
+        run: uv run --with pytest pytest
