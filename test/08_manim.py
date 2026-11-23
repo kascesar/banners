@@ -6,7 +6,7 @@ Run with: uv run marimo edit test/08_manim.py
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App(width="full", layout_file="layouts/08_manim.slides.json")
+app = marimo.App(width="full")
 
 
 @app.cell

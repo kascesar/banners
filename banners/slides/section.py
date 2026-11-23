@@ -2,9 +2,9 @@
 
 import marimo as mo
 
-from ..slide import Slide
-from ..palette import Palette, SectionPalette
 from .. import config as _cfg
+from ..palette import Palette, SectionPalette
+from ..slide import Slide
 
 
 class Section(Slide):

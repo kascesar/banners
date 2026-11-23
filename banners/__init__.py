@@ -21,12 +21,12 @@ Cover(
 ```
 """
 
-from .slide import Slide
-from .slides import Cover, Intro, Section, Closing
-from .content import Text, Image, Graph, AnimatedGraph, Table, Plot, Manim, FlowAnimation
-from .palette import Palette, SectionPalette, ORANGE, BLUE, GREEN, PURPLE, GRAY
 from .background import Background
 from .config import configure
+from .content import AnimatedGraph, FlowAnimation, Graph, Image, Manim, Plot, Table, Text
+from .palette import BLUE, GRAY, GREEN, ORANGE, PURPLE, Palette, SectionPalette
+from .slide import Slide
+from .slides import Closing, Cover, Intro, Section
 
 __all__ = [
     "configure",

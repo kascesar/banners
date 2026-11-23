@@ -2,38 +2,71 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Working by milestones
+
+Work is planned in `MILESTONES.md`. When asked to "take the next milestone":
+
+1. Read `MILESTONES.md` and pick the **first** milestone whose status is `[ ]`.
+2. Work on a branch named `milestone/<id>-<slug>` (e.g. `milestone/m2-unit-tests`).
+3. Implement only that milestone. If you find unrelated issues, add them to the
+   **Backlog** section of `MILESTONES.md` instead of fixing them.
+4. A milestone is done only when **every** acceptance criterion passes. Run the
+   verification commands listed in it and paste their result in the commit message body.
+5. Mark it `[x]`, add a one-line entry to the **Log** section (date, branch, summary),
+   commit, and stop. Do not start the next milestone in the same session.
+6. If a criterion cannot be met, mark the milestone `[!]`, write why under it, and stop.
+
 ## Commands
 
 ```bash
 # Install (always use uv, never pip)
 uv pip install -e "."            # core only
-uv pip install -e ".[dev]"       # includes manim, pandas, pdoc
+uv pip install -e ".[manim]"     # + manim (needs system libs, see README)
+uv pip install -e ".[dev]"       # dev tools: hatch, pdoc, pandas, manim
 
-# Run the visual demo / reference guide
-uv run marimo edit test.py
+# Visual reference notebooks (one per feature)
+uv run marimo edit test/01_intro.py        # ... through test/10_background.py
+uv run marimo edit example/showcase.py     # full demo deck
 
-# Generate docs
-uv run pdoc banners -o docs/
+# Docs
+make docs                        # pdoc → docs/
+
+# Release (manual for now; see MILESTONES.md M5)
+make publish
 ```
 
-No test suite exists yet. Visual validation is done via `test.py` in marimo.
+### Tests
+
+- `test/` holds **marimo notebooks** for visual validation, not pytest tests.
+  Every notebook ends with `if __name__ == "__main__": app.run()`.
+- Automated tests (pytest) live in `tests/` once milestone M2 is done.
+  Run them with `uv run pytest`.
+- Anything that requires manim or system libraries (cairo, pango, ffmpeg) must be
+  marked `@pytest.mark.manim` and is skipped by default.
 
 ---
 
 ## Architecture
 
-`banners` is a **marimo presentation library**. Every slide calls `.render()` which returns a `mo.vstack` of marimo components, displayed directly in a notebook cell.
+`banners` is a **marimo presentation library** published on PyPI as `marimo-banners`.
+Every slide calls `.render()` which returns a `mo.vstack` of marimo components,
+displayed directly in a notebook cell (slides also implement `_display_()`).
 
 ### Layers
 
 ```
 banners/
-  config.py          # Global mutable state: team, date, palette, section counter
+  config.py          # Global mutable state: team, date, icon, palette, background, section counter
   palette.py         # Palette / SectionPalette dataclasses + 5 presets
+  background.py      # Background: color / gradient / image + automatic text contrast
   slide.py           # Slide base class — layout engine lives here
   slides/            # Cover, Intro, Section, Closing — each overrides _render_banner()
   content/           # Leaf content elements — each has a .render() method
   scenes/            # Reusable Manim Scene factories (e.g. PipelineScene)
+  static/            # Vendored mermaid.min.js
+test/                # Visual reference notebooks (marimo), one per feature
+example/             # Demo decks (showcase, ondas_electromagneticas)
+example/layouts/     # marimo slide-layout files (*.slides.json)
 ```
 
 ### `Slide` base class (`slide.py`)
@@ -49,11 +82,25 @@ All four slide types inherit `Slide` and only implement `_render_banner()` to re
 
 ### Global config (`config.py`)
 
-`configure()` writes to a module-level `_state` dict and resets the `Section` auto-counter to 0. `Section.__init__` calls `_cfg._next_section_number()` to get its auto-number, so **cell order matters** — sections number themselves at construction time.
+`configure()` writes only the arguments passed (uses an `_UNSET` sentinel) to a
+module-level `_state` dict and always resets the `Section` auto-counter to 0.
+`Section.__init__` calls `_cfg._next_section_number()` (returns `"01"`, `"02"`, …),
+so **cell order matters** — sections number themselves at construction time.
+
+Because `_state` is module-global, tests must reset it between cases
+(call `configure()` with explicit values or restore a snapshot of `_state` in a fixture).
 
 ### Palette system (`palette.py`)
 
 `Palette` is for full-banner slides (Cover/Intro/Closing). It has `start/mid/end` colors and a `gradient` property. `Palette.to_section_palette()` derives a `SectionPalette` (border + dark bg) by darkening `start`. Predefined constants: `ORANGE`, `BLUE`, `GREEN`, `PURPLE`, `GRAY`.
+
+### Backgrounds (`background.py`)
+
+`Background.color()`, `Background.gradient()`, `Background.image(src, overlay=...)`
+produce a `Background(css=...)`. Set globally via `configure(background=...)` or per slide.
+`text_color()` parses the first color in the CSS (`_parse_first_color`: named colors,
+`#rrggbbaa`, `#rrggbb`, `#rgba`, …), computes WCAG relative luminance and returns
+`"#ffffff"` (dark bg, luminance < 0.2) or `"#1f2937"` (light bg), or `None` if unparseable.
 
 ---
 
@@ -63,7 +110,7 @@ All content elements live in `banners/content/`. Each class must expose a `.rend
 
 | Class | Notes |
 |-------|-------|
-| `Text(body)` | Wraps a markdown string. |
+| `Text(body)` | Wraps a markdown string (LaTeX supported). |
 | `Image(src, width)` | Accepts path, bytes, or URL. `_icon_src()` in `slide.py` handles conversion. |
 | `Graph(diagram)` | Static Mermaid via `mo.mermaid()`. |
 | `AnimatedGraph(diagram)` | Interactive: Python Mermaid parser → SVG → anywidget. Click toggles node highlight. |
@@ -79,6 +126,8 @@ Uses a custom pipeline instead of mermaid.js to avoid marimo's shadow DOM (which
 2. `_layout()` — BFS level assignment with `max_level = len(nodes)` cycle guard → `{node: (x,y)}`
 3. `_build_svg()` — generates SVG with `.ag-node` class on each node group
 4. `_GraphWidget(anywidget.AnyWidget)` — `_esm` JS attaches click listeners that toggle fill color
+
+These pure functions (`_parse`, `_layout`, `_build_svg`) are the main target for unit tests.
 
 ### `Manim` + `FlowAnimation` internals
 
@@ -110,7 +159,14 @@ A factory function (not a class) that imports manim lazily and returns a `_Pipel
 2. Export it from `banners/content/__init__.py`.
 3. Export it from `banners/__init__.py` (`__all__`).
 4. If it needs interactive JS, use `anywidget.AnyWidget` with `_esm` — never `mo.Html()` with `<script>`.
+5. Add a visual notebook `test/NN_<name>.py` and unit tests in `tests/`.
 
 ## Adding a new scene
 
 Add a factory function to `banners/scenes/` that lazily imports manim and returns a `Scene` subclass. Export from `banners/scenes/__init__.py`. Use `self.next_section("name")` for click-advance steps.
+
+## Conventions
+
+- Python ≥ 3.10. Use `uv` for everything (`uv run`, `uv pip`, `uv build`).
+- Public API changes must update `banners/__init__.py` `__all__`, the README, and docstrings (pdoc builds docs from them, Google style).
+- Do not commit rendered media (`*.mp4` is gitignored) or `__marimo__/` folders.
