@@ -88,3 +88,6 @@ tramp
 
 # --- Marimo
 **/__marimo__
+
+# Private templates and brand assets (logos, photos) — keep out of the public repo
+private/

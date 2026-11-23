@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import base64
 import ssl
+import textwrap
 import urllib.request
 import uuid
 from pathlib import Path
 
 import marimo as mo
 
+from . import config as _cfg
 from .palette import Palette
 
 INK = "#111827"
@@ -17,6 +19,9 @@ INK = "#111827"
 MUTED = "#6b7280"
 """Secondary text color (subtitles, labels, captions)."""
 RULE = "#e5e7eb"
+"""Hairline color for dividers."""
+BODY_SIZE = "1.2rem"
+"""Font size of slide body text (marimo's default is about 1rem)."""
 """Hairline color for dividers."""
 
 _KIND_COLORS = {
@@ -95,6 +100,9 @@ class Slide:
             A `mo.Html` component (via `mo.vstack`) ready to display in a
             marimo cell.
         """
+        template = _cfg.get("template")
+        if template is not None:
+            return template.render(self)
         banner = self._render_banner()
         content_parts = self._render_content() + self._render_footer()
         return self._wrap_slide(banner, content_parts)
@@ -142,7 +150,7 @@ class Slide:
         body = self._md_html(self.footer, muted)
         return [mo.Html(
             f'<div style="margin-top:1.5rem;padding-top:0.6rem;border-top:1px solid {rule};'
-            f'font-size:0.85rem;">{body}</div>'
+            f'font-size:1rem;">{body}</div>'
         )]
 
     # ── Design helpers ───────────────────────────────────────────────────────
@@ -217,6 +225,27 @@ class Slide:
         )
 
     @staticmethod
+    def _prose(text: str) -> mo.Html:
+        """Render markdown body text at `BODY_SIZE`, larger than marimo's default.
+
+        marimo's default prose size (about 16 px) is hard to read when the
+        notebook is projected as slides, so slide text is scaled up.
+
+        Args:
+            text: Markdown source.
+
+        Returns:
+            A `mo.Html` component.
+        """
+        uid = f"pr{uuid.uuid4().hex[:8]}"
+        inner = mo.as_html(mo.md(textwrap.dedent(text))).text
+        return mo.Html(
+            f"<style>.{uid} *:not(code):not(pre):not(h1):not(h2):not(h3):not(h4)"
+            f"{{font-size:inherit!important;line-height:1.5!important;}}</style>"
+            f'<div class="{uid}" style="font-size:{BODY_SIZE};">{inner}</div>'
+        )
+
+    @staticmethod
     def _kicker(text: str, color: str) -> str:
         """Build the small uppercase label shown above a heading.
 
@@ -228,7 +257,7 @@ class Slide:
             An HTML string.
         """
         return (
-            f'<div style="font-size:0.78rem;font-weight:600;letter-spacing:0.12em;'
+            f'<div style="font-size:0.9rem;font-weight:600;letter-spacing:0.12em;'
             f'text-transform:uppercase;color:{color};">{text}</div>'
         )
 
@@ -314,7 +343,7 @@ class Slide:
         from .content.text import Text as _Text
 
         if isinstance(item, (_Text, str)):
-            md = mo.md(item.body if isinstance(item, _Text) else item)
+            md = self._prose(item.body if isinstance(item, _Text) else item)
             return self._card(md, wrap_kind) if wrap_kind else md
 
         if hasattr(item, "render") and callable(item.render):

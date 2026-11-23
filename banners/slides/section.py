@@ -37,6 +37,9 @@ class Section(Slide):
         icon: Icon placed at the right end of the header.
             Pass a dict with keys `"src"` (path, URL, or bytes) and optionally
             `"size"` (CSS height, default `"28px"`).
+        image: Photo for the slide. Only used by a `Template`: a divider with
+            the photo on the right half, or a content slide with the photo on
+            the left half. Ignored by the default editorial style.
 
     Example:
         ```python
@@ -70,6 +73,7 @@ class Section(Slide):
         footer: str = "",
         icon: "dict | None" = None,
         background=None,
+        image=None,
     ) -> None:
         if palette is None:
             global_palette = _cfg.get("palette")
@@ -80,6 +84,7 @@ class Section(Slide):
         super().__init__(title, subtitle, content, palette, content_kind, footer, background=background)
         self.number = number if number is not None else _cfg._next_section_number()
         self.icon = icon if icon is not None else _cfg.get("icon")
+        self.image = image
 
     def render(self) -> mo.Html:
         """Assemble banner, content, and footer.
@@ -87,6 +92,9 @@ class Section(Slide):
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
         """
+        template = _cfg.get("template")
+        if template is not None:
+            return template.render(self)
         banner = self._render_banner()
         content_parts = self._render_content() + self._render_footer()
         return self._wrap_slide(banner, content_parts)
@@ -94,12 +102,12 @@ class Section(Slide):
     def _render_banner(self) -> mo.Html:
         ink, muted, rule = self._ink()
         number_html = (
-            f'<div style="font-size:1rem;font-weight:600;letter-spacing:0.04em;color:{self._accent_text()};'
+            f'<div style="font-size:1.15rem;font-weight:600;letter-spacing:0.04em;color:{self._accent_text()};'
             f'font-variant-numeric:tabular-nums;min-width:2ch;flex-shrink:0;">{self.number}</div>'
             if self.number else ""
         )
         subtitle_html = (
-            f'<p style="font-size:1rem;color:{muted};margin:0.35rem 0 0;">{self.subtitle}</p>'
+            f'<p style="font-size:1.2rem;color:{muted};margin:0.35rem 0 0;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
         icon_html = self._icon_inline_html(
@@ -110,7 +118,7 @@ class Section(Slide):
             <div style="display:flex;align-items:baseline;gap:1rem;">
                 {number_html}
                 <div style="flex:1;">
-                    <h3 style="font-size:1.75rem;font-weight:600;letter-spacing:-0.01em;line-height:1.2;
+                    <h3 style="font-size:2rem;font-weight:600;letter-spacing:-0.01em;line-height:1.2;
                                margin:0;color:{ink};">{self.title}</h3>
                     {subtitle_html}
                 </div>

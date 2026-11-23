@@ -29,6 +29,8 @@ class Cover(Slide):
         team: Team line shown in small caps at the top left of the panel.
         icon: Institutional icon placed at the right of the title block. Pass a dict with keys `"src"` (path, URL, or bytes) and
             optionally `"size"` (CSS height, default `"40px"`).
+        image: Photo for the cover. Only used by a `Template` (photo cover
+            layout); ignored by the default editorial style.
 
     Example:
         ```python
@@ -63,12 +65,14 @@ class Cover(Slide):
         team: str = "",
         icon: "dict | None" = None,
         background=None,
+        image=None,
     ) -> None:
         background = background if background is not None else _cfg.get("background")
         super().__init__(title, subtitle, content, palette or _cfg.get("palette"), content_kind, footer, background=background)
         self.date = date or _cfg.get("date", "")
         self.team = team or _cfg.get("team", "")
         self.icon = icon if icon is not None else _cfg.get("icon")
+        self.image = image
 
     def _render_banner(self) -> mo.Html:
         p = self.palette
@@ -77,7 +81,7 @@ class Cover(Slide):
         )
         meta_html = (
             f'<div style="display:flex;justify-content:space-between;gap:1rem;'
-            f'font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;'
+            f'font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;'
             f'color:{p.text_muted};padding-bottom:0.9rem;'
             f'border-bottom:1px solid rgba(255,255,255,0.16);">{meta}</div>'
             if meta else ""

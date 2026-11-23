@@ -86,13 +86,16 @@ class Intro(Slide):
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
         """
+        template = _cfg.get("template")
+        if template is not None:
+            return template.render(self)
         banner = self._render_banner()
         content_parts = []
         if self.summary:
             ink, _, _ = self._ink()
-            body = self._md_html(self.summary, ink, size="1.15rem")
+            body = self._md_html(self.summary, ink, size="1.3rem")
             content_parts.append(mo.Html(
-                f'<div style="font-size:1.15rem;line-height:1.5;padding:0.15rem 0 0.15rem 1.1rem;'
+                f'<div style="font-size:1.3rem;line-height:1.5;padding:0.15rem 0 0.15rem 1.1rem;'
                 f'border-left:3px solid {self._accent()};margin-bottom:0.5rem;">{body}</div>'
             ))
         content_parts.extend(self._render_content())
@@ -104,7 +107,7 @@ class Intro(Slide):
         label = self.tag if self.tag else self.team
         kicker_html = self._kicker(label, self._accent_text()) if label else ""
         subtitle_html = (
-            f'<p style="font-size:1.1rem;line-height:1.45;color:{muted};margin:0.5rem 0 0;">{self.subtitle}</p>'
+            f'<p style="font-size:1.25rem;line-height:1.45;color:{muted};margin:0.5rem 0 0;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
         icon_html = self._icon_inline_html(
