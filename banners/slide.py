@@ -17,6 +17,21 @@ if TYPE_CHECKING:
     from .content.image import Image
     from .content.graph import Graph
 
+INK = "#111827"
+"""Primary text color for headings drawn directly on the slide."""
+MUTED = "#6b7280"
+"""Secondary text color (subtitles, labels, captions)."""
+RULE = "#e5e7eb"
+"""Hairline color for dividers."""
+
+_KIND_COLORS = {
+    "neutral": "#4b5563",
+    "info": "#2f6fd0",
+    "success": "#2e7d4f",
+    "warn": "#b7791f",
+    "danger": "#b42318",
+}
+
 ContentItem = object
 """Type alias for a single content element: Text, Image, Graph, or any marimo component."""
 
@@ -32,7 +47,7 @@ class Slide:
     - **Single item** — rendered at full width.
     - **List of N items** — rendered as an equal-width CSS grid (`1fr` per
       column) regardless of type. Pass `content_kind` to wrap `Text` items
-      in a `mo.callout` box.
+      in a light card.
 
     Args:
         title: Main heading of the slide.
@@ -120,9 +135,65 @@ class Slide:
         )
 
     def _render_footer(self) -> list:
-        if self.footer:
-            return [mo.md(f"> {self.footer}")]
-        return []
+        if not self.footer:
+            return []
+        ink, muted, rule = self._ink()
+        body = self._md_html(self.footer, muted)
+        return [mo.Html(
+            f'<div style="margin-top:1.5rem;padding-top:0.6rem;border-top:1px solid {rule};'
+            f'font-size:0.85rem;">{body}</div>'
+        )]
+
+    # ── Design helpers ───────────────────────────────────────────────────────
+
+    def _ink(self) -> "tuple[str, str, str]":
+        """Return `(ink, muted, rule)` colors for text drawn on the slide itself.
+
+        Switches to light colors when the slide has a dark `Background`.
+        """
+        bg = self.background
+        if bg is not None and hasattr(bg, "text_color") and bg.text_color() == "#ffffff":
+            return "#ffffff", "rgba(255,255,255,0.72)", "rgba(255,255,255,0.22)"
+        return INK, MUTED, RULE
+
+    def _accent(self) -> str:
+        """Accent color of the slide palette (`Palette.end` / `SectionPalette.border`)."""
+        p = self.palette
+        return getattr(p, "end", None) or getattr(p, "border", None) or "#4b5563"
+
+    def _md_html(self, text: str, color: str, size: str = "inherit") -> str:
+        """Render markdown to HTML forcing a text color on its block elements."""
+        uid = f"md{id(text):x}{abs(hash(color)) % 10_000:x}"
+        inner = mo.as_html(mo.md(text)).text
+        return (
+            f"<style>.{uid} p,.{uid} li,.{uid} strong,.{uid} em{{color:{color}!important;"
+            f"font-size:{size}!important;margin:0;}}</style><div class=\"{uid}\" style=\"color:{color};\">{inner}</div>"
+        )
+
+    def _kicker(self, text: str, color: str) -> str:
+        return (
+            f'<div style="font-size:0.78rem;font-weight:600;letter-spacing:0.12em;'
+            f'text-transform:uppercase;color:{color};">{text}</div>'
+        )
+
+    def _accent_rule(self, rule: str, margin: str = "1rem 0 1.5rem") -> str:
+        """Full-width hairline with a short accent segment on the left."""
+        return (
+            f'<div style="position:relative;height:1px;background:{rule};margin:{margin};">'
+            f'<div style="position:absolute;left:0;top:-1px;width:48px;height:3px;'
+            f'background:{self._accent()};"></div></div>'
+        )
+
+    @staticmethod
+    def _card(md, kind: str) -> mo.Html:
+        """Light card with a thin top rule colored by `kind`."""
+        color = _KIND_COLORS.get(kind, _KIND_COLORS["neutral"])
+        inner = mo.as_html(md).text
+        return mo.Html(
+            f'<div style="height:100%;box-sizing:border-box;background:#f9fafb;'
+            f'border:1px solid {RULE};border-top:2px solid {color};border-radius:2px;'
+            f'padding:0.85rem 1.1rem 0.5rem;color:{INK};">{inner}</div>'
+        )
 
     def _display_(self):
         return self.render()
@@ -162,7 +233,7 @@ class Slide:
         Args:
             item: A `Text`, `Image`, `Graph`, plain string, or marimo component.
             wrap_kind: If set and the item is `Text` or `str`, wraps the
-                rendered markdown in a `mo.callout` with this kind.
+                rendered markdown in a card whose top rule is colored by kind.
 
         Returns:
             A marimo component.
@@ -171,7 +242,7 @@ class Slide:
 
         if isinstance(item, (_Text, str)):
             md = mo.md(item.body if isinstance(item, _Text) else item)
-            return mo.callout(md, kind=wrap_kind) if wrap_kind else md
+            return self._card(md, wrap_kind) if wrap_kind else md
 
         if hasattr(item, "render") and callable(item.render):
             return item.render()
@@ -196,7 +267,7 @@ class Slide:
         inner = "".join(parts)
         return mo.Html(
             f'<div style="display:grid;grid-template-columns:{cols};'
-            f'gap:1rem;align-items:start;">{inner}</div>'
+            f'gap:1.25rem;align-items:stretch;">{inner}</div>'
         )
 
     @staticmethod

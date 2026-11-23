@@ -85,28 +85,30 @@ class Section(Slide):
         return self._wrap_slide(banner, content_parts)
 
     def _render_banner(self) -> mo.Html:
-        p = self.palette
+        ink, muted, rule = self._ink()
         number_html = (
-            f'<div style="font-size:2.5rem;font-weight:900;color:{p.border};'
-            f'line-height:1;margin-bottom:0.2rem;opacity:0.85;flex-shrink:0;">{self.number}</div>'
+            f'<div style="font-size:1rem;font-weight:600;letter-spacing:0.04em;color:{self._accent()};'
+            f'font-variant-numeric:tabular-nums;min-width:2ch;flex-shrink:0;">{self.number}</div>'
             if self.number else ""
         )
         subtitle_html = (
-            f'<p style="font-size:0.95rem;color:{p.text_sub};margin:0.3rem 0 0;">{self.subtitle}</p>'
+            f'<p style="font-size:1rem;color:{muted};margin:0.35rem 0 0;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
         icon_html = self._icon_inline_html(
-            self.icon, default_size="32px", style="margin-left:auto;flex-shrink:0;opacity:0.8;"
+            self.icon, default_size="28px", style="margin-left:auto;flex-shrink:0;align-self:center;"
         )
         return mo.Html(f"""
-        <div style="padding:1.1rem 1.5rem;background:{p.gradient};
-                    border-left:5px solid {p.border};border-radius:0 0.5rem 0.5rem 0;
-                    color:{p.text_main};margin-bottom:1.25rem;display:flex;align-items:center;gap:1.2rem;">
-            {number_html}
-            <div style="flex:1;">
-                <h3 style="font-size:1.5rem;font-weight:700;margin:0;color:{p.text_main};">{self.title}</h3>
-                {subtitle_html}
+        <div style="padding-top:0.5rem;">
+            <div style="display:flex;align-items:baseline;gap:1rem;">
+                {number_html}
+                <div style="flex:1;">
+                    <h3 style="font-size:1.75rem;font-weight:600;letter-spacing:-0.01em;line-height:1.2;
+                               margin:0;color:{ink};">{self.title}</h3>
+                    {subtitle_html}
+                </div>
+                {icon_html}
             </div>
-            {icon_html}
+            {self._accent_rule(rule)}
         </div>
         """)
