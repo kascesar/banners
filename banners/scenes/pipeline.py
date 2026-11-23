@@ -30,12 +30,26 @@ def PipelineScene():
     """
     try:
         from manim import (
-            Scene, VGroup, RoundedRectangle, Text, Arrow,
-            FadeIn, GrowArrow, Write, FadeOut,
-            UP, DOWN, LEFT, RIGHT, ORIGIN,
-            WHITE, GRAY, GREEN, YELLOW, BLUE, ORANGE,
-            Create, Transform,
+            BLUE,
+            DOWN,
+            GRAY,
+            LEFT,
+            ORANGE,
+            ORIGIN,
+            RIGHT,
+            UP,
+            WHITE,
+            YELLOW,
+            Arrow,
+            Create,
+            FadeIn,
+            GrowArrow,
             ManimColor,
+            RoundedRectangle,
+            Scene,
+            Text,
+            VGroup,
+            Write,
         )
     except ImportError as e:
         raise ImportError("manim is required. Run: uv pip install 'banners[manim]'") from e
@@ -104,7 +118,7 @@ def PipelineScene():
             # ── Step 5: Load ───────────────────────────────────────────────
             self.next_section("load")
             load = make_node("Load", "Athena table", color=ACCENT)
-            load.shift(RIGHT * 5.8)  # noqa: E501  — intentionally wider shift
+            load.shift(RIGHT * 5.8)
             a4 = Arrow(join.get_right(), load.get_left(), buff=0.1,
                        color=ACCENT, stroke_width=2.5)
             self.play(GrowArrow(a4), FadeIn(load))

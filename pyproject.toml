@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev   = ["hatch", "pdoc", "pandas", "manim"]
+dev   = ["hatch", "pdoc", "pandas", "manim", "ruff"]
 manim = ["manim"]
 [project.urls]
 Homepage = "https://github.com/kascesar/banners"
@@ -23,3 +23,20 @@ Repository = "https://github.com/kascesar/banners"
 
 [tool.hatch.build.targets.wheel]
 packages = ["banners"]
+
+# Linter. Se ejecuta con `uv run ruff check banners`.
+[tool.ruff]
+# Largo máximo de línea; las líneas más largas se reportan como error.
+line-length = 100
+# Versión mínima de Python soportada; ruff no sugiere sintaxis más nueva que esta.
+target-version = "py310"
+
+[tool.ruff.lint]
+# Reglas desactivadas. RUF022 ordenaría alfabéticamente los `__all__`, pero pdoc
+# usa ese orden para la documentación y los `__all__` están agrupados a propósito.
+ignore = ["RUF022"]
+
+[tool.ruff.lint.isort]
+# true: `from x import a, b as c` queda en un solo bloque; false: ruff separa cada
+# import con alias en su propio `from x import (...)`.
+combine-as-imports = true

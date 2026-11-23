@@ -8,6 +8,7 @@ import io
 import json
 import tempfile
 from pathlib import Path
+from typing import ClassVar
 
 _HERE = Path(__file__).parent
 
@@ -35,7 +36,7 @@ class Manim:
             steps with ``self.next_section("name")``.
     """
 
-    _QUALITY_MAP = {
+    _QUALITY_MAP: ClassVar[dict[str, str]] = {
         "low": "low_quality",
         "medium": "medium_quality",
         "high": "high_quality",
@@ -101,7 +102,6 @@ class Manim:
         import logging
         sink = io.StringIO()
         with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
-            old_level = logging.root.manager.loggerDict.copy()
             logging.disable(logging.CRITICAL)
             try:
                 yield
@@ -116,19 +116,18 @@ class Manim:
             data = cache_file.read_bytes()
         else:
             quality = self._QUALITY_MAP.get(self.quality, "low_quality")
-            with tempfile.TemporaryDirectory() as tmpdir:
-                with tempconfig({
-                    "media_dir": tmpdir,
-                    "format": self.format,
-                    "quality": quality,
-                    "verbosity": "CRITICAL",
-                    "disable_caching": True,
-                }):
-                    scene_cls = self.scene if isinstance(self.scene, type) else self.scene
-                    with self._quiet():
-                        instance = scene_cls()
-                        instance.render()
-                    data = self._find_output(tmpdir, self.format)
+            with tempfile.TemporaryDirectory() as tmpdir, tempconfig({
+                "media_dir": tmpdir,
+                "format": self.format,
+                "quality": quality,
+                "verbosity": "CRITICAL",
+                "disable_caching": True,
+            }):
+                scene_cls = self.scene
+                with self._quiet():
+                    instance = scene_cls()
+                    instance.render()
+                data = self._find_output(tmpdir, self.format)
 
             if data is None:
                 return mo.callout(mo.md("Manim rendered but no output file was found."), kind="danger")
@@ -156,7 +155,7 @@ class Manim:
                     "verbosity": "CRITICAL",
                     "disable_caching": True,
                 }):
-                    scene_cls = self.scene if isinstance(self.scene, type) else self.scene
+                    scene_cls = self.scene
                     with self._quiet():
                         instance = scene_cls()
                         instance.render()

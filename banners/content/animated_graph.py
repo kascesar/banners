@@ -4,12 +4,10 @@ import math
 import re
 import uuid
 from collections import defaultdict
-
 from pathlib import Path
 
 import anywidget
 import traitlets
-import marimo as mo
 
 _HERE = Path(__file__).parent
 
@@ -131,12 +129,17 @@ def _build_svg(nodes, edges, pos, node_w, node_h, uid):
     svg_h = max(ys) + node_h + pad * 2
 
     parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {svg_w} {svg_h}" '
-        f'width="100%" style="font-family:sans-serif;font-size:13px;max-width:{svg_w}px;display:block;margin:0 auto;">',
+        (
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {svg_w} {svg_h}" '
+            f'width="100%" style="font-family:sans-serif;font-size:13px;'
+            f'max-width:{svg_w}px;display:block;margin:0 auto;">'
+        ),
         '<defs>',
-        f'  <marker id="arr-{uid}" markerWidth="10" markerHeight="7" '
-        f'refX="9" refY="3.5" orient="auto">',
-        f'    <polygon points="0 0,10 3.5,0 7" fill="#6b7280"/>',
+        (
+            f'  <marker id="arr-{uid}" markerWidth="10" markerHeight="7" '
+            f'refX="9" refY="3.5" orient="auto">'
+        ),
+        '    <polygon points="0 0,10 3.5,0 7" fill="#6b7280"/>',
         '  </marker>',
         '</defs>',
     ]

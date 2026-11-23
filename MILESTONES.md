@@ -1,0 +1,121 @@
+# Milestones
+
+Status: `[ ]` pending · `[x]` done · `[!]` blocked (reason written below it)
+
+Rules for Claude Code are in `CLAUDE.md` → "Working by milestones".
+One milestone per session, one branch per milestone.
+
+---
+
+## [x] M1 — Repo hygiene
+
+Fix small inconsistencies so later milestones start from a clean base.
+
+- `test/08_manim.py` references `layouts/08_manim.slides.json`, which does not exist.
+  Either create `test/layouts/08_manim.slides.json` (same shape as
+  `example/layouts/showcase.slides.json`) or remove the `layout_file` argument.
+- Decide what to do with `layouts/test.slides.json` at the repo root (empty
+  `{"type":"slides","data":{}}`, not referenced anywhere): delete it or document it.
+- `README.org` and `README.md` coexist: confirm which one is canonical
+  (`pyproject.toml` uses `README.md`) and remove or sync the other.
+- Add `ruff` to the `dev` extra and a `[tool.ruff]` section in `pyproject.toml`
+  (line-length 100, target py310). Fix what `ruff check` reports, without behavior changes.
+
+**Acceptance criteria**
+- `grep -rn "layout_file" test example` → every referenced file exists (relative to the notebook).
+- `uv run ruff check banners` → exit 0.
+- `uv run python -c "import banners; print(banners.__all__)"` → works.
+
+---
+
+## [ ] M2 — Unit tests for pure logic
+
+Create a pytest suite in `tests/` (not `test/`, which holds marimo notebooks).
+
+- Add `pytest` and `pytest-cov` to the `dev` extra and `[tool.pytest.ini_options]` in `pyproject.toml`
+  with `testpaths = ["tests"]` and a `manim` marker skipped by default.
+- `tests/conftest.py`: fixture that snapshots and restores `banners.config._state`.
+- Cover at least:
+  - `config`: `configure()` only overrides passed args; resets section counter;
+    `_next_section_number()` returns `"01"`, `"02"`, …
+  - `Section` auto-numbering across consecutive instances and after `configure()`.
+  - `palette`: `Palette.gradient`, `to_section_palette()` darkens `start`, the 5 presets exist.
+  - `background`: `_parse_first_color` for named colors, `#rgb`/`#rgba`/`#rrggbb`/`#rrggbbaa`,
+    `rgb()`/`rgba()` (0–255 and 0–1 ranges),
+    gradients (first color wins), and unparseable input → `None`;
+    `text_color()` returns white on dark, `#1f2937` on light.
+  - `AnimatedGraph`: `_parse` for `graph LR` and `graph TD`, labels with `[...]`,
+    edge labels; `_layout` on a chain, a fork, and a cycle (must terminate);
+    `_build_svg` returns SVG with one `.ag-node` per node.
+  - `Slide`: `_render_item` dispatch (`str`, `Text`, object with `.render()`, passthrough)
+    and `_render_content` with 1 vs N items.
+
+**Acceptance criteria**
+- `uv run pytest` → all green, ≥ 30 tests, runs without manim installed.
+- `uv run pytest --cov=banners --cov-report=term` → ≥ 60% on
+  `config.py`, `palette.py`, `background.py`, `content/animated_graph.py`.
+- No changes to library behavior (only tests and config). If a test reveals a bug,
+  mark it `@pytest.mark.xfail(reason=...)` and add the bug to the Backlog.
+
+---
+
+## [ ] M3 — CI on GitHub Actions
+
+- `.github/workflows/ci.yml`: on push and pull_request, matrix Python 3.10 / 3.12,
+  install with `uv` (`astral-sh/setup-uv`), run `ruff check` and `pytest`.
+- Manim tests are not run in CI (marker skipped by default).
+- Add a CI badge to `README.md`.
+
+**Acceptance criteria**
+- Workflow file passes `uvx actionlint` (or is valid YAML if actionlint is unavailable).
+- Locally, the exact commands used by the workflow succeed.
+- After push, the workflow run is green (César verifies on GitHub).
+
+---
+
+## [ ] M4 — Smoke test for the visual notebooks
+
+Make sure every notebook in `test/` and `example/` at least executes without errors.
+
+- `tests/test_notebooks.py`: parametrize over `test/*.py` and `example/*.py`,
+  run each with `uv run python <file>` (they all call `app.run()`) in a subprocess
+  with a timeout, and assert exit code 0.
+- Notebooks that need manim (`08_manim.py`, `09_flow_animation.py`, any example using it)
+  are marked `manim`.
+- Add it to CI (non-manim subset).
+
+**Acceptance criteria**
+- `uv run pytest tests/test_notebooks.py` → green for all non-manim notebooks.
+- `uv run pytest -m manim` → green locally on César's Fedora (with system libs installed).
+
+---
+
+## [ ] M5 — Automated release to PyPI
+
+- `.github/workflows/release.yml`: on tag `v*`, build with `uv build` and publish
+  using PyPI Trusted Publishing (no API token in secrets).
+- Check that the tag matches `project.version` in `pyproject.toml`; fail otherwise.
+- Document the release steps in `CLAUDE.md` → Commands (replace `make publish`).
+
+**Acceptance criteria**
+- Workflow valid (actionlint).
+- `uv build` locally produces sdist + wheel, and `uvx twine check dist/*` passes.
+- César configures the Trusted Publisher on PyPI and a test tag publishes
+  (can be tested first against TestPyPI).
+
+---
+
+## Backlog
+
+Unplanned items found while working. Promote to a milestone when relevant.
+
+- `banners/scenes/pipeline.py` y otros mensajes de `ImportError` sugieren `uv pip install 'banners[manim]'`,
+  pero el paquete en PyPI se llama `marimo-banners`.
+
+---
+
+## Log
+
+| Date | Milestone | Branch | Summary |
+|------|-----------|--------|---------|
+| 2026-11-23 | M1 | `milestone/m1-repo-hygiene` | Quita `layout_file` roto de `test/08_manim.py`, borra `layouts/test.slides.json` y `README.org`; agrega ruff y corrige sus hallazgos. |

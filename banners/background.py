@@ -3,7 +3,6 @@
 import re
 from dataclasses import dataclass
 
-
 _NAMED_COLORS = {
     "white": (255, 255, 255), "black": (0, 0, 0),
     "red": (255, 0, 0), "green": (0, 128, 0), "blue": (0, 0, 255),
@@ -97,7 +96,7 @@ class Background:
         start: str,
         end: str,
         *,
-        mid: str = None,
+        mid: str | None = None,
         angle: int = 135,
     ) -> "Background":
         """Linear gradient background.

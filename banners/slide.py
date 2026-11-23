@@ -6,16 +6,10 @@ import base64
 import ssl
 import urllib.request
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import marimo as mo
 
 from .palette import Palette
-
-if TYPE_CHECKING:
-    from .content.text import Text
-    from .content.image import Image
-    from .content.graph import Graph
 
 ContentItem = object
 """Type alias for a single content element: Text, Image, Graph, or any marimo component."""
@@ -64,9 +58,9 @@ class Slide:
         self,
         title: str,
         subtitle: str = "",
-        content: "list[ContentItem] | ContentItem | None" = None,
+        content: list[ContentItem] | ContentItem | None = None,
         palette: Palette | None = None,
-        content_kind: "str | None" = None,
+        content_kind: str | None = None,
         footer: str = "",
         background=None,
     ) -> None:
@@ -156,7 +150,7 @@ class Slide:
 
         return [self._css_grid(rendered)]
 
-    def _render_item(self, item: ContentItem, wrap_kind: "str | None" = None):
+    def _render_item(self, item: ContentItem, wrap_kind: str | None = None):
         """Render a single content item into a marimo component.
 
         Args:
@@ -248,7 +242,7 @@ class Slide:
         b64 = base64.b64encode(icon).decode()
         return f"data:image/png;base64,{b64}"
 
-    def _icon_corner_html(self, icon: "dict | None", bottom: str, right: str, default_size: str) -> str:
+    def _icon_corner_html(self, icon: dict | None, bottom: str, right: str, default_size: str) -> str:
         if icon is None:
             return ""
         try:
@@ -259,15 +253,15 @@ class Slide:
                 f'style="position:absolute;bottom:{bottom};right:{right};'
                 f'height:{size};opacity:0.85;border-radius:4px;">'
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 — el ícono es decorativo; si falla, se omite
             return ""
 
-    def _icon_inline_html(self, icon: "dict | None", default_size: str, style: str = "") -> str:
+    def _icon_inline_html(self, icon: dict | None, default_size: str, style: str = "") -> str:
         if icon is None:
             return ""
         try:
             size = icon.get("size", default_size)
             src = self._icon_src(icon["src"])
             return f'<img src="{src}" style="height:{size};{style}border-radius:4px;">'
-        except Exception:
+        except Exception:  # noqa: BLE001 — el ícono es decorativo; si falla, se omite
             return ""

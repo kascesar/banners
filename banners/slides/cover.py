@@ -2,9 +2,9 @@
 
 import marimo as mo
 
-from ..slide import Slide
-from ..palette import Palette
 from .. import config as _cfg
+from ..palette import Palette
+from ..slide import Slide
 
 
 class Cover(Slide):

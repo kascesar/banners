@@ -73,7 +73,7 @@ class FlowAnimation:
         self,
         nodes: list,
         edges=None,
-        direction: str = None,
+        direction: str | None = None,
         quality: str = "low",
         width: str = "100%",
         autoplay: bool = False,
@@ -171,9 +171,15 @@ class FlowAnimation:
 
         try:
             from manim import (
-                Scene, RoundedRectangle, Arrow,
-                Write, FadeIn, GrowArrow,
-                GRAY as MG, Text as MText, UP,
+                GRAY as MG,
+                UP,
+                Arrow,
+                FadeIn,
+                GrowArrow,
+                RoundedRectangle,
+                Scene,
+                Text as MText,
+                Write,
             )
         except ImportError:
             return None
@@ -340,9 +346,15 @@ class FlowAnimation:
 
         try:
             from manim import (
-                Scene, RoundedRectangle, Arrow,
-                Write, FadeIn, GrowArrow,
-                GRAY as MG, Text as MText, UP,
+                GRAY as MG,
+                UP,
+                Arrow,
+                FadeIn,
+                GrowArrow,
+                RoundedRectangle,
+                Scene,
+                Text as MText,
+                Write,
             )
         except ImportError:
             return None
