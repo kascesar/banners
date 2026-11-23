@@ -144,6 +144,15 @@ Unplanned items found while working. Promote to a milestone when relevant.
   `BasicScene` recibe `MathTex`, `FadeOut` y `MW` como parámetros, pero ninguna celda los
   define (la celda de imports solo trae `Scene`, `Text as MT`, `Write`, `FadeIn`, `Create`,
   `Line`, `LEFT`, `RIGHT` y `UP`). Prueba: `tests/test_notebooks.py` (xfail, marca `manim`).
+- `Slide._icon_src` desactiva la verificación TLS (`check_hostname = False`,
+  `verify_mode = ssl.CERT_NONE`) al descargar íconos e imágenes por URL, así que acepta
+  certificados inválidos o suplantados. Afecta a `icon=` y a `Background.image(url)`.
+- Regenerar los GIFs del README (`demo-1-slide-types.gif`, `demo-2-content-types.gif`,
+  `demo-3-backgrounds.gif`) con el diseño editorial de la 0.3; hoy muestran el estilo 0.2
+  (el README lo advierte en una nota).
+- Los textos de los notebooks de `test/` describen el diseño anterior (por ejemplo,
+  `test/01_intro.py` dice "Compact gradient banner" y "Dark panel with left border").
+- (Opcional) `configure(font=...)` para definir una tipografía corporativa en todas las slides.
 
 ---
 
@@ -156,3 +165,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | 2026-11-23 | M3 | `milestone/m3-ci` | Workflow `.github/workflows/ci.yml` (Python 3.10 y 3.12, `uv sync --locked` sin extras, `ruff check` y `pytest`) y badge de CI en el README. |
 | 2026-11-23 | M4 | `milestone/m4-notebook-smoke` | Prueba de humo `tests/test_notebooks.py` que ejecuta los 12 notebooks (4 con marca `manim`, 4 xfail por errores anotados en el Backlog). |
 | 2026-11-23 | M5 | `milestone/m5-release` | Workflow `release.yml` que publica en PyPI con Trusted Publishing al subir un tag `v*` (TestPyPI si el tag contiene `rc`) y falla si el tag no coincide con la versión; pasos de release en `CLAUDE.md`. |
+| 2026-11-23 | — | `design/editorial` | Rediseño editorial de las slides (patch de César) más correcciones visuales: íconos sin superposición, contraste en fondos oscuros, tamaño del resumen de `Intro`; docstrings, README con "Upgrading from 0.2" y versión 0.3.0. |
