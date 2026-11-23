@@ -90,7 +90,7 @@ Make sure every notebook in `test/` and `example/` at least executes without err
 
 ---
 
-## [ ] M5 — Automated release to PyPI
+## [x] M5 — Automated release to PyPI
 
 - `.github/workflows/release.yml`: on tag `v*`, build with `uv build` and publish
   using PyPI Trusted Publishing (no API token in secrets).
@@ -102,6 +102,8 @@ Make sure every notebook in `test/` and `example/` at least executes without err
 - `uv build` locally produces sdist + wheel, and `uvx twine check dist/*` passes.
 - César configures the Trusted Publisher on PyPI and a test tag publishes
   (can be tested first against TestPyPI).
+
+Pendiente de verificación de César: configurar el Trusted Publisher en PyPI (y TestPyPI si aplica) y publicar con un tag de prueba.
 
 ---
 
@@ -129,3 +131,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 |------|-----------|--------|---------|
 | 2026-11-23 | M1 | `milestone/m1-repo-hygiene` | Quita `layout_file` roto de `test/08_manim.py`, borra `layouts/test.slides.json` y `README.org`; agrega ruff y corrige sus hallazgos. |
 | 2026-11-23 | M2 | `milestone/m2-unit-tests` | Suite pytest en `tests/` (64 pruebas + 2 xfail por errores anotados en el Backlog), fixture de `_state`, marca `manim`. |
+| 2026-11-23 | M5 | `milestone/m5-release` | Workflow `release.yml` que publica en PyPI con Trusted Publishing al subir un tag `v*` (TestPyPI si el tag contiene `rc`) y falla si el tag no coincide con la versión; pasos de release en `CLAUDE.md`. |
