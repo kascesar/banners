@@ -295,6 +295,54 @@ When `background` is set and `content_kind` is not, the content text color is ch
 
 On a dark background (one whose automatic text color is white), the titles, subtitles, kickers, section numbers and rules drawn directly on the slide switch to white or translucent white. The accent color stays only on the short rule segments and bars.
 
+# Templates (fixed 16:9 slides)
+
+By default slides use the editorial style, which flows with the notebook width.
+A `Template` renders every slide on a fixed 16:9 canvas instead, like a
+corporate PowerPoint master: positions and font sizes are relative to the slide
+width (`cqw` units), so the deck keeps its proportions and stays legible on any
+screen. Use it to reproduce your organization's template while keeping every
+banners feature (Mermaid, plots, tables, Manim).
+
+```python
+from banners import Template, configure
+from banners.content import Plot, Text
+from banners.slides import Closing, Cover, Intro, Section
+
+corp = Template(
+    primary="#ff6600",                   # titles + main segment of the bottom bar
+    secondary="#054af6",                 # end segment of the bottom bar
+    logo_on_dark="assets/logo_white.png",
+    logo_on_light="assets/logo_color.png",
+    mark="assets/isotype.png",           # small mark on content slides
+    closing_image="assets/mascot.png",   # picture next to the closing title
+    font="'Century Gothic', 'URW Gothic', sans-serif",
+)
+configure(template=corp, team="Analytics", date="November 2026")
+
+Cover(title="Churn v2", subtitle="Model migration")                  # dark cover
+Cover(title="Churn v2", image="assets/photo.jpg")                    # photo cover
+Section(title="Context", image="assets/photo2.jpg")                  # divider with photo
+Intro(title="Problem", content=[Text("..."), Text("...")])            # big title + columns
+Section(title="Results", content=[Plot(fig), Text("- ...")])          # visual + text
+Section(title="Impact", image="assets/photo3.jpg", content=Text(".."))  # photo + text
+Closing(title="Thanks")                                               # closing
+```
+
+| Slide | Layout |
+|-------|--------|
+| `Cover()` / `Cover(image=...)` | Dark cover with logo, or photo cover with the title over the picture. |
+| `Section()` without content | Divider; with `image=`, the photo fills the right half. |
+| `Section(content=[visual, Text])` | Visual on the left, title and text on the right. |
+| `Section(content=..., image=...)` | Photo on the left half, title and content on the right. |
+| `Section(content=...)` | Title on top, content in columns. |
+| `Intro()` | Large title in the left column, content in columns on the right. |
+| `Closing()` | Closing slide; `title=""` shows the centered logo. |
+
+Keep brand assets (logos, photos) out of public repositories: define your
+`Template` in a private module next to your notebooks. `configure(template=None)`
+goes back to the editorial style. `Template(scale=1.1)` enlarges every font.
+
 # Documentation
 
 ```bash

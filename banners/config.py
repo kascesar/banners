@@ -6,6 +6,7 @@ _state: dict = {
     "icon": None,
     "palette": None,
     "background": None,
+    "template": None,
     "_section_counter": 0,
 }
 
@@ -18,6 +19,7 @@ def configure(
     icon=_UNSET,
     palette=_UNSET,
     background=_UNSET,
+    template=_UNSET,
 ) -> None:
     """Set global defaults shared by all slides and reset the section counter.
 
@@ -37,6 +39,9 @@ def configure(
             instance (`Background.color()`, `Background.gradient()`, or
             `Background.image()`). Individual slides can override this with
             their own `background` argument.
+        template: A `Template` that renders every slide on a fixed 16:9
+            canvas (corporate PowerPoint style). Pass `None` to go back to
+            the default editorial style.
 
     Example:
         ```python
@@ -62,6 +67,8 @@ def configure(
         _state["palette"] = palette
     if background is not _UNSET:
         _state["background"] = background
+    if template is not _UNSET:
+        _state["template"] = template
     _state["_section_counter"] = 0
 
 

@@ -27,6 +27,7 @@ from .content import AnimatedGraph, FlowAnimation, Graph, Image, Manim, Plot, Ta
 from .palette import BLUE, GRAY, GREEN, ORANGE, PURPLE, Palette, SectionPalette
 from .slide import Slide
 from .slides import Closing, Cover, Intro, Section
+from .template import Template
 
 __all__ = [
     "configure",
@@ -35,4 +36,5 @@ __all__ = [
     "Text", "Image", "Graph", "AnimatedGraph", "Table", "Plot", "Manim", "FlowAnimation",
     "Palette", "SectionPalette", "ORANGE", "BLUE", "GREEN", "PURPLE", "GRAY",
     "Background",
+    "Template",
 ]

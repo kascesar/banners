@@ -66,6 +66,7 @@ banners/
   palette.py         # Palette / SectionPalette dataclasses + 5 presets
   background.py      # Background: color / gradient / image + automatic text contrast
   slide.py           # Slide base class — layout engine lives here
+  template.py        # Template: fixed 16:9 canvas renderer (corporate PowerPoint style)
   slides/            # Cover, Intro, Section, Closing — each overrides _render_banner()
   content/           # Leaf content elements — each has a .render() method
   scenes/            # Reusable Manim Scene factories (e.g. PipelineScene)
@@ -85,6 +86,16 @@ example/layouts/     # marimo slide-layout files (*.slides.json)
 `_render_item()` dispatches by type: `Text`/`str` → `mo.md()`; anything with `.render()` → call it; otherwise pass through as-is.
 
 All four slide types inherit `Slide` and only implement `_render_banner()` to return a `mo.Html` banner block.
+
+### Templates (`template.py`)
+
+When `configure(template=Template(...))` is set, every slide's `render()` returns
+`template.render(self)` instead of the editorial layout. The template draws a
+16:9 canvas (`container-type:inline-size` + `aspect-ratio:16/9`) with absolutely
+positioned boxes in % of the slide and font sizes in `cqw` (`SIZES`, taken from
+PowerPoint point sizes). Layout is chosen by slide type and content (see the
+module docstring). `Cover.image` and `Section.image` are only used by templates.
+Never commit organization brand assets (logos, photos) to this public repo.
 
 ### Global config (`config.py`)
 

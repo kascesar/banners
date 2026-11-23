@@ -77,6 +77,9 @@ class Closing(Slide):
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
         """
+        template = _cfg.get("template")
+        if template is not None:
+            return template.render(self)
         banner = self._render_banner()
         content_parts = self._render_content()
         if self.stats:
@@ -96,12 +99,12 @@ class Closing(Slide):
             sep = f"border-left:1px solid {rule};" if i else ""
             cells.append(
                 f'<div style="padding:1.1rem 1.5rem 1.2rem;{sep}">'
-                f'<div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;'
+                f'<div style="font-size:0.9rem;font-weight:600;letter-spacing:0.08em;'
                 f'text-transform:uppercase;color:{muted};">{label}</div>'
-                f'<div style="font-size:2.25rem;font-weight:600;letter-spacing:-0.02em;'
+                f'<div style="font-size:2.6rem;font-weight:600;letter-spacing:-0.02em;'
                 f'line-height:1.15;color:{ink};font-variant-numeric:tabular-nums;'
                 f'margin:0.4rem 0 0.2rem;">{value}</div>'
-                f'<div style="font-size:0.85rem;color:{muted};">{caption}</div></div>'
+                f'<div style="font-size:1rem;color:{muted};">{caption}</div></div>'
             )
         return mo.Html(
             f'<div style="display:grid;grid-template-columns:repeat({len(cells)},1fr);'
@@ -120,7 +123,7 @@ class Closing(Slide):
         # sits on top of the hairline or the text.
         team_html = (
             f'<div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;'
-            f'font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;'
+            f'font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;'
             f'color:{p.text_muted};margin-top:2.5rem;padding-top:0.9rem;'
             f'border-top:1px solid rgba(255,255,255,0.16);">'
             f'<span>{self.team}</span>{icon_html}</div>'
