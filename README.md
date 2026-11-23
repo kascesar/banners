@@ -6,6 +6,8 @@ Composable slide presentations inside [marimo](https://marimo.io) notebooks.
 
 Each slide is a Python object. Content is declared with dedicated classes and the layout adjusts automatically depending on what you pass.
 
+The default look is sober and editorial: left-aligned headings in a medium weight, one accent color per palette used sparingly for rules and labels, thin lines instead of boxes, and nearly square corners. `Cover` and `Closing` use a solid dark panel; `Intro` and `Section` use a light header with an accent rule.
+
 > **Personal note:** This project is a personal initiative to explore the capabilities of generative AI for developing complete, production-quality software projects — from architecture decisions to implementation, testing, and documentation — using [Claude Code](https://claude.ai/code) as the primary development partner.
 
 ---
@@ -22,6 +24,8 @@ Four slide types (`Cover`, `Intro`, `Section`, `Closing`) with five built-in pal
 
 ![Content types demo](demo-2-content-types.gif)
 
+> The animations on this page were recorded with version 0.2 and still show the previous gradient style.
+
 `Text` (markdown + LaTeX), `Image`, `Graph` (Mermaid), `AnimatedGraph` (interactive), `Table`, `Plot` (matplotlib / plotly), `FlowAnimation`, and `Manim` — all composable inside any slide.
 
 ---
@@ -31,6 +35,18 @@ Four slide types (`Cover`, `Intro`, `Section`, `Closing`) with five built-in pal
 ![Slide backgrounds demo](demo-3-backgrounds.gif)
 
 `Background.color()`, `Background.gradient()`, and `Background.image()` — apply to any slide. Dark overlays and text contrast are handled automatically.
+
+---
+
+# Upgrading from 0.2
+
+Version 0.3 changes only the visual style. The public API is the same: every class, parameter and default value from 0.2 still works, so existing decks run without code changes. What changes on screen:
+
+- `Cover` and `Closing` render a solid, left-aligned panel instead of a centered gradient banner.
+- `Intro` and `Section` render a light header with a thin accent rule instead of a colored box.
+- `content_kind` renders light cards with a colored top rule instead of `mo.callout` boxes, and `Closing(stats=...)` renders a typographic row instead of `mo.stat` boxes.
+- `footer` renders a small gray note below a thin rule instead of a blockquote.
+- The five preset palettes (`ORANGE`, `BLUE`, `GREEN`, `PURPLE`, `GRAY`) have new, less saturated colors. Decks that need the old colors can define them with `Palette(start=..., mid=..., end=...)`; the 0.2 values are `#7c2d12`/`#c2410c`/`#ea580c` (orange), `#1e3a5f`/`#1d4ed8`/`#3b82f6` (blue), `#14532d`/`#15803d`/`#22c55e` (green), `#3b0764`/`#7e22ce`/`#a855f7` (purple) and `#111827`/`#374151`/`#6b7280` (gray).
 
 ---
 
@@ -92,10 +108,10 @@ Cover(
 
 | Parameter | Used by | Description |
 |-----------|---------|-------------|
-| `team` | `Cover`, `Intro`, `Closing` | Label shown in the banner |
-| `date` | `Cover` | Date line at the bottom of the banner |
-| `palette` | `Cover`, `Intro`, `Closing` | Color palette (`BLUE`, `GREEN`, etc.) |
-| `icon` | All slides | Logo/icon placed on the banner |
+| `team` | `Cover`, `Intro`, `Closing` | Team line in small caps (top of the `Cover` panel, bottom of `Closing`, kicker fallback in `Intro`) |
+| `date` | `Cover` | Date shown at the top right of the panel |
+| `palette` | All slides | Color palette (`BLUE`, `GREEN`, etc.) |
+| `icon` | All slides | Logo/icon placed next to the heading |
 
 Calling `configure()` also resets the `Section` auto-number counter to zero.
 
@@ -105,22 +121,22 @@ Any slide parameter passed explicitly overrides the global value.
 
 | Class | Purpose | Typical position |
 |-------|---------|-----------------|
-| `Cover` | Large centered banner | First slide |
-| `Intro` | Context or problem statement | Slides 2–3 |
-| `Section` | Intermediate slide with left border | Middle slides |
-| `Closing` | Closing banner with optional metrics | Last slide |
+| `Cover` | Solid title panel with team and date | First slide |
+| `Intro` | Light header with kicker, for context or problem statement | Slides 2–3 |
+| `Section` | Light header with section number, for content | Middle slides |
+| `Closing` | Solid panel, mirroring `Cover`, with optional metrics row | Last slide |
 
 All slides share these parameters:
 
 | Parameter | Description |
 |-----------|-------------|
 | `title` | Main heading |
-| `subtitle` | Support phrase shown inside the banner |
-| `content` | Content element(s) displayed below the banner |
+| `subtitle` | Support phrase shown below the title |
+| `content` | Content element(s) displayed below the header |
 | `palette` | Color palette. Defaults to orange |
-| `content_kind` | Box style for `Text` lists: `neutral`, `info`, `success`, `warn`, `danger` |
-| `footer` | Quote rendered as a blockquote at the bottom of the slide |
-| `icon` | Banner icon. Falls back to the global `configure()` value |
+| `content_kind` | Card style for `Text` items in a list: `neutral`, `info`, `success`, `warn`, `danger`. Each text goes in a light card whose top rule takes the kind's color |
+| `footer` | Short note (source, closing remark) in small gray text below a thin rule |
+| `icon` | Icon placed next to the heading. Falls back to the global `configure()` value |
 | `background` | Custom slide background (see [Slide backgrounds](#slide-backgrounds)) |
 
 ## Section — auto-numbering
@@ -242,19 +258,21 @@ Renders are cached on disk (`~/.cache/banners/manim/`) keyed by scene source cod
 
 All slides accept a `palette` parameter. The default is orange.
 
-| Constant | Colors |
-|----------|--------|
-| `ORANGE` | `#7c2d12` → `#c2410c` → `#ea580c` |
-| `BLUE` | `#1e3a5f` → `#1d4ed8` → `#3b82f6` |
-| `GREEN` | `#14532d` → `#15803d` → `#22c55e` |
-| `PURPLE` | `#3b0764` → `#7e22ce` → `#a855f7` |
-| `GRAY` | `#111827` → `#374151` → `#6b7280` |
+A palette has two roles. `start` is the solid color of the `Cover` and `Closing` panels, a deep, low-saturation tone. `end` is the accent, used sparingly for the short bar above the title, the rule under headers, kickers and section numbers. `mid` is only used by the `Palette.gradient` property, kept for custom backgrounds.
 
-Custom palettes: `Palette(start, mid, end)` for full-banner slides, `SectionPalette(border, bg_start, bg_end)` for `Section`.
+| Constant | Panel (`start`) | Accent (`end`) |
+|----------|-----------------|----------------|
+| `ORANGE` | `#2a1810` dark umber | `#c4561b` burnt orange |
+| `BLUE` | `#0f2340` navy | `#2f6fd0` mid blue |
+| `GREEN` | `#0f2a1f` dark forest | `#2e8b57` green |
+| `PURPLE` | `#221a3a` deep aubergine | `#6e56cf` violet |
+| `GRAY` | `#1a1d21` graphite | `#5b6470` slate |
+
+Custom palettes: `Palette(start=..., end=...)` for any slide. `Section` also accepts a `SectionPalette(border=...)`, where `border` is the accent; a `Palette` passed to `Section` is converted automatically.
 
 # Slide backgrounds
 
-The `background` parameter paints the full slide area (banner + content) with a custom background. Use the `Background` factory class:
+The `background` parameter paints the full slide area (header + content) with a custom background. Use the `Background` factory class:
 
 ```python
 from banners import Background
@@ -273,7 +291,9 @@ Cover(title="URL",   background=Background.image("https://...", overlay="rgba(0,
 Cover(title="Raw",   background=Background.image(raw_bytes, overlay=None))
 ```
 
-When `background` is set and `content_kind` is not, the content text color is chosen automatically based on the background luminance. Passing `content_kind` explicitly disables this.
+When `background` is set and `content_kind` is not, the content text color is chosen automatically based on the background luminance. Passing `content_kind` explicitly disables this: the text goes in light cards, which stay legible on any background.
+
+On a dark background (one whose automatic text color is white), the titles, subtitles, kickers, section numbers and rules drawn directly on the slide switch to white or translucent white. The accent color stays only on the short rule segments and bars.
 
 # Documentation
 
