@@ -1,4 +1,4 @@
-"""Closing slide — large centered banner with optional metrics."""
+"""Closing slide — solid title panel with an optional row of metrics."""
 
 import marimo as mo
 
@@ -8,28 +8,32 @@ from ..slide import Slide
 
 
 class Closing(Slide):
-    """Closing slide with a large centered banner and an optional metrics row.
+    """Closing slide with a solid panel and an optional row of metrics.
 
-    Same visual weight as `Cover`. Intended as the **last slide** of every
-    presentation. The `stats` parameter renders a row of `mo.stat` boxes
-    useful for summarizing key numbers.
+    Uses the same panel as `Cover`, so the deck opens and closes with the same
+    look. Intended as the **last slide** of every presentation. The `stats`
+    parameter renders a typographic row of key numbers below the panel.
 
     Args:
         title: Main closing message. Keep it conclusive and direct.
-        subtitle: Support phrase displayed inside the banner below the title.
+        subtitle: Support phrase displayed in the panel below the title.
         content: Elements displayed above the stats row. Accepts a single
             `Text`, `Image`, or `Graph` instance, or a list of them.
-        palette: Color palette for the banner gradient. Defaults to `ORANGE`.
-        content_kind: Box style for `Text` lists (`"neutral"`, `"info"`,
-            `"success"`, `"warn"`, `"danger"`).
-        team: Team line shown in small caps at the bottom of the banner.
+        palette: Color palette: `start` fills the panel and `end` is the
+            accent. Defaults to the global palette, or `ORANGE`.
+        content_kind: Card style for `Text` items in a list (`"neutral"`,
+            `"info"`, `"success"`, `"warn"`, `"danger"`). Each text goes in a
+            light card whose top rule takes the color of the kind.
+        team: Team line shown in small caps at the bottom of the panel.
         stats: List of metric tuples `(value, label, caption)` rendered as
-            a horizontal row of bordered `mo.stat` boxes. Keep `value` short
+            a horizontal row: label in small caps, large value, gray caption,
+            separated by thin vertical rules. Keep `value` short
             (a number, symbol, or 1–3 words). Comfortable range: 2–4 items.
-        footer: Closing quote shown at the bottom of the slide as a blockquote.
-        icon: Icon placed in the bottom-right corner of the banner. Pass a
+        footer: Short note (source, closing remark) shown at the bottom of
+            the slide in small gray text below a thin rule.
+        icon: Icon placed at the right end of the team row. Pass a
             dict with keys `"src"` (path, URL, or bytes) and optionally
-            `"size"` (CSS height, default `"44px"`).
+            `"size"` (CSS height, default `"40px"`).
 
     Example:
         ```python

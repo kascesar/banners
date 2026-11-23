@@ -1,4 +1,4 @@
-"""Intro slide — compact banner for context or problem-statement slides."""
+"""Intro slide — light header for context or problem-statement slides."""
 
 import marimo as mo
 
@@ -8,30 +8,35 @@ from ..slide import Slide
 
 
 class Intro(Slide):
-    """Compact gradient banner for slides that open a thematic block.
+    """Light, left-aligned header for slides that open a thematic block.
 
-    Typically used for slides 2–3 to set context or frame the problem.
-    Supports an optional `summary` callout block between the banner and
-    the content area, and an optional `footer` blockquote.
+    Typically used for slides 2–3 to set context or frame the problem. The
+    header shows a small accent-colored kicker, the title, the subtitle in
+    gray and an accent rule. Supports an optional `summary` paragraph between
+    the header and the content area, and an optional `footer` note.
 
     Args:
         title: Slide heading.
-        subtitle: Support phrase displayed inside the banner below the title.
+        subtitle: Support phrase displayed in gray below the title.
         content: Elements displayed below the summary block. Accepts a single
             `Text`, `Image`, or `Graph` instance, or a list of them.
-        palette: Color palette for the banner gradient. Defaults to `ORANGE`.
-        content_kind: Box style for `Text` lists (`"neutral"`, `"info"`,
-            `"success"`, `"warn"`, `"danger"`).
-        tag: Short label shown in small caps above the title
+        palette: Color palette; only `end` is used, as the accent color.
+            Defaults to the global palette, or `ORANGE`.
+        content_kind: Card style for `Text` items in a list (`"neutral"`,
+            `"info"`, `"success"`, `"warn"`, `"danger"`). Each text goes in a
+            light card whose top rule takes the color of the kind.
+        tag: Short kicker shown in accent-colored small caps above the title
             (e.g. `"Context"`, `"Problem"`). Falls back to the team line
             when empty.
-        summary: Full-width highlighted block rendered between the banner
-            and the content area. Displayed as a yellow `warn` callout.
-        footer: Closing quote shown at the bottom of the slide as a blockquote.
+        summary: Key sentence rendered between the header and the content
+            area as a larger paragraph with a 3px accent-colored left border.
+            Markdown is supported.
+        footer: Short note (source, closing remark) shown at the bottom of
+            the slide in small gray text below a thin rule.
         team: Team line used as the tag fallback.
-        icon: Icon placed in the bottom-right corner of the banner. Pass a
+        icon: Icon placed at the right end of the header. Pass a
             dict with keys `"src"` (path, URL, or bytes) and optionally
-            `"size"` (CSS height, default `"36px"`).
+            `"size"` (CSS height, default `"32px"`).
 
     Example:
         ```python

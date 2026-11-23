@@ -1,4 +1,4 @@
-"""Cover slide — large centered banner."""
+"""Cover slide — solid, left-aligned title panel."""
 
 import marimo as mo
 
@@ -8,23 +8,27 @@ from ..slide import Slide
 
 
 class Cover(Slide):
-    """Title slide with a large centered gradient banner.
+    """Title slide with a solid, left-aligned panel in the palette's `start` color.
+
+    The panel shows the team and the date in a top row, a short accent bar,
+    the title and the subtitle.
 
     Intended as the **first slide** of every presentation.
 
     Args:
         title: Main project title.
         subtitle: Short context phrase displayed inside the banner.
-        date: Date string shown at the bottom of the banner (e.g. `"April 2026"`).
+        date: Date string shown at the top right of the panel (e.g. `"April 2026"`).
         content: Elements displayed below the banner. Accepts a single
             `Text`, `Image`, or `Graph` instance, or a list of them.
-        palette: Color palette for the banner gradient. Defaults to `ORANGE`.
-        content_kind: Box style for `Text` lists (`"neutral"`, `"info"`,
-            `"success"`, `"warn"`, `"danger"`).
-        team: Team line shown in small caps above the title.
-        icon: Institutional icon placed in the bottom-right corner of the
-            banner. Pass a dict with keys `"src"` (path, URL, or bytes) and
-            optionally `"size"` (CSS height, default `"44px"`).
+        palette: Color palette: `start` fills the panel and `end` is the
+            accent. Defaults to the global palette, or `ORANGE`.
+        content_kind: Card style for `Text` items in a list (`"neutral"`,
+            `"info"`, `"success"`, `"warn"`, `"danger"`). Each text goes in a
+            light card whose top rule takes the color of the kind.
+        team: Team line shown in small caps at the top left of the panel.
+        icon: Institutional icon placed at the right of the title block. Pass a dict with keys `"src"` (path, URL, or bytes) and
+            optionally `"size"` (CSS height, default `"40px"`).
 
     Example:
         ```python

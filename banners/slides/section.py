@@ -1,4 +1,4 @@
-"""Section slide — left border accent with dark background."""
+"""Section slide — light, left-aligned header with a numbered title and an accent rule."""
 
 import marimo as mo
 
@@ -8,28 +8,35 @@ from ..slide import Slide
 
 
 class Section(Slide):
-    """Intermediate section slide with a left color border and dark background.
+    """Intermediate section slide with a light, left-aligned header.
+
+    The header shows a small section number in the accent color, the title,
+    the subtitle in gray and a full-width hairline with a short accent segment.
+    There is no box around the header.
 
     Takes less vertical space than `Cover` or `Closing`, leaving more room
     for content. Intended for **all middle slides** of a presentation.
 
     Args:
         title: Section heading.
-        subtitle: Short support phrase shown to the right of the title.
+        subtitle: Short support phrase shown in gray below the title.
         content: Elements displayed below the banner. Accepts a single
             `Text`, `Image`, or `Graph` instance, or a list of them.
             Lists that contain any `Image` or `Graph` automatically use
             an equal-width CSS grid layout.
-        palette: `SectionPalette` instance controlling the border color and
-            dark background gradient. Defaults to the orange `SectionPalette`.
-        content_kind: Box style for `Text`-only lists (`"neutral"`, `"info"`,
-            `"success"`, `"warn"`, `"danger"`).
-        number: Section number displayed large on the left of the banner
-            (e.g. `"01"`, `"02"`). Omit to hide.
-        footer: Closing quote shown at the bottom of the slide as a blockquote.
-        icon: Icon placed at the right end of the banner, vertically centered.
+        palette: `SectionPalette` (or `Palette`, converted automatically) that
+            sets the accent color through its `border` attribute. Defaults to
+            the global palette, or the orange `SectionPalette`.
+        content_kind: Card style for `Text` items in a list (`"neutral"`,
+            `"info"`, `"success"`, `"warn"`, `"danger"`). Each text goes in a
+            light card whose top rule takes the color of the kind.
+        number: Section number shown small, in the accent color, to the left
+            of the title (e.g. `"01"`, `"02"`). Omit to number automatically.
+        footer: Short note (source, closing remark) shown at the bottom of
+            the slide in small gray text below a thin rule.
+        icon: Icon placed at the right end of the header.
             Pass a dict with keys `"src"` (path, URL, or bytes) and optionally
-            `"size"` (CSS height, default `"32px"`).
+            `"size"` (CSS height, default `"28px"`).
 
     Example:
         ```python
