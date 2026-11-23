@@ -5,12 +5,16 @@ from dataclasses import dataclass
 
 @dataclass
 class Palette:
-    """Three-stop linear gradient palette for full-banner slides (Cover, Intro, Closing).
+    """Color palette for slides.
+
+    `start` is the solid panel color used by `Cover` and `Closing`; `end` is
+    the accent used sparingly for rules, section numbers and kickers. `mid`
+    is only used by the `gradient` property, kept for custom backgrounds.
 
     Attributes:
-        start: Gradient start color (hex). Default is deep brown-red.
-        mid: Gradient mid color (hex).
-        end: Gradient end color (hex). Default is bright orange.
+        start: Panel color (hex), a deep, low-saturation tone.
+        mid: Secondary panel tone (hex), used by `gradient`.
+        end: Accent color (hex).
         text_main: Primary text color on the banner.
         text_sub: Subtitle text color.
         text_muted: Muted text color (dates, captions).
@@ -29,14 +33,14 @@ class Palette:
         ```
     """
 
-    start: str = "#7c2d12"
-    mid: str = "#c2410c"
-    end: str = "#ea580c"
+    start: str = "#2a1810"
+    mid: str = "#3d2216"
+    end: str = "#c4561b"
 
     text_main: str = "#ffffff"
-    text_sub: str = "#ffedd5"
-    text_muted: str = "#fdba74"
-    text_tag: str = "#fed7aa"
+    text_sub: str = "#d6d3d1"
+    text_muted: str = "#a8a29e"
+    text_tag: str = "#a8a29e"
 
     @property
     def gradient(self) -> str:
@@ -84,7 +88,7 @@ class SectionPalette:
         ```
     """
 
-    border: str = "#ea580c"
+    border: str = "#c4561b"
     bg_start: str = "#1c0a00"
     bg_end: str = "#1f1210"
 
@@ -98,18 +102,23 @@ class SectionPalette:
 
 
 # ── Predefined palettes ───────────────────────────────────────────────────────
+# Deep, desaturated panel tones with one restrained accent each.
 
 ORANGE = Palette()
-"""Default team palette — deep orange gradient."""
+"""Default palette — dark umber panel, burnt-orange accent."""
 
-BLUE = Palette(start="#1e3a5f", mid="#1d4ed8", end="#3b82f6")
-"""Dark blue gradient."""
+BLUE = Palette(start="#0f2340", mid="#16325c", end="#2f6fd0",
+               text_sub="#cbd5e1", text_muted="#94a3b8", text_tag="#94a3b8")
+"""Navy panel, mid-blue accent."""
 
-GREEN = Palette(start="#14532d", mid="#15803d", end="#22c55e")
-"""Dark green gradient."""
+GREEN = Palette(start="#0f2a1f", mid="#173d2d", end="#2e8b57",
+                text_sub="#cfd8d3", text_muted="#94a89c", text_tag="#94a89c")
+"""Dark forest panel, green accent."""
 
-PURPLE = Palette(start="#3b0764", mid="#7e22ce", end="#a855f7")
-"""Deep purple gradient."""
+PURPLE = Palette(start="#221a3a", mid="#2e2450", end="#6e56cf",
+                 text_sub="#d4d0e0", text_muted="#a09ab8", text_tag="#a09ab8")
+"""Deep aubergine panel, violet accent."""
 
-GRAY = Palette(start="#111827", mid="#374151", end="#6b7280")
-"""Dark gray gradient."""
+GRAY = Palette(start="#1a1d21", mid="#2a2e34", end="#5b6470",
+               text_sub="#d1d5db", text_muted="#9ca3af", text_tag="#9ca3af")
+"""Graphite panel, slate accent."""

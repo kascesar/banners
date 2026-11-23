@@ -1,4 +1,4 @@
-"""Section slide — left border accent with dark background."""
+"""Section slide — light, left-aligned header with a numbered title and an accent rule."""
 
 import marimo as mo
 
@@ -8,28 +8,35 @@ from ..slide import Slide
 
 
 class Section(Slide):
-    """Intermediate section slide with a left color border and dark background.
+    """Intermediate section slide with a light, left-aligned header.
+
+    The header shows a small section number in the accent color, the title,
+    the subtitle in gray and a full-width hairline with a short accent segment.
+    There is no box around the header.
 
     Takes less vertical space than `Cover` or `Closing`, leaving more room
     for content. Intended for **all middle slides** of a presentation.
 
     Args:
         title: Section heading.
-        subtitle: Short support phrase shown to the right of the title.
+        subtitle: Short support phrase shown in gray below the title.
         content: Elements displayed below the banner. Accepts a single
             `Text`, `Image`, or `Graph` instance, or a list of them.
             Lists that contain any `Image` or `Graph` automatically use
             an equal-width CSS grid layout.
-        palette: `SectionPalette` instance controlling the border color and
-            dark background gradient. Defaults to the orange `SectionPalette`.
-        content_kind: Box style for `Text`-only lists (`"neutral"`, `"info"`,
-            `"success"`, `"warn"`, `"danger"`).
-        number: Section number displayed large on the left of the banner
-            (e.g. `"01"`, `"02"`). Omit to hide.
-        footer: Closing quote shown at the bottom of the slide as a blockquote.
-        icon: Icon placed at the right end of the banner, vertically centered.
+        palette: `SectionPalette` (or `Palette`, converted automatically) that
+            sets the accent color through its `border` attribute. Defaults to
+            the global palette, or the orange `SectionPalette`.
+        content_kind: Card style for `Text` items in a list (`"neutral"`,
+            `"info"`, `"success"`, `"warn"`, `"danger"`). Each text goes in a
+            light card whose top rule takes the color of the kind.
+        number: Section number shown small, in the accent color, to the left
+            of the title (e.g. `"01"`, `"02"`). Omit to number automatically.
+        footer: Short note (source, closing remark) shown at the bottom of
+            the slide in small gray text below a thin rule.
+        icon: Icon placed at the right end of the header.
             Pass a dict with keys `"src"` (path, URL, or bytes) and optionally
-            `"size"` (CSS height, default `"32px"`).
+            `"size"` (CSS height, default `"28px"`).
 
     Example:
         ```python
@@ -85,28 +92,30 @@ class Section(Slide):
         return self._wrap_slide(banner, content_parts)
 
     def _render_banner(self) -> mo.Html:
-        p = self.palette
+        ink, muted, rule = self._ink()
         number_html = (
-            f'<div style="font-size:2.5rem;font-weight:900;color:{p.border};'
-            f'line-height:1;margin-bottom:0.2rem;opacity:0.85;flex-shrink:0;">{self.number}</div>'
+            f'<div style="font-size:1rem;font-weight:600;letter-spacing:0.04em;color:{self._accent_text()};'
+            f'font-variant-numeric:tabular-nums;min-width:2ch;flex-shrink:0;">{self.number}</div>'
             if self.number else ""
         )
         subtitle_html = (
-            f'<p style="font-size:0.95rem;color:{p.text_sub};margin:0.3rem 0 0;">{self.subtitle}</p>'
+            f'<p style="font-size:1rem;color:{muted};margin:0.35rem 0 0;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
         icon_html = self._icon_inline_html(
-            self.icon, default_size="32px", style="margin-left:auto;flex-shrink:0;opacity:0.8;"
+            self.icon, default_size="28px", style="margin-left:auto;flex-shrink:0;align-self:center;"
         )
         return mo.Html(f"""
-        <div style="padding:1.1rem 1.5rem;background:{p.gradient};
-                    border-left:5px solid {p.border};border-radius:0 0.5rem 0.5rem 0;
-                    color:{p.text_main};margin-bottom:1.25rem;display:flex;align-items:center;gap:1.2rem;">
-            {number_html}
-            <div style="flex:1;">
-                <h3 style="font-size:1.5rem;font-weight:700;margin:0;color:{p.text_main};">{self.title}</h3>
-                {subtitle_html}
+        <div style="padding-top:0.5rem;">
+            <div style="display:flex;align-items:baseline;gap:1rem;">
+                {number_html}
+                <div style="flex:1;">
+                    <h3 style="font-size:1.75rem;font-weight:600;letter-spacing:-0.01em;line-height:1.2;
+                               margin:0;color:{ink};">{self.title}</h3>
+                    {subtitle_html}
+                </div>
+                {icon_html}
             </div>
-            {icon_html}
+            {self._accent_rule(rule)}
         </div>
         """)

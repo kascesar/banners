@@ -47,10 +47,11 @@ def test_render_item_text_is_dedented():
     assert "<strong>hola</strong>" in _html(Slide("t")._render_item(Text(body)))
 
 
-def test_render_item_wrap_kind_uses_callout():
-    """Con `wrap_kind`, el texto se envuelve en un `mo.callout` de ese tipo."""
+def test_render_item_wrap_kind_uses_card():
+    """Con `wrap_kind`, el texto va en una tarjeta cuyo borde superior tiene el color del tipo."""
     html = _html(Slide("t")._render_item("hola", wrap_kind="info"))
-    assert "marimo-callout" in html and "info" in html
+    assert "border-top:2px solid #2f6fd0" in html
+    assert "marimo-callout" not in html
 
 
 def test_render_item_calls_render():
@@ -87,6 +88,6 @@ def test_render_content_n_items_grid():
 
 
 def test_render_content_kind_wraps_only_text():
-    """`content_kind` envuelve el texto en callouts y deja intactos los demás elementos."""
+    """`content_kind` envuelve el texto en tarjetas y deja intactos los demás elementos."""
     html = _html(Slide("t", content=["a", _Renderable()], content_kind="warn")._render_content()[0])
-    assert html.count("<marimo-callout") == 1
+    assert html.count("border-top:2px solid") == 1

@@ -5,11 +5,27 @@ from __future__ import annotations
 import base64
 import ssl
 import urllib.request
+import uuid
 from pathlib import Path
 
 import marimo as mo
 
 from .palette import Palette
+
+INK = "#111827"
+"""Primary text color for headings drawn directly on the slide."""
+MUTED = "#6b7280"
+"""Secondary text color (subtitles, labels, captions)."""
+RULE = "#e5e7eb"
+"""Hairline color for dividers."""
+
+_KIND_COLORS = {
+    "neutral": "#4b5563",
+    "info": "#2f6fd0",
+    "success": "#2e7d4f",
+    "warn": "#b7791f",
+    "danger": "#b42318",
+}
 
 ContentItem = object
 """Type alias for a single content element: Text, Image, Graph, or any marimo component."""
@@ -26,7 +42,7 @@ class Slide:
     - **Single item** — rendered at full width.
     - **List of N items** — rendered as an equal-width CSS grid (`1fr` per
       column) regardless of type. Pass `content_kind` to wrap `Text` items
-      in a `mo.callout` box.
+      in a light card.
 
     Args:
         title: Main heading of the slide.
@@ -109,14 +125,148 @@ class Slide:
         else:
             content_html = ""
         return mo.Html(
-            f'<div style="background:{bg_css};padding:1rem;border-radius:0.75rem;">'
+            f'<div style="background:{bg_css};padding:1.5rem 2rem;border-radius:3px;">'
             f"{banner_html}{content_html}</div>"
         )
 
     def _render_footer(self) -> list:
-        if self.footer:
-            return [mo.md(f"> {self.footer}")]
-        return []
+        """Render the footer as a small muted note below a hairline.
+
+        Returns:
+            A one-item list with the footer `mo.Html`, or an empty list when
+            the slide has no footer.
+        """
+        if not self.footer:
+            return []
+        _, muted, rule = self._ink()
+        body = self._md_html(self.footer, muted)
+        return [mo.Html(
+            f'<div style="margin-top:1.5rem;padding-top:0.6rem;border-top:1px solid {rule};'
+            f'font-size:0.85rem;">{body}</div>'
+        )]
+
+    # ── Design helpers ───────────────────────────────────────────────────────
+
+    def _on_dark(self) -> bool:
+        """Tell whether the slide sits on a dark `Background`.
+
+        Returns:
+            `True` when the slide has a `Background` whose `text_color()` is
+            white, `False` otherwise (no background, light, or unparseable).
+        """
+        bg = self.background
+        return bg is not None and hasattr(bg, "text_color") and bg.text_color() == "#ffffff"
+
+    def _ink(self) -> tuple[str, str, str]:
+        """Return the colors for text and lines drawn directly on the slide.
+
+        Switches to white and translucent white when the slide has a dark
+        `Background`, so headings stay legible.
+
+        Returns:
+            A tuple `(ink, muted, rule)`: heading color, secondary text color
+            and hairline color.
+        """
+        if self._on_dark():
+            return "#ffffff", "rgba(255,255,255,0.72)", "rgba(255,255,255,0.22)"
+        return INK, MUTED, RULE
+
+    def _accent(self) -> str:
+        """Return the accent color of the slide palette.
+
+        Returns:
+            `Palette.end` or `SectionPalette.border`, or a neutral gray if the
+            palette has neither.
+        """
+        p = self.palette
+        return getattr(p, "end", None) or getattr(p, "border", None) or "#4b5563"
+
+    def _accent_text(self) -> str:
+        """Return the color for small accent-colored text (kickers, section numbers).
+
+        The palette accents are mid-tones that lose contrast on a dark
+        `Background`, so on dark slides the text uses translucent white and the
+        accent stays only on rules and bars.
+
+        Returns:
+            A CSS color string.
+        """
+        return "rgba(255,255,255,0.72)" if self._on_dark() else self._accent()
+
+    @staticmethod
+    def _md_html(text: str, color: str, size: str = "inherit") -> str:
+        """Render markdown to HTML forcing a text color and size on all its elements.
+
+        marimo renders paragraphs as `<span class="paragraph">`, so the rule
+        targets every descendant instead of `p`.
+
+        Args:
+            text: Markdown source.
+            color: CSS color applied to the text.
+            size: CSS font size applied to the text. Defaults to `"inherit"`.
+
+        Returns:
+            An HTML string with a scoped `<style>` block and the rendered markdown.
+        """
+        uid = f"md{uuid.uuid4().hex[:8]}"
+        inner = mo.as_html(mo.md(text)).text
+        return (
+            f"<style>.{uid},.{uid} *{{color:{color}!important;font-size:{size}!important;}}"
+            f".{uid} .paragraph,.{uid} p{{margin:0;}}</style>"
+            f'<div class="{uid}">{inner}</div>'
+        )
+
+    @staticmethod
+    def _kicker(text: str, color: str) -> str:
+        """Build the small uppercase label shown above a heading.
+
+        Args:
+            text: Label text.
+            color: CSS color of the label.
+
+        Returns:
+            An HTML string.
+        """
+        return (
+            f'<div style="font-size:0.78rem;font-weight:600;letter-spacing:0.12em;'
+            f'text-transform:uppercase;color:{color};">{text}</div>'
+        )
+
+    def _accent_rule(self, rule: str, margin: str = "1rem 0 1.5rem") -> str:
+        """Build a full-width hairline with a short accent segment on the left.
+
+        Args:
+            rule: CSS color of the hairline.
+            margin: CSS margin of the rule block.
+
+        Returns:
+            An HTML string.
+        """
+        return (
+            f'<div style="position:relative;height:1px;background:{rule};margin:{margin};">'
+            f'<div style="position:absolute;left:0;top:-1px;width:48px;height:3px;'
+            f'background:{self._accent()};"></div></div>'
+        )
+
+    @staticmethod
+    def _card(md, kind: str) -> mo.Html:
+        """Wrap rendered markdown in a light card with a top rule colored by `kind`.
+
+        Args:
+            md: A marimo component (usually `mo.md`) to place inside the card.
+            kind: One of `"neutral"`, `"info"`, `"success"`, `"warn"`,
+                `"danger"`. Unknown values fall back to `"neutral"`.
+
+        Returns:
+            A `mo.Html` card that fills the height of its grid row.
+        """
+        color = _KIND_COLORS.get(kind, _KIND_COLORS["neutral"])
+        inner = mo.as_html(md).text
+        return mo.Html(
+            f'<div style="height:100%;box-sizing:border-box;background:#f9fafb;'
+            f'border:1px solid {RULE};border-top:2px solid {color};border-radius:2px;'
+            f'padding:0.85rem 1.1rem 0.5rem;color:{INK};">{inner}</div>'
+        )
 
     def _display_(self):
         return self.render()
@@ -156,7 +306,7 @@ class Slide:
         Args:
             item: A `Text`, `Image`, `Graph`, plain string, or marimo component.
             wrap_kind: If set and the item is `Text` or `str`, wraps the
-                rendered markdown in a `mo.callout` with this kind.
+                rendered markdown in a card whose top rule is colored by kind.
 
         Returns:
             A marimo component.
@@ -165,7 +315,7 @@ class Slide:
 
         if isinstance(item, (_Text, str)):
             md = mo.md(item.body if isinstance(item, _Text) else item)
-            return mo.callout(md, kind=wrap_kind) if wrap_kind else md
+            return self._card(md, wrap_kind) if wrap_kind else md
 
         if hasattr(item, "render") and callable(item.render):
             return item.render()
@@ -190,14 +340,7 @@ class Slide:
         inner = "".join(parts)
         return mo.Html(
             f'<div style="display:grid;grid-template-columns:{cols};'
-            f'gap:1rem;align-items:start;">{inner}</div>'
-        )
-
-    @staticmethod
-    def _tag_line(text: str, color: str) -> str:
-        return (
-            f'<div style="font-size:0.85rem;letter-spacing:0.2em;text-transform:uppercase;'
-            f'color:{color};margin-bottom:0.5rem;">{text}</div>'
+            f'gap:1.25rem;align-items:stretch;">{inner}</div>'
         )
 
     @staticmethod
@@ -241,20 +384,6 @@ class Slide:
 
         b64 = base64.b64encode(icon).decode()
         return f"data:image/png;base64,{b64}"
-
-    def _icon_corner_html(self, icon: dict | None, bottom: str, right: str, default_size: str) -> str:
-        if icon is None:
-            return ""
-        try:
-            size = icon.get("size", default_size)
-            src = self._icon_src(icon["src"])
-            return (
-                f'<img src="{src}" '
-                f'style="position:absolute;bottom:{bottom};right:{right};'
-                f'height:{size};opacity:0.85;border-radius:4px;">'
-            )
-        except Exception:  # noqa: BLE001 — el ícono es decorativo; si falla, se omite
-            return ""
 
     def _icon_inline_html(self, icon: dict | None, default_size: str, style: str = "") -> str:
         if icon is None:
