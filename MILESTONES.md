@@ -28,7 +28,7 @@ Fix small inconsistencies so later milestones start from a clean base.
 
 ---
 
-## [ ] M2 — Unit tests for pure logic
+## [x] M2 — Unit tests for pure logic
 
 Create a pytest suite in `tests/` (not `test/`, which holds marimo notebooks).
 
@@ -111,6 +111,15 @@ Unplanned items found while working. Promote to a milestone when relevant.
 
 - `banners/scenes/pipeline.py` y otros mensajes de `ImportError` sugieren `uv pip install 'banners[manim]'`,
   pero el paquete en PyPI se llama `marimo-banners`.
+- `AnimatedGraph._parse` pierde la etiqueta del nodo destino de una arista: `A --> B[Validar]`
+  deja `B` con etiqueta `"B"`. `_edge_re` no está anclado al final de la línea y el grupo
+  perezoso de la etiqueta acepta vacío. Se nota en `test/05_animated_graph.py` (`D[Load]`
+  aparece como "D"). Prueba: `tests/test_animated_graph.py::test_parse_destination_label` (xfail).
+- `background._parse_first_color` busca cada formato en todo el string en orden fijo
+  (`#rrggbbaa`, `#rrggbb`, `#rgba`, `#rgb`, `rgb()`), así que en un gradiente con formatos
+  mezclados no gana el primer color: `linear-gradient(#fff, #000000)` da negro y el texto
+  automático queda blanco sobre un inicio blanco. Prueba:
+  `tests/test_background.py::test_parse_first_color_gradient_mixed_formats_first_wins` (xfail).
 
 ---
 
@@ -119,3 +128,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | Date | Milestone | Branch | Summary |
 |------|-----------|--------|---------|
 | 2026-11-23 | M1 | `milestone/m1-repo-hygiene` | Quita `layout_file` roto de `test/08_manim.py`, borra `layouts/test.slides.json` y `README.org`; agrega ruff y corrige sus hallazgos. |
+| 2026-11-23 | M2 | `milestone/m2-unit-tests` | Suite pytest en `tests/` (64 pruebas + 2 xfail por errores anotados en el Backlog), fixture de `_state`, marca `manim`. |
