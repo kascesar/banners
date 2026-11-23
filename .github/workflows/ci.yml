@@ -35,6 +35,7 @@ jobs:
         run: uv run --with ruff ruff check banners tests
 
       # pytest se agrega igual que ruff. Omite las pruebas marcadas `manim`
-      # (addopts en pyproject.toml).
+      # (addopts en pyproject.toml). pandas no es dependencia de la librería, pero
+      # los notebooks de tests/test_notebooks.py lo importan (p. ej. test/06_table.py).
       - name: Pytest
-        run: uv run --with pytest pytest
+        run: uv run --with pytest --with pandas pytest

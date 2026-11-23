@@ -75,7 +75,7 @@ Pendiente de verificación de César: que el workflow corra verde tras el push.
 
 ---
 
-## [ ] M4 — Smoke test for the visual notebooks
+## [x] M4 — Smoke test for the visual notebooks
 
 Make sure every notebook in `test/` and `example/` at least executes without errors.
 
@@ -89,6 +89,16 @@ Make sure every notebook in `test/` and `example/` at least executes without err
 **Acceptance criteria**
 - `uv run pytest tests/test_notebooks.py` → green for all non-manim notebooks.
 - `uv run pytest -m manim` → green locally on César's Fedora (with system libs installed).
+
+Pendiente de verificación de César: uv run pytest -m manim en su Fedora con las libs del sistema
+(`example/ondas_electromagneticas.py` falla con `ValueError: latex error converting to dvi`
+porque falta la clase LaTeX `standalone.cls`, que usa la plantilla por defecto de `MathTex`;
+`kpsewhich standalone.cls` no encuentra nada y `dvisvgm` tampoco está en el PATH.
+`test/08_manim.py` y `test/09_flow_animation.py` pasan; `example/showcase.py` queda xfail
+por el error anotado en el Backlog).
+
+La prueba `tests/test_notebooks.py` entra al CI de M3 sin cambios en el workflow: el CI
+ejecuta `uv run pytest` y `addopts = "-m 'not manim'"` deja fuera los notebooks con manim.
 
 ---
 
@@ -122,6 +132,16 @@ Unplanned items found while working. Promote to a milestone when relevant.
   mezclados no gana el primer color: `linear-gradient(#fff, #000000)` da negro y el texto
   automático queda blanco sobre un inicio blanco. Prueba:
   `tests/test_background.py::test_parse_first_color_gradient_mixed_formats_first_wins` (xfail).
+- `test/04_graph.py` y `test/05_animated_graph.py` no compilan (`SyntaxError`): la celda de
+  documentación usa `mo.md(r"""...""")` y el ejemplo de código de adentro contiene otra
+  triple comilla (`Graph("""...`), que cierra el string antes de tiempo. Prueba:
+  `tests/test_notebooks.py` (xfail).
+- `test/07_plot.py` no se ejecuta: varias celdas importan `matplotlib.pyplot as plt` y marimo
+  lanza `MultipleDefinitionError`. Prueba: `tests/test_notebooks.py` (xfail).
+- `example/showcase.py` falla con `NameError: name 'MathTex' is not defined`: la celda de
+  `BasicScene` recibe `MathTex`, `FadeOut` y `MW` como parámetros, pero ninguna celda los
+  define (la celda de imports solo trae `Scene`, `Text as MT`, `Write`, `FadeIn`, `Create`,
+  `Line`, `LEFT`, `RIGHT` y `UP`). Prueba: `tests/test_notebooks.py` (xfail, marca `manim`).
 
 ---
 
@@ -132,3 +152,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | 2026-11-23 | M1 | `milestone/m1-repo-hygiene` | Quita `layout_file` roto de `test/08_manim.py`, borra `layouts/test.slides.json` y `README.org`; agrega ruff y corrige sus hallazgos. |
 | 2026-11-23 | M2 | `milestone/m2-unit-tests` | Suite pytest en `tests/` (64 pruebas + 2 xfail por errores anotados en el Backlog), fixture de `_state`, marca `manim`. |
 | 2026-11-23 | M3 | `milestone/m3-ci` | Workflow `.github/workflows/ci.yml` (Python 3.10 y 3.12, `uv sync --locked` sin extras, `ruff check` y `pytest`) y badge de CI en el README. |
+| 2026-11-23 | M4 | `milestone/m4-notebook-smoke` | Prueba de humo `tests/test_notebooks.py` que ejecuta los 12 notebooks (4 con marca `manim`, 4 xfail por errores anotados en el Backlog). |
