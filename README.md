@@ -1,5 +1,7 @@
 # marimo-banners
 
+[![CI](https://github.com/kascesar/banners/actions/workflows/ci.yml/badge.svg)](https://github.com/kascesar/banners/actions/workflows/ci.yml)
+
 Composable slide presentations inside [marimo](https://marimo.io) notebooks.
 
 Each slide is a Python object. Content is declared with dedicated classes and the layout adjusts automatically depending on what you pass.

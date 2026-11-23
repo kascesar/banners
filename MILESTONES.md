@@ -59,7 +59,7 @@ Create a pytest suite in `tests/` (not `test/`, which holds marimo notebooks).
 
 ---
 
-## [ ] M3 — CI on GitHub Actions
+## [x] M3 — CI on GitHub Actions
 
 - `.github/workflows/ci.yml`: on push and pull_request, matrix Python 3.10 / 3.12,
   install with `uv` (`astral-sh/setup-uv`), run `ruff check` and `pytest`.
@@ -70,6 +70,8 @@ Create a pytest suite in `tests/` (not `test/`, which holds marimo notebooks).
 - Workflow file passes `uvx actionlint` (or is valid YAML if actionlint is unavailable).
 - Locally, the exact commands used by the workflow succeed.
 - After push, the workflow run is green (César verifies on GitHub).
+
+Pendiente de verificación de César: que el workflow corra verde tras el push.
 
 ---
 
@@ -149,4 +151,5 @@ Unplanned items found while working. Promote to a milestone when relevant.
 |------|-----------|--------|---------|
 | 2026-11-23 | M1 | `milestone/m1-repo-hygiene` | Quita `layout_file` roto de `test/08_manim.py`, borra `layouts/test.slides.json` y `README.org`; agrega ruff y corrige sus hallazgos. |
 | 2026-11-23 | M2 | `milestone/m2-unit-tests` | Suite pytest en `tests/` (64 pruebas + 2 xfail por errores anotados en el Backlog), fixture de `_state`, marca `manim`. |
+| 2026-11-23 | M3 | `milestone/m3-ci` | Workflow `.github/workflows/ci.yml` (Python 3.10 y 3.12, `uv sync --locked` sin extras, `ruff check` y `pytest`) y badge de CI en el README. |
 | 2026-11-23 | M4 | `milestone/m4-notebook-smoke` | Prueba de humo `tests/test_notebooks.py` que ejecuta los 12 notebooks (4 con marca `manim`, 4 xfail por errores anotados en el Backlog). |
