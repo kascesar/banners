@@ -88,6 +88,20 @@ class Template:
         bar: Draw the two-color bar along the bottom edge.
         bar_split: Fraction of the bar width taken by `primary`.
         scale: Multiplier applied to every font size.
+        heading_font: CSS font-family for titles; `None` uses `font`.
+        cover_image: Photo used by `Cover` when the slide passes no `image`.
+        divider_image: Photo used by dividers when the slide passes no `image`.
+        divider_icon: Large icon on dividers without a photo: an icon name
+            from `banners.icons.ICONS` or any image source.
+        icon_color: Color of named icons (`mark`, `divider_icon`); defaults to
+            the title color.
+        bar_colors: Colors of the bottom bar in equal segments; overrides
+            `primary`/`secondary`/`bar_split`.
+        section_colors: Colors cycled by section number for titles and icons
+            of `Section` slides (colorful decks).
+        panel: Background of the box that holds a chart or visual.
+        auto_contrast: Replace title colors that fall below a 3:1 contrast
+            ratio with the background. Turn off to keep exact brand colors.
     """
 
     primary: str = "#e4572e"
@@ -107,6 +121,15 @@ class Template:
     bar: bool = True
     bar_split: float = 2 / 3
     scale: float = 1.0
+    heading_font: str | None = None
+    cover_image: object = None
+    divider_image: object = None
+    divider_icon: object = None
+    icon_color: str | None = None
+    bar_colors: tuple | None = None
+    section_colors: tuple | None = None
+    panel: str = "#ffffff"
+    auto_contrast: bool = True
 
     # ── Entry point ──────────────────────────────────────────────────────────
 
@@ -137,7 +160,13 @@ class Template:
 
     def _canvas(self, bg: str, inner: str, color: str, bar_top: float = 95.4) -> str:
         bar = ""
-        if self.bar:
+        if self.bar and self.bar_colors:
+            n = len(self.bar_colors)
+            bar = "".join(
+                self._box(i * 100 / n, bar_top, 100 / n, 4.6, "", f"background:{c};")
+                for i, c in enumerate(self.bar_colors)
+            )
+        elif self.bar:
             split = self.bar_split * 100
             bar = (
                 self._box(0, bar_top, split, 4.6, "", f"background:{self.primary};")
@@ -157,10 +186,44 @@ class Template:
 
     def _text(self, text: str, size: str, color: str, bold: bool = False, extra: str = "") -> str:
         weight = "700" if bold else "400"
+        if self.heading_font and size in ("display", "title", "closing"):
+            extra = f"font-family:{self.heading_font};" + extra
         return (
             f'<div style="font-size:{self._fs(size)};font-weight:{weight};color:{color};'
             f'line-height:1.1;{extra}">{text}</div>'
         )
+
+    def _on(self, bg: str, color: str) -> str:
+        """Return `color`, or a safe fallback (`on_dark` on dark backgrounds,
+        `text` on light ones) when `color` lacks contrast against `bg`
+        (WCAG contrast ratio below 3:1, the minimum for large text)."""
+        from .background import _parse_first_color, _relative_luminance
+
+        if not self.auto_contrast:
+            return color
+        a, b = _parse_first_color(bg), _parse_first_color(color)
+        if a is None or b is None:
+            return color
+        la, lb = _relative_luminance(*a), _relative_luminance(*b)
+        ratio = (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+        if ratio >= 3:
+            return color
+        return self.on_dark if la < 0.18 else self.text
+
+    def _title_color(self, slide, default: str | None = None) -> str:
+        """Title color: cycled from `section_colors` by section number."""
+        number = getattr(slide, "number", None)
+        if self.section_colors and number and str(number).isdigit():
+            return self.section_colors[(int(number) - 1) % len(self.section_colors)]
+        return default or self.primary
+
+    def _resolve(self, image, color: str):
+        """Turn an icon name into a colored icon URI; pass other sources through."""
+        from .icons import ICONS, icon
+
+        if isinstance(image, str) and image in ICONS:
+            return icon(image, color=self.icon_color or color)
+        return image
 
     @staticmethod
     def _src(image) -> str | None:
@@ -208,8 +271,9 @@ class Template:
         )
         return self._box(x, y, w, None, f'<div style="position:relative;">{white}{color_mark}</div>')
 
-    def _mark(self) -> str:
-        return self._box(91.9, 5.7, 2.9, None, self._img(self.mark, "width:100%;height:auto;"))
+    def _mark(self, color: str | None = None) -> str:
+        mark = self._resolve(self.mark, color or self.primary)
+        return self._box(91.9, 5.7, 2.9, None, self._img(mark, "width:100%;height:auto;"))
 
     def _content(self, slide, items: list, color: str, columns: bool = True, lead: str = "") -> str:
         """Render content items as body text, side by side when `columns` is set."""
@@ -267,12 +331,12 @@ class Template:
     # ── Layouts ──────────────────────────────────────────────────────────────
 
     def _cover(self, s) -> str:
-        image = getattr(s, "image", None)
+        image = getattr(s, "image", None) or self.cover_image
         if image is None:
             inner = (
                 self._dark_logo(5.1, 6.1, 21.3)
                 + (self._box(50, 7, 44.9, None, self._text(s.team, "label", self.on_dark, extra="text-align:right;")) if s.team else "")
-                + self._box(11.7, 37, 80, None, self._text(s.title, "display", self.primary, bold=True))
+                + self._box(11.7, 37, 80, None, self._text(s.title, "display", self._on(self.dark, self._title_color(s)), bold=True))
                 + (self._box(12.2, 52, 75, None, self._text(s.subtitle, "subtitle", self.on_dark, extra="line-height:1.25;")) if s.subtitle else "")
                 + (self._box(5.8, 87.5, 50, None, self._text(s.date, "small", self.on_dark)) if s.date else "")
             )
@@ -289,11 +353,17 @@ class Template:
         return self._canvas(self.light, inner, self.text, bar_top=76.1)
 
     def _divider(self, s) -> str:
-        image = getattr(s, "image", None)
-        title_color = self.text if image is not None else self.primary
-        width = 38 if image is not None else 85
+        image = getattr(s, "image", None) or self.divider_image
+        accent = self._title_color(s)
+        title_color = self.text if image is not None else self._on(self.light, accent)
+        icon_html = ""
+        if image is None and self.divider_icon is not None:
+            src = self._resolve(self.divider_icon, accent)
+            icon_html = self._box(66, 24, 22, None, self._img(src, "width:100%;height:auto;opacity:0.9;"))
+        width = 38 if image is not None or icon_html else 85
         inner = (
-            self._photo(image, 46.5, 0, 53.5, 95.4)
+            icon_html
+            + self._photo(image, 46.5, 0, 53.5, 95.4)
             + self._logo(self.logo_on_light, 5.2, 7, 21.3)
             + self._box(5.2, 36, width, None, self._text(s.title, "display", title_color, bold=True))
             + (self._box(5.2, 72.9, width, None, self._text(s.subtitle, "label", self.muted, extra="line-height:1.25;")) if s.subtitle else "")
@@ -309,7 +379,7 @@ class Template:
         )
         return self._box(
             x, y, w, h,
-            self._text(s.title, "title", self.primary, bold=True)
+            self._text(s.title, "title", self._on(self.light, self._title_color(s)), bold=True)
             + subtitle
             + f'<div style="flex:1;min-height:0;margin-top:2.2cqw;">{body}</div>',
             "display:flex;flex-direction:column;",
@@ -328,7 +398,7 @@ class Template:
             inner = (
                 self._photo(image, 0, 0, 54, 95.4)
                 + self._stack(s, 57.8, 14, 34, 74, self._content(s, items, self.text, columns=False))
-                + self._mark()
+                + self._mark(self._title_color(s))
             )
             return self._canvas(self.light, inner, self.text)
 
@@ -336,9 +406,9 @@ class Template:
             # Visual on the left, title and text on the right.
             visual = self._content(s, items[:1], self.text)
             inner = (
-                self._box(5.1, 22, 44.9, 62, visual, "background:#ffffff;padding:1.2cqw;box-sizing:border-box;")
+                self._box(5.1, 22, 44.9, 62, visual, f"background:{self.panel};padding:1.2cqw;box-sizing:border-box;")
                 + self._stack(s, 54.4, 22, 40.4, 66, self._content(s, items[1:], self.text, columns=False))
-                + self._mark()
+                + self._mark(self._title_color(s))
                 + self._footer(s, self.muted)
             )
             return self._canvas(self.light, inner, self.text)
@@ -346,7 +416,7 @@ class Template:
         # Title on top, content in columns below.
         inner = (
             self._stack(s, 5.2, 10, 84, 76, self._content(s, items, self.text))
-            + self._mark()
+            + self._mark(self._title_color(s))
             + self._footer(s, self.muted)
         )
         return self._canvas(self.light, inner, self.text)
@@ -359,7 +429,7 @@ class Template:
         items = self._items(s)
         inner = (
             self._logo(self.logo_on_light, 5.2, 7, 21.3)
-            + self._box(5.2, 28.8, 27.1, 42, self._text(s.title, "display", self.primary, bold=True))
+            + self._box(5.2, 28.8, 27.1, 42, self._text(s.title, "display", self._on(self.light, self._title_color(s)), bold=True))
             + (self._box(5.2, 72.9, 27.1, None, self._text(label_text, "label", self.muted, extra="line-height:1.25;")) if label_text else "")
             + self._box(35.8, 28.8, 57.2, 56, self._content(s, items, self.text, lead=lead))
             + self._footer(s, self.muted)
@@ -374,7 +444,8 @@ class Template:
             )
             return self._canvas(self.dark, inner, self.on_dark)
 
-        has_image = self._src(self.closing_image) is not None
+        closing_image = self._resolve(self.closing_image, self.primary)
+        has_image = self._src(closing_image) is not None
         dy = 6 if s.stats else 0  # push the title down to make room for the stats row
         if has_image:
             head = (
@@ -382,7 +453,7 @@ class Template:
                           self._text(s.title, "closing", "#ffffff", bold=True, extra="text-align:right;"),
                           "display:flex;align-items:center;justify-content:flex-end;")
                 + self._box(51.5, 42.9 + dy, None, 14.2, "", "border-left:1px solid rgba(255,255,255,0.7);")
-                + self._box(54.8, 38.8 + dy, 9.9, 22.5, self._img(self.closing_image, "height:100%;width:auto;"))
+                + self._box(54.8, 38.8 + dy, 9.9, 22.5, self._img(closing_image, "height:100%;width:auto;"))
             )
         else:
             head = self._box(10, 40 + dy, 80, 20,
@@ -423,6 +494,7 @@ BECH = Template(
     font="'Century Gothic', 'URW Gothic', 'URW Gothic L', 'Questrial', sans-serif",
     logo_on_light=_COMMONS + "Logo_BancoEstado.svg",
     mark=_COMMONS + "Logo_BancoEstado_(cropped).svg",
+    auto_contrast=False,  # keep the brand orange exactly as in the deck
 )
 """BancoEstado corporate template (colors, font and layout of its 16:9 deck).
 
@@ -438,3 +510,105 @@ from banners.template import BECH
 mine = replace(BECH, closing_image="assets/pato.png")
 ```
 """
+
+
+def _commons(name: str, width: int = 1920) -> str:
+    return f"{_COMMONS}{name}?width={width}"
+
+
+EXECUTIVE = Template(
+    primary="#1f2933",
+    secondary="#9aa5b1",
+    dark="#1f2933",
+    closing_bg="#1f2933",
+    light="#ffffff",
+    text="#323f4b",
+    muted="#7b8794",
+    on_dark="#f5f7fa",
+    font="'Helvetica Neue', Arial, sans-serif",
+    heading_font="Georgia, Cambria, 'Times New Roman', serif",
+    mark="chart",
+    divider_icon="layers",
+    bar=False,
+)
+"""Sober, monochrome: graphite on white, serif titles, thin line icons, no bar."""
+
+INSTITUTIONAL = Template(
+    primary="#0b2545",
+    secondary="#8da9c4",
+    dark="#0b2545",
+    closing_bg="#0b2545",
+    light="#f7f9fb",
+    text="#13315c",
+    muted="#6b7c93",
+    font="'Helvetica Neue', Arial, sans-serif",
+    heading_font="Cambria, Georgia, serif",
+    mark="building",
+    divider_icon="shield",
+)
+"""Formal navy with steel blue, serif titles and monochrome navy icons."""
+
+COSMOS = Template(
+    primary="#22d3ee",
+    secondary="#a78bfa",
+    dark="#070912",
+    closing_bg="#070912",
+    light="#0d1024",
+    text="#e5e7eb",
+    muted="#9ca3af",
+    on_dark="#e5e7eb",
+    panel="#151936",
+    font="'Helvetica Neue', Arial, sans-serif",
+    cover_image=_commons("Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg"),
+    divider_image=_commons("The_Earth_seen_from_Apollo_17.jpg"),
+    mark="orbit",
+    bar_colors=("#22d3ee", "#a78bfa", "#f472b6"),
+    section_colors=("#22d3ee", "#a78bfa", "#f472b6", "#facc15"),
+)
+"""Dark, colorful space theme with NASA public-domain photos (Hubble's Pillars
+of Creation on the cover, Apollo 17's Earth on dividers)."""
+
+VIBRANT = Template(
+    primary="#ef476f",
+    secondary="#118ab2",
+    dark="#073b4c",
+    closing_bg="#073b4c",
+    light="#ffffff",
+    text="#1f2937",
+    muted="#6b7280",
+    font="'Trebuchet MS', 'Segoe UI', Arial, sans-serif",
+    mark="spark",
+    divider_icon="target",
+    bar_colors=("#ef476f", "#ffd166", "#06d6a0", "#118ab2"),
+    section_colors=("#ef476f", "#118ab2", "#0a9396", "#e76f51"),
+)
+"""Bright and playful: four-color bar, each section in its own color."""
+
+TERRA = Template(
+    primary="#2d6a4f",
+    secondary="#c8553d",
+    dark="#1b4332",
+    closing_bg="#1b4332",
+    light="#f4f1ea",
+    text="#283618",
+    muted="#6b705c",
+    font="Verdana, 'DejaVu Sans', sans-serif",
+    heading_font="Georgia, Cambria, serif",
+    cover_image=_commons("Grand_Canyon_National_Park_GRCA9857.jpg"),
+    mark="mountain",
+    divider_icon="leaf",
+    bar_colors=("#2d6a4f", "#dda15e", "#c8553d"),
+    section_colors=("#2d6a4f", "#bc6c25", "#c8553d"),
+)
+"""Earthy greens and terracotta with a public-domain Grand Canyon photo
+(U.S. National Park Service) on the cover; good for climate and nature topics."""
+
+PRESETS = {
+    "BECH": BECH,
+    "EXECUTIVE": EXECUTIVE,
+    "INSTITUTIONAL": INSTITUTIONAL,
+    "COSMOS": COSMOS,
+    "VIBRANT": VIBRANT,
+    "TERRA": TERRA,
+}
+"""All built-in templates by name."""
