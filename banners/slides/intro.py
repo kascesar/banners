@@ -76,7 +76,7 @@ class Intro(Slide):
         self.icon = icon if icon is not None else _cfg.get("icon")
 
     def render(self) -> mo.Html:
-        """Assemble banner, summary callout, content, and footer.
+        """Assemble banner, summary block, content, and footer.
 
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
@@ -84,26 +84,32 @@ class Intro(Slide):
         banner = self._render_banner()
         content_parts = []
         if self.summary:
-            content_parts.append(mo.callout(mo.md(self.summary), kind="warn"))
+            ink, _, _ = self._ink()
+            body = self._md_html(self.summary, ink, size="1.15rem")
+            content_parts.append(mo.Html(
+                f'<div style="font-size:1.15rem;line-height:1.5;padding:0.15rem 0 0.15rem 1.1rem;'
+                f'border-left:3px solid {self._accent()};margin-bottom:0.5rem;">{body}</div>'
+            ))
         content_parts.extend(self._render_content())
         content_parts.extend(self._render_footer())
         return self._wrap_slide(banner, content_parts)
 
     def _render_banner(self) -> mo.Html:
-        p = self.palette
+        ink, muted, rule = self._ink()
         label = self.tag if self.tag else self.team
-        top_html = self._tag_line(label, p.text_tag)
+        kicker_html = self._kicker(label, self._accent()) if label else ""
         subtitle_html = (
-            f'<p style="font-size:1.1rem;color:{p.text_sub};margin:0.5rem 0 0;">{self.subtitle}</p>'
+            f'<p style="font-size:1.1rem;line-height:1.45;color:{muted};margin:0.5rem 0 0;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
-        icon_html = self._icon_corner_html(self.icon, bottom="0.75rem", right="1.25rem", default_size="36px")
+        icon_html = self._icon_corner_html(self.icon, bottom="1.75rem", right="0", default_size="32px")
         return mo.Html(f"""
-        <div style="position:relative;padding:1.6rem 2rem;background:{p.gradient};
-                    border-radius:0.75rem;color:{p.text_main};margin-bottom:1.25rem;">
-            {top_html}
-            <h2 style="font-size:2rem;font-weight:700;margin:0;color:{p.text_main};line-height:1.2;">{self.title}</h2>
+        <div style="position:relative;padding-top:0.5rem;">
+            {kicker_html}
+            <h2 style="font-size:2.25rem;font-weight:600;letter-spacing:-0.015em;line-height:1.15;
+                       margin:0.5rem 0 0;color:{ink};">{self.title}</h2>
             {subtitle_html}
             {icon_html}
+            {self._accent_rule(rule, margin="1.25rem 0 1.5rem")}
         </div>
         """)

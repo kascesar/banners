@@ -76,31 +76,49 @@ class Closing(Slide):
         banner = self._render_banner()
         content_parts = self._render_content()
         if self.stats:
-            content_parts.append(
-                mo.hstack(
-                    [mo.stat(v, label=l, caption=c, bordered=True) for v, l, c in self.stats],
-                    justify="space-around",
-                )
-            )
+            content_parts.append(self._render_stats())
         content_parts.extend(self._render_footer())
         return self._wrap_slide(banner, content_parts)
+
+    def _render_stats(self) -> mo.Html:
+        ink, muted, rule = self._ink()
+        cells = []
+        for i, (value, label, caption) in enumerate(self.stats):
+            sep = f"border-left:1px solid {rule};" if i else ""
+            cells.append(
+                f'<div style="padding:1.1rem 1.5rem 1.2rem;{sep}">'
+                f'<div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;'
+                f'text-transform:uppercase;color:{muted};">{label}</div>'
+                f'<div style="font-size:2.25rem;font-weight:600;letter-spacing:-0.02em;'
+                f'line-height:1.15;color:{ink};font-variant-numeric:tabular-nums;'
+                f'margin:0.4rem 0 0.2rem;">{value}</div>'
+                f'<div style="font-size:0.85rem;color:{muted};">{caption}</div></div>'
+            )
+        return mo.Html(
+            f'<div style="display:grid;grid-template-columns:repeat({len(cells)},1fr);'
+            f'border-top:1px solid {rule};border-bottom:1px solid {rule};">{"".join(cells)}</div>'
+        )
 
     def _render_banner(self) -> mo.Html:
         p = self.palette
         subtitle_html = (
-            f'<p style="font-size:1.2rem;color:{p.text_sub};margin:1rem 0 1.5rem;">{self.subtitle}</p>'
+            f'<p style="font-size:1.2rem;line-height:1.45;color:{p.text_sub};'
+            f'margin:1rem 0 0;max-width:50ch;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
         team_html = (
-            f'<div style="font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;'
-            f'color:{p.text_muted};margin-top:1rem;">{self.team}</div>'
+            f'<div style="font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;'
+            f'color:{p.text_muted};margin-top:2.5rem;padding-top:0.9rem;'
+            f'border-top:1px solid rgba(255,255,255,0.16);">{self.team}</div>'
             if self.team else ""
         )
-        icon_html = self._icon_corner_html(self.icon, bottom="1rem", right="1.5rem", default_size="44px")
+        icon_html = self._icon_corner_html(self.icon, bottom="1.25rem", right="2.5rem", default_size="40px")
         return mo.Html(f"""
-        <div style="position:relative;text-align:center;padding:3rem 2rem 2rem;
-                    background:{p.gradient};border-radius:1rem;color:{p.text_main};margin-bottom:1.5rem;">
-            <h1 style="font-size:2.6rem;font-weight:800;color:{p.text_main};margin-bottom:0.5rem;line-height:1.2;">{self.title}</h1>
+        <div style="position:relative;background:{p.start};color:{p.text_main};
+                    padding:3rem 2.75rem 1.5rem;border-radius:3px;margin-bottom:1.75rem;">
+            <div style="width:40px;height:3px;background:{p.end};margin-bottom:1.25rem;"></div>
+            <h1 style="font-size:2.6rem;font-weight:600;letter-spacing:-0.02em;line-height:1.15;
+                       margin:0;max-width:24ch;color:{p.text_main};">{self.title}</h1>
             {subtitle_html}
             {team_html}
             {icon_html}

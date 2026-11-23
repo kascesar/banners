@@ -2,6 +2,15 @@
 
 import marimo as mo
 
+_THEME = (
+    "%%{init: {'theme': 'base', 'themeVariables': {"
+    "'primaryColor': '#f3f4f6', 'primaryBorderColor': '#9ca3af', "
+    "'primaryTextColor': '#111827', 'lineColor': '#6b7280', "
+    "'secondaryColor': '#e5e7eb', 'tertiaryColor': '#ffffff', "
+    "'fontSize': '14px'}}}%%"
+)
+"""Neutral Mermaid theme applied unless the diagram declares its own `%%{init}%%`."""
+
 
 class Graph:
     """Mermaid diagram element for use inside a slide's content area.
@@ -34,4 +43,7 @@ class Graph:
         Returns:
             A `mo.Html` component ready to display in a marimo cell.
         """
-        return mo.mermaid(self.diagram)
+        diagram = self.diagram
+        if "%%{init" not in diagram:
+            diagram = _THEME + "\n" + diagram.strip("\n")
+        return mo.mermaid(diagram)

@@ -68,23 +68,30 @@ class Cover(Slide):
 
     def _render_banner(self) -> mo.Html:
         p = self.palette
-        team_html = self._tag_line(self.team, p.text_tag) if self.team else ""
+        meta = "".join(
+            f'<span>{t}</span>' for t in (self.team, self.date) if t
+        )
+        meta_html = (
+            f'<div style="display:flex;justify-content:space-between;gap:1rem;'
+            f'font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;'
+            f'color:{p.text_muted};padding-bottom:0.9rem;'
+            f'border-bottom:1px solid rgba(255,255,255,0.16);">{meta}</div>'
+            if meta else ""
+        )
         subtitle_html = (
-            f'<p style="font-size:1.3rem;color:{p.text_sub};margin:1rem 0 0.25rem;">{self.subtitle}</p>'
+            f'<p style="font-size:1.25rem;font-weight:400;line-height:1.45;color:{p.text_sub};'
+            f'margin:1.1rem 0 0;max-width:46ch;">{self.subtitle}</p>'
             if self.subtitle else ""
         )
-        date_html = (
-            f'<p style="font-size:0.9rem;color:{p.text_muted};margin-top:0.5rem;">{self.date}</p>'
-            if self.date else ""
-        )
-        icon_html = self._icon_corner_html(self.icon, bottom="1rem", right="1.5rem", default_size="44px")
+        icon_html = self._icon_corner_html(self.icon, bottom="1.75rem", right="2.5rem", default_size="40px")
         return mo.Html(f"""
-        <div style="position:relative;text-align:center;padding:3rem 2rem 1.5rem;
-                    background:{p.gradient};border-radius:1rem;color:{p.text_main};margin-bottom:1.5rem;">
-            {team_html}
-            <h1 style="font-size:3.2rem;font-weight:800;margin:0.5rem 0;color:{p.text_main};line-height:1.15;">{self.title}</h1>
+        <div style="position:relative;background:{p.start};color:{p.text_main};
+                    padding:1.5rem 2.75rem 3rem;border-radius:3px;margin-bottom:1.75rem;">
+            {meta_html}
+            <div style="width:40px;height:3px;background:{p.end};margin:3.5rem 0 1.25rem;"></div>
+            <h1 style="font-size:3rem;font-weight:600;letter-spacing:-0.02em;line-height:1.1;
+                       margin:0;max-width:22ch;color:{p.text_main};">{self.title}</h1>
             {subtitle_html}
-            {date_html}
             {icon_html}
         </div>
         """)
