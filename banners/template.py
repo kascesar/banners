@@ -63,8 +63,9 @@ class Template:
     """Fixed 16:9 slide template.
 
     Images (`logo_on_dark`, `logo_on_light`, `mark`, `closing_image`) accept a
-    file path, URL, or raw bytes, like `icon=`. Leave them as `None` to omit
-    them.
+    URL, a file path, or raw bytes. URLs are loaded by the browser when the
+    slide is shown (nothing is downloaded or embedded); paths and bytes are
+    embedded in the slide. Leave them as `None` to omit them.
 
     Attributes:
         primary: Title color and main segment of the bottom bar.
@@ -76,10 +77,14 @@ class Template:
         muted: Labels and subtitles on light backgrounds.
         on_dark: Text color on dark backgrounds.
         font: CSS font-family stack.
-        logo_on_dark: Full logo for dark backgrounds.
+        logo_on_dark: Full logo for dark backgrounds. When `None`,
+            `logo_on_light` is shown in white, with `mark` kept in color over
+            its left `logo_mark_width` fraction.
         logo_on_light: Full logo for light backgrounds.
         mark: Small isotype shown in the top-right corner of content slides.
         closing_image: Picture shown next to the closing title.
+        logo_mark_width: Fraction of the logo width taken by the isotype at
+            its left (used only by the white-logo fallback).
         bar: Draw the two-color bar along the bottom edge.
         bar_split: Fraction of the bar width taken by `primary`.
         scale: Multiplier applied to every font size.
@@ -98,6 +103,7 @@ class Template:
     logo_on_light: object = None
     mark: object = None
     closing_image: object = None
+    logo_mark_width: float = 0.205
     bar: bool = True
     bar_split: float = 2 / 3
     scale: float = 1.0
@@ -158,8 +164,12 @@ class Template:
 
     @staticmethod
     def _src(image) -> str | None:
+        """Return an `<img>`-ready source: URLs pass through and are loaded by
+        the browser; paths and bytes are embedded as base64 data URIs."""
         if image is None:
             return None
+        if isinstance(image, str) and image.startswith(("http://", "https://", "data:")):
+            return image
         from .slide import Slide
 
         try:
@@ -178,8 +188,25 @@ class Template:
         layers = f"{overlay}," if overlay else ""
         return self._box(x, y, w, h, "", f"background:{layers}url({src}) center/cover no-repeat;")
 
-    def _logo(self, image, x: float, y: float, w: float) -> str:
-        return self._box(x, y, w, None, self._img(image, "width:100%;height:auto;"))
+    def _logo(self, image, x: float, y: float, w: float, style: str = "") -> str:
+        return self._box(x, y, w, None, self._img(image, f"width:100%;height:auto;{style}"))
+
+    def _dark_logo(self, x: float, y: float, w: float) -> str:
+        """Logo for dark backgrounds: `logo_on_dark`, or else `logo_on_light`
+        turned solid white with a CSS filter."""
+        if self.logo_on_dark is not None:
+            return self._logo(self.logo_on_dark, x, y, w)
+        white = self._img(self.logo_on_light, "width:100%;height:auto;filter:brightness(0) invert(1);"
+                          + (f"clip-path:inset(0 0 0 {self.logo_mark_width * 100:.1f}%);" if self.mark else ""))
+        if not white:
+            return ""
+        # Keep the isotype in color: the white copy hides its own mark area and
+        # `mark` is drawn on top, at the left, with the logo's full height.
+        color_mark = (
+            self._img(self.mark, "position:absolute;left:0;top:0;height:100%;width:auto;")
+            if self.mark else ""
+        )
+        return self._box(x, y, w, None, f'<div style="position:relative;">{white}{color_mark}</div>')
 
     def _mark(self) -> str:
         return self._box(91.9, 5.7, 2.9, None, self._img(self.mark, "width:100%;height:auto;"))
@@ -243,7 +270,7 @@ class Template:
         image = getattr(s, "image", None)
         if image is None:
             inner = (
-                self._logo(self.logo_on_dark, 5.1, 6.1, 21.3)
+                self._dark_logo(5.1, 6.1, 21.3)
                 + (self._box(50, 7, 44.9, None, self._text(s.team, "label", self.on_dark, extra="text-align:right;")) if s.team else "")
                 + self._box(11.7, 37, 80, None, self._text(s.title, "display", self.primary, bold=True))
                 + (self._box(12.2, 52, 75, None, self._text(s.subtitle, "subtitle", self.on_dark, extra="line-height:1.25;")) if s.subtitle else "")
@@ -342,7 +369,7 @@ class Template:
     def _closing(self, s) -> str:
         if not s.title:
             inner = (
-                self._logo(self.logo_on_dark, 38, 45.7, 24)
+                self._dark_logo(38, 45.7, 24)
                 + (self._box(5.1, 86.5, 50, None, self._text(s.team, "label", self.on_dark)) if s.team else "")
             )
             return self._canvas(self.dark, inner, self.on_dark)
@@ -379,3 +406,35 @@ class Template:
                               f'<div style="display:grid;grid-template-columns:repeat({len(s.stats)},1fr);">{cells}</div>')
         team = self._box(5.1, 86.5, 50, None, self._text(s.team, "label", self.on_dark)) if s.team else ""
         return self._canvas(self.closing_bg, head + sub + stats + team, self.on_dark)
+
+
+# ── Presets ───────────────────────────────────────────────────────────────────
+
+_COMMONS = "https://commons.wikimedia.org/wiki/Special:FilePath/"
+
+BECH = Template(
+    primary="#ff6600",
+    secondary="#054af6",
+    dark="#404040",
+    closing_bg="#363e45",
+    light="#f5f5f5",
+    text="#343e46",
+    muted="#6b7280",
+    font="'Century Gothic', 'URW Gothic', 'URW Gothic L', 'Questrial', sans-serif",
+    logo_on_light=_COMMONS + "Logo_BancoEstado.svg",
+    mark=_COMMONS + "Logo_BancoEstado_(cropped).svg",
+)
+"""BancoEstado corporate template (colors, font and layout of its 16:9 deck).
+
+Logos are linked from Wikimedia Commons (public domain) and loaded by the
+browser, so no brand files live in this repository. On dark slides the logo is
+shown in solid white. Photos are not included: pass your own with
+`Cover(image=...)` / `Section(image=...)`. To add more images, copy the preset:
+
+```python
+from dataclasses import replace
+from banners.template import BECH
+
+mine = replace(BECH, closing_image="assets/pato.png")
+```
+"""

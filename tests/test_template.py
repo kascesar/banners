@@ -83,3 +83,30 @@ def test_bad_image_is_omitted(tpl):
 def test_configure_none_restores_editorial(tpl):
     configure(template=None)
     assert "aspect-ratio:16/9" not in html(Cover(title="Deck"))
+
+
+def test_url_images_pass_through_without_download(monkeypatch):
+    from banners.slide import Slide
+
+    def boom(_):
+        raise AssertionError("URL images must not be downloaded")
+
+    monkeypatch.setattr(Slide, "_icon_src", staticmethod(boom))
+    configure(template=Template(logo_on_light="https://example.org/logo.svg"))
+    assert 'src="https://example.org/logo.svg"' in html(Section(title="Divider"))
+
+
+def test_dark_slides_fall_back_to_white_light_logo():
+    configure(template=Template(logo_on_light="https://example.org/logo.svg"))
+    out = html(Cover(title="Deck"))
+    assert 'src="https://example.org/logo.svg"' in out
+    assert "invert(1)" in out
+
+
+def test_bech_preset_links_logos_and_has_no_photos():
+    from banners.template import BECH
+
+    assert BECH.primary == "#ff6600" and BECH.secondary == "#054af6"
+    assert BECH.logo_on_light.startswith("https://commons.wikimedia.org/")
+    assert BECH.mark.startswith("https://commons.wikimedia.org/")
+    assert BECH.logo_on_dark is None and BECH.closing_image is None

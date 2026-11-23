@@ -339,6 +339,18 @@ Closing(title="Thanks")                                               # closing
 | `Intro()` | Large title in the left column, content in columns on the right. |
 | `Closing()` | Closing slide; `title=""` shows the centered logo. |
 
+Image fields accept a URL (loaded by the browser, nothing is embedded), a
+path, or bytes. When `logo_on_dark` is not set, dark slides show
+`logo_on_light` in white with the `mark` kept in color.
+
+A BancoEstado preset is included; its logos are linked from Wikimedia Commons
+(public domain) and it ships no photos:
+
+```python
+from banners.template import BECH
+configure(template=BECH, team="Analítica Avanzada", date="Noviembre 2026")
+```
+
 Keep brand assets (logos, photos) out of public repositories: define your
 `Template` in a private module next to your notebooks. `configure(template=None)`
 goes back to the editorial style. `Template(scale=1.1)` enlarges every font.
