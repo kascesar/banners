@@ -31,8 +31,14 @@ uv run marimo edit example/showcase.py     # full demo deck
 # Docs
 make docs                        # pdoc → docs/
 
-# Release (manual for now; see MILESTONES.md M5)
-make publish
+# Release: .github/workflows/release.yml publishes to PyPI on a `v*` tag.
+# 1. Bump `version` in pyproject.toml (e.g. 0.2.3) and commit it.
+# 2. Tag that commit with the same version and push the tag:
+git tag v0.2.3
+git push origin v0.2.3
+# The workflow fails if the tag (without `v`) differs from pyproject's version.
+# Tags containing `rc` (e.g. v0.2.3rc1) go to TestPyPI instead of PyPI.
+# `make publish` remains as a manual fallback (needs a local PyPI token).
 ```
 
 ### Tests

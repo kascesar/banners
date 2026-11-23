@@ -1,0 +1,55 @@
+# Publica marimo-banners en PyPI cada vez que se sube un tag `vX.Y.Z`.
+#
+# La publicación usa Trusted Publishing: PyPI confía en el token OIDC que GitHub
+# emite para este workflow, así que no hay tokens de API guardados en secrets.
+# Para que funcione, el dueño del proyecto en PyPI debe registrar una vez el
+# publicador en https://pypi.org/manage/project/marimo-banners/settings/publishing/
+# con estos datos:
+#   Owner: kascesar · Repository: banners · Workflow: release.yml · Environment: pypi
+#
+# Los tags con `rc` (por ejemplo `v0.2.3rc1`) se publican en TestPyPI en vez de
+# PyPI. Para eso se registra el mismo publicador, con los mismos datos, en
+# https://test.pypi.org/manage/project/marimo-banners/settings/publishing/
+# (si el proyecto aún no existe en TestPyPI, se registra como "pending publisher").
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Entorno de GitHub con el que se registra el publicador en PyPI; GitHub lo
+    # crea automáticamente en la primera ejecución si no existe.
+    environment: pypi
+    permissions:
+      # Necesario para que GitHub emita el token OIDC que usa Trusted Publishing.
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      # El tag sin la `v` debe coincidir con `project.version` de pyproject.toml;
+      # si no coincide, el job falla antes de construir nada.
+      - name: Verificar que el tag coincide con la versión
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(uv version --short)"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::El tag $GITHUB_REF_NAME no coincide con la versión $version de pyproject.toml"
+            exit 1
+          fi
+
+      - name: Construir sdist y wheel
+        run: uv build
+
+      - name: Publicar en TestPyPI
+        if: contains(github.ref_name, 'rc')
+        run: uv publish --trusted-publishing always --publish-url https://test.pypi.org/legacy/
+
+      - name: Publicar en PyPI
+        if: ${{ !contains(github.ref_name, 'rc') }}
+        run: uv publish --trusted-publishing always

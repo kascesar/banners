@@ -102,7 +102,7 @@ ejecuta `uv run pytest` y `addopts = "-m 'not manim'"` deja fuera los notebooks 
 
 ---
 
-## [ ] M5 — Automated release to PyPI
+## [x] M5 — Automated release to PyPI
 
 - `.github/workflows/release.yml`: on tag `v*`, build with `uv build` and publish
   using PyPI Trusted Publishing (no API token in secrets).
@@ -114,6 +114,8 @@ ejecuta `uv run pytest` y `addopts = "-m 'not manim'"` deja fuera los notebooks 
 - `uv build` locally produces sdist + wheel, and `uvx twine check dist/*` passes.
 - César configures the Trusted Publisher on PyPI and a test tag publishes
   (can be tested first against TestPyPI).
+
+Pendiente de verificación de César: configurar el Trusted Publisher en PyPI (y TestPyPI si aplica) y publicar con un tag de prueba.
 
 ---
 
@@ -153,3 +155,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | 2026-11-23 | M2 | `milestone/m2-unit-tests` | Suite pytest en `tests/` (64 pruebas + 2 xfail por errores anotados en el Backlog), fixture de `_state`, marca `manim`. |
 | 2026-11-23 | M3 | `milestone/m3-ci` | Workflow `.github/workflows/ci.yml` (Python 3.10 y 3.12, `uv sync --locked` sin extras, `ruff check` y `pytest`) y badge de CI en el README. |
 | 2026-11-23 | M4 | `milestone/m4-notebook-smoke` | Prueba de humo `tests/test_notebooks.py` que ejecuta los 12 notebooks (4 con marca `manim`, 4 xfail por errores anotados en el Backlog). |
+| 2026-11-23 | M5 | `milestone/m5-release` | Workflow `release.yml` que publica en PyPI con Trusted Publishing al subir un tag `v*` (TestPyPI si el tag contiene `rc`) y falla si el tag no coincide con la versión; pasos de release en `CLAUDE.md`. |
