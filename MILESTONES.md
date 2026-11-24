@@ -393,14 +393,54 @@ project's own rules.
 
 ---
 
-## [ ] M11 — Usage guide on GitHub Pages
+## [ ] M11 — Bilingual documentation site (Quarto, GitHub Pages)
 
-A GitHub Pages site with the detailed guide that leaves the README in M9:
-installation, slides, content elements, palettes, themes, templates,
-backgrounds, animations, and the API reference (pdoc). Includes rewriting the
-texts of the `test/` notebooks, which describe the old design, and a recipe
-for building an organization's own template from its logo URL and colors
-(from M10). Needs a brainstorming pass before planning.
+The README sells banners; this site teaches it. It is a Quarto website in
+English and Spanish, published on GitHub Pages, written for someone who has
+never used banners: short, direct, with code next to its result.
+
+Design (approved by César, 2026-11-24), modelled on numpy, pandas, polars,
+matplotlib and scikit-learn (Getting started → user guide with one concept
+per page → API reference → examples):
+
+| # | Section | Pages |
+|---|---|---|
+| 0 | Home | Pitch, template gallery, equation GIF, install, 30-second example |
+| 1 | Get started | Install, a 3-slide deck in 5 minutes, slide mode, full screen |
+| 2 | Look and feel | Templates → Palettes → Themes → Layouts → Backgrounds |
+| 3 | Slides | Cover, Intro, Section, Closing (one page each) |
+| 4 | Content | Text, Image, Table, Plot, Graph, AnimatedGraph, FlowAnimation, Manim (one page each) |
+| 5 | How-to guides | Present full screen; your organization's template (from M10); a click-through Manim scene; cache and speed |
+| 6 | Examples | Showcase, electromagnetic waves |
+| 7 | API reference | pdoc, generated from the docstrings |
+| 8 | What's new | Release notes and upgrade steps |
+
+Decisions:
+- **Two languages in plain Quarto, no R:** one website with `site/en/` and
+  `site/es/` mirrors (same file names), one sidebar per language, and a navbar
+  EN/ES link that a small script points at the same page in the other
+  language. babelquarto was rejected because it needs R.
+- **Pre-generated images, no code execution at render time:** every picture
+  and GIF comes from the Playwright pipeline (`make docs-images`, an extension
+  of `make readme-images`), so CI needs neither manim nor Chromium.
+- **API reference with pdoc** (already used), rendered into the site under
+  `/api/`. quartodoc is unmaintained. The committed pdoc output in `docs/` is
+  removed.
+- **Branches:** sources on `milestone/m11-docs`, merged to `main` like any
+  milestone; a GitHub Action renders the site and publishes it to the
+  `gh-pages` branch on every push to `main`.
+- **README equation GIF:** the `MaxwellDerivationScene` slide of
+  `example/ondas_electromagneticas.py`, recorded in marimo while it advances
+  step by step, joins the README.
+
+**Acceptance criteria**
+- `site/en/` and `site/es/` contain the same pages (test).
+- Every Python code block in the site runs against the current API; blocks
+  that need manim run under the `manim` marker (test).
+- `quarto render site` succeeds in CI on every pull request.
+- The site is live on GitHub Pages and the EN/ES switch keeps the page.
+- The README shows the equation GIF.
+- César approves the site.
 
 ---
 
