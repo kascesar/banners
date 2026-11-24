@@ -61,7 +61,6 @@ def _(Cover, Text):
             Text("**Animated derivation** — from curl to wave equation."),
             Text("**The speed of light** — an inevitable consequence."),
         ],
-        content_kind="warn"
     ).render()
     return
 
@@ -82,7 +81,6 @@ def _(Intro, Text):
             Text("**Ampère–Maxwell** — a varying B field induces an E field."),
             Text("**Together** — they feed back into each other and produce a wave that propagates without a material medium."),
         ],
-        content_kind="info",
     ).render()
     return
 
@@ -377,7 +375,6 @@ def _(Closing, Text):
             Text("The speed $v = 1/\\sqrt{\\mu_0\\varepsilon_0}$ equals $c$ — light **is** an electromagnetic wave."),
             Text("The solution $E_0\\sin(kx-\\omega t)$ describes transverse waves that propagate without a material medium."),
         ],
-        content_kind="warn",
     )
     return
 

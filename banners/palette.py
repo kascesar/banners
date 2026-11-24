@@ -47,59 +47,6 @@ class Palette:
         """CSS linear-gradient string built from start, mid and end stops."""
         return f"linear-gradient(135deg, {self.start} 0%, {self.mid} 50%, {self.end} 100%)"
 
-    def to_section_palette(self) -> "SectionPalette":
-        """Derive a SectionPalette from this palette.
-
-        Uses `end` as the border accent and a darkened `start` for the background.
-        """
-        def _darken(hex_color: str, factor: float) -> str:
-            h = hex_color.lstrip("#")
-            r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
-            return f"#{int(r * factor):02x}{int(g * factor):02x}{int(b * factor):02x}"
-
-        return SectionPalette(
-            border=self.end,
-            bg_start=_darken(self.start, 0.30),
-            bg_end=_darken(self.start, 0.42),
-        )
-
-
-@dataclass
-class SectionPalette:
-    """Palette for Section slides: left border accent over a dark background.
-
-    Attributes:
-        border: Left-border accent color (hex).
-        bg_start: Dark background gradient start color (hex).
-        bg_end: Dark background gradient end color (hex).
-        text_main: Primary text color.
-        text_sub: Subtitle text color.
-
-    Example:
-        ```python
-        from banners.palette import SectionPalette
-
-        blue_section = SectionPalette(
-            border="#3b82f6",
-            bg_start="#0f172a",
-            bg_end="#1e293b",
-        )
-        Section(title="Results", palette=blue_section).render()
-        ```
-    """
-
-    border: str = "#c4561b"
-    bg_start: str = "#1c0a00"
-    bg_end: str = "#1f1210"
-
-    text_main: str = "#ffffff"
-    text_sub: str = "#d1d5db"
-
-    @property
-    def gradient(self) -> str:
-        """CSS linear-gradient string for the dark background."""
-        return f"linear-gradient(90deg, {self.bg_start} 0%, {self.bg_end} 100%)"
-
 
 # ── Predefined palettes ───────────────────────────────────────────────────────
 # Deep, desaturated panel tones with one restrained accent each.

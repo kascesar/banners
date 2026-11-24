@@ -280,6 +280,8 @@ Unplanned items found while working. Promote to a milestone when relevant.
 - `Slide._icon_src` disables TLS verification (`check_hostname = False`,
   `verify_mode = ssl.CERT_NONE`) when downloading icons and images by URL, so it accepts
   invalid or spoofed certificates. It affects `icon=` and `Background.image(url)`.
+- `Cover` and `Closing` accept `content=` and `footer=`, but the template layouts do not draw
+  them, so the values are silently ignored. Either draw them or remove the parameters.
 - A local `make publish` would put `.claude/settings.local.json` in the sdist: hatch only
   reads the project `.gitignore`, not the user's global git ignore file. The CI release
   builds from a clean checkout and is not affected. Fix: an `exclude` rule in `pyproject.toml`.

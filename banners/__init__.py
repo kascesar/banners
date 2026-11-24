@@ -25,7 +25,7 @@ from .background import Background
 from .config import configure
 from .content import AnimatedGraph, FlowAnimation, Graph, Image, Manim, Plot, Table, Text
 from .icons import ICONS, icon
-from .palette import BLUE, GRAY, GREEN, ORANGE, PURPLE, Palette, SectionPalette
+from .palette import BLUE, GRAY, GREEN, ORANGE, PURPLE, Palette
 from .slide import Slide
 from .slides import Closing, Cover, Intro, Section
 from .template import BECH, COSMOS, EXECUTIVE, INSTITUTIONAL, PRESETS, TERRA, VIBRANT, Template
@@ -35,7 +35,7 @@ __all__ = [
     "Slide",
     "Cover", "Intro", "Section", "Closing",
     "Text", "Image", "Graph", "AnimatedGraph", "Table", "Plot", "Manim", "FlowAnimation",
-    "Palette", "SectionPalette", "ORANGE", "BLUE", "GREEN", "PURPLE", "GRAY",
+    "Palette", "ORANGE", "BLUE", "GREEN", "PURPLE", "GRAY",
     "Background",
     "Template",
     "BECH", "EXECUTIVE", "INSTITUTIONAL", "COSMOS", "VIBRANT", "TERRA", "PRESETS",

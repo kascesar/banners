@@ -3,7 +3,6 @@
 _state: dict = {
     "team": "",
     "date": "",
-    "icon": None,
     "palette": None,
     "background": None,
     "template": None,
@@ -16,7 +15,6 @@ _UNSET = object()
 def configure(
     team: str = _UNSET,
     date: str = _UNSET,
-    icon=_UNSET,
     palette=_UNSET,
     background=_UNSET,
     template=_UNSET,
@@ -30,8 +28,6 @@ def configure(
     Args:
         team: Team line shown in `Cover`, `Intro`, and `Closing` banners.
         date: Date string shown in `Cover` (e.g. `"April 2026"`).
-        icon: Icon applied to all slides. Pass a dict with keys `"src"`
-            (path, URL, or bytes) and optionally `"size"` (CSS height).
         palette: Color palette applied to `Cover`, `Intro`, and `Closing`.
             Pass any `Palette` instance or predefined constant
             (`BLUE`, `GREEN`, `PURPLE`, `GRAY`).
@@ -39,9 +35,8 @@ def configure(
             instance (`Background.color()`, `Background.gradient()`, or
             `Background.image()`). Individual slides can override this with
             their own `background` argument.
-        template: A `Template` that renders every slide on a fixed 16:9
-            canvas (corporate PowerPoint style). Pass `None` to go back to
-            the default editorial style.
+        template: The `Template` that draws every slide on the 16:9 canvas.
+            `None` uses a default `Template()`.
 
     Example:
         ```python
@@ -52,7 +47,6 @@ def configure(
             team="Analytics Team",
             date="April 2026",
             palette=BLUE,
-            icon={"src": "img/logo.png"},
             background=Background.gradient("#0f172a", "#1e3a5f"),
         )
         ```
@@ -61,8 +55,6 @@ def configure(
         _state["team"] = team
     if date is not _UNSET:
         _state["date"] = date
-    if icon is not _UNSET:
-        _state["icon"] = icon
     if palette is not _UNSET:
         _state["palette"] = palette
     if background is not _UNSET:

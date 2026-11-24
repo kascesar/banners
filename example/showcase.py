@@ -111,7 +111,6 @@ def _(Cover, Text, mo):
         Text("**Point 2** — A concrete result."),
         Text("**Point 3** — Team or business impact."),
     ],
-    content_kind="neutral",
     ).render()
     ```
     """),
@@ -123,7 +122,6 @@ def _(Cover, Text, mo):
                 Text("**Point 2** — A concrete result."),
                 Text("**Point 3** — Team or business impact."),
             ],
-            content_kind="neutral",
         ).render(),
     ], gap="0.5rem")
     return
@@ -144,7 +142,6 @@ def _(Intro, Text, mo):
         Text("**Gap** — What was missing."),
         Text("**Opportunity** — What we could gain."),
     ],
-    content_kind="warn",
     footer="The question wasn't whether — but how.",
     ).render()
     ```
@@ -159,7 +156,6 @@ def _(Intro, Text, mo):
                 Text("**Gap** — What was missing."),
                 Text("**Opportunity** — What we could gain."),
             ],
-            content_kind="warn",
             footer="The question wasn't whether — but how.",
         ).render(),
     ], gap="0.5rem")
@@ -204,7 +200,6 @@ def _(Closing, Text, mo):
         Text("**Second takeaway** — concrete."),
         Text("**Third takeaway** — actionable."),
     ],
-    content_kind="neutral",
     ).render()
     ```
     """),
@@ -216,7 +211,6 @@ def _(Closing, Text, mo):
                 Text("**Second takeaway** — concrete."),
                 Text("**Third takeaway** — actionable."),
             ],
-            content_kind="neutral",
         ).render(),
     ], gap="0.5rem")
     return
@@ -315,29 +309,6 @@ def _(Section, Text):
     ).render()
 
 
-    # ── content_kind ──────────────────────────────────────
-    return
-
-
-@app.cell
-def _(Section, Text, mo):
-    mo.vstack([
-        mo.md("""
-    ```python
-    Section(
-    content=[Text("..."), Text("...")],
-    content_kind="info",   # "neutral" | "info" | "success" | "warn" | "danger"
-    ).render()
-    ```
-    """),
-        mo.hstack([
-            Section(title="neutral", content=[Text("neutral"), Text("neutral")], content_kind="neutral").render(),
-            Section(title="info",    content=[Text("info"),    Text("info")],    content_kind="info").render(),
-            Section(title="success", content=[Text("success"), Text("success")], content_kind="success").render(),
-            Section(title="warn",    content=[Text("warn"),    Text("warn")],    content_kind="warn").render(),
-            Section(title="danger",  content=[Text("danger"),  Text("danger")],  content_kind="danger").render(),
-        ], gap="0.75rem"),
-    ], gap="0.5rem")
     return
 
 
@@ -633,7 +604,6 @@ def _(Background, Section, Text, mo):
                 "https://picsum.photos/seed/wave/1200/600",
                 #overlay="rgba(0,0,0,0.55)",
             ),
-            content_kind="warn"
     )
     return
 

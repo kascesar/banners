@@ -75,11 +75,6 @@ def test_bad_image_is_omitted(tpl):
     assert "<img" not in html(Cover(title="Deck"))
 
 
-def test_configure_none_restores_editorial(tpl):
-    configure(template=None)
-    assert "aspect-ratio:16/9" not in html(Cover(title="Deck"))
-
-
 def test_url_images_pass_through_without_download(monkeypatch):
     from banners.slide import Slide
 
