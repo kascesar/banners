@@ -29,7 +29,9 @@ def _parse(diagram: str):
         r')?'
     )
     _nid = r'([A-Za-z0-9_]+)'
-    _edge_re = re.compile(_nid + _ns + r'\s*-[-\.]+>+(?:\|([^|]*)\|)?\s*' + _nid + _ns)
+    # Anchored at the end of the line, so the lazy label groups of the
+    # destination node must consume its label (e.g. `B[Validate]`).
+    _edge_re = re.compile(_nid + _ns + r'\s*-[-\.]+>+(?:\|([^|]*)\|)?\s*' + _nid + _ns + r'\s*;?\s*$')
     _solo_re = re.compile(_nid + _ns + r'\s*$')
 
     def _label(groups, fallback):

@@ -1,0 +1,21 @@
+<script>
+// Language button at the top right: opens the same page in the other language.
+// Pages outside en/ and es/ (the home redirect) link to the other home page.
+(function () {
+  var path = window.location.pathname;
+  var isEs = path.indexOf("/es/") !== -1;
+  var target = isEs ? path.replace("/es/", "/en/") : path.replace("/en/", "/es/");
+  if (target === path) target = path.replace(/[^/]*$/, "") + (isEs ? "en/index.html" : "es/index.html");
+  var nav = document.querySelector("#navbarCollapse .navbar-nav.ms-auto") || document.querySelector(".navbar-nav");
+  if (!nav) return;
+  var li = document.createElement("li");
+  li.className = "nav-item";
+  var a = document.createElement("a");
+  a.className = "nav-link lang-switch";
+  a.href = target;
+  a.textContent = isEs ? "English" : "Español";
+  a.setAttribute("lang", isEs ? "en" : "es");
+  li.appendChild(a);
+  nav.appendChild(li);
+})();
+</script>

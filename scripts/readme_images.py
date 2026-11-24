@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MEDIA = ROOT / "media"
 SHOWCASE = ROOT / "example" / "showcase.py"
+ONDAS = ROOT / "example" / "ondas_electromagneticas.py"
 # The 16:9 slide canvas drawn by `Template.render` (marimo normalizes the style
 # attribute, so match the property name only).
 CANVAS = '[style*="container-type"]'
@@ -169,6 +170,72 @@ def shoot(page, html_path: Path, out_dir: Path, prefix: str) -> tuple[list[str],
     return kinds, shots
 
 
+def gif_command(
+    video: Path, out: Path, box: tuple[int, int, int, int], fps: int = 12, width: int = 800, start: float = 0.0
+) -> list[str]:
+    """Build the ffmpeg command that turns a screen recording into a GIF.
+
+    The recording is cropped to the slide, resampled to `fps` and scaled to
+    `width`; a palette computed from the clip keeps the colors clean.
+
+    Args:
+        video: The recording (WebM from Playwright).
+        out: Path of the GIF to write.
+        box: Area to keep, as (x, y, width, height) in video pixels.
+        fps: Frames per second of the GIF.
+        width: Width of the GIF in pixels; the height keeps the proportion.
+        start: Seconds to skip at the beginning of the recording.
+
+    Returns:
+        The command, ready for `subprocess.run`.
+    """
+    x, y, w, h = box
+    chain = f"crop={w}:{h}:{x}:{y},fps={fps},scale={width}:-1:flags=lanczos"
+    graph = f"[0:v]{chain},split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4"
+    return ["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{start:.2f}", "-i", str(video),
+            "-filter_complex", graph, "-loop", "0", str(out)]
+
+
+def record_player_gif(browser, html: Path, out: Path, title: str, clicks: int, step_ms: int) -> None:
+    """Record a slide with a click-through animation while it advances, as a GIF.
+
+    Args:
+        browser: A Playwright browser.
+        html: The exported notebook that holds the slide.
+        out: Path of the GIF to write.
+        title: Text that identifies the slide (its title).
+        clicks: How many times to advance the animation.
+        step_ms: Time each step stays on screen, in milliseconds.
+    """
+    import time
+
+    size = {"width": 1600, "height": 1000}
+    with tempfile.TemporaryDirectory() as videos:
+        context = browser.new_context(viewport=size, record_video_dir=videos, record_video_size=size)
+        opened = time.monotonic()
+        page = context.new_page()
+        page.goto(html.as_uri())
+        page.wait_for_timeout(8000)
+        page.evaluate(
+            "for (const e of document.querySelectorAll('body *'))"
+            "  if (getComputedStyle(e).position === 'fixed') e.style.visibility = 'hidden';"
+        )
+        slide = page.locator(CANVAS).filter(has_text=title).filter(has=page.locator("iframe")).first
+        slide.scroll_into_view_if_needed()
+        page.wait_for_timeout(4000)
+        box = slide.bounding_box()
+        player = slide.locator("iframe").bounding_box()
+        start = time.monotonic() - opened
+        page.wait_for_timeout(step_ms)
+        for _ in range(clicks):
+            page.mouse.click(player["x"] + player["width"] / 2, player["y"] + player["height"] / 2)
+            page.wait_for_timeout(step_ms)
+        video = page.video.path()
+        context.close()
+        crop = tuple(round(v) for v in (box["x"], box["y"], box["width"], box["height"]))
+        subprocess.run(gif_command(Path(video), out, crop, start=start), check=True)
+
+
 def main() -> None:
     """Write the template gallery PNGs and the showcase GIFs to `media/`."""
     from PIL import Image
@@ -195,6 +262,9 @@ def main() -> None:
             raise SystemExit(f"expected {len(PART_NAMES)} showcase parts, found {len(parts)}: {parts}")
         for name, indexes in zip(PART_NAMES, parts):
             make_gif([shots[i] for i in indexes], MEDIA / f"{name}.gif")
+
+        ondas = export(ONDAS, tmp / "ondas.html")
+        record_player_gif(browser, ondas, MEDIA / "equations.gif", "Derivation — Step by Step", clicks=5, step_ms=3500)
         browser.close()
 
 

@@ -1,0 +1,68 @@
+---
+title: "Presentar en pantalla completa"
+description: "Convierte un notebook en slides y muéstralo en pantalla completa, o compártelo como archivo."
+---
+
+Esta guía cubre la vista de slides de marimo, cómo presentar en pantalla
+completa y cómo exportar una presentación a un solo archivo HTML.
+
+## Activar el layout de slides
+
+marimo puede mostrar un notebook como slides: la salida de cada celda se
+vuelve una slide y el código queda oculto.
+
+1. Abre el notebook con `marimo edit deck.py`.
+2. Abre la vista de app (el botón de vista previa abajo a la derecha, o
+   <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>.</kbd>).
+3. En el menú de layout de la vista de app, elige **Slides**.
+
+marimo guarda esa elección en un archivo `layouts/deck.slides.json` y la anota
+en el encabezado del notebook:
+
+```python
+# fragment: las primeras líneas de un notebook que usa el layout de slides.
+import marimo
+
+app = marimo.App(width="full", layout_file="layouts/deck.slides.json")
+```
+
+`width="full"` permite que las slides usen todo el ancho de la ventana.
+Mantén la carpeta `layouts/` junto al notebook; sin ella, marimo muestra el
+notebook como una página.
+
+## Presentar
+
+Ejecuta el notebook como app:
+
+```bash
+marimo run deck.py
+```
+
+marimo lo abre en el navegador con el layout de slides. Presiona el botón
+**Fullscreen** abajo a la derecha de las slides: las slides llenan la pantalla
+y las flechas del teclado avanzan y retroceden (fuera de la pantalla
+completa, usa las flechas a los costados de la slide). Como banners dibuja
+cada slide sobre un lienzo de 16:9 que se ajusta al ancho de la ventana, las
+slides llenan un proyector sin cambios.
+
+::: {.callout-tip}
+## Revisa la presentación antes de la charla
+
+Las animaciones se dibujan y se guardan en caché la primera vez que se ejecuta
+su celda. Recorrer la presentación una vez antes de la charla hace que,
+durante la charla, cada animación salga de la caché y aparezca de inmediato.
+:::
+
+## Compartir como archivo
+
+`marimo export html` ejecuta el notebook y escribe un solo archivo HTML que se
+abre en cualquier navegador, sin Python:
+
+```bash
+marimo export html deck.py -o deck.html
+```
+
+Las slides, los gráficos, las tablas, los diagramas de Mermaid y los
+reproductores paso a paso de `FlowAnimation` y `Manim` funcionan en el archivo
+exportado. `AnimatedGraph` no, porque necesita el notebook en ejecución para
+responder a los clics.

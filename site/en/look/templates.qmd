@@ -1,0 +1,107 @@
+---
+title: "Templates"
+description: "A template decides how every slide looks: layouts, colors, fonts, logos and pictures."
+---
+
+This page covers what a template is, the six templates that come with
+banners, and the options that a template of your own can set.
+
+## One line changes the whole deck
+
+A template draws every slide of the deck. The slides only hold their content
+(titles, text, plots); the template decides where each piece goes and which
+colors and fonts it uses. That is why one call changes the look of a whole
+presentation:
+
+```python
+from banners import EXECUTIVE, configure
+
+configure(template=EXECUTIVE)
+```
+
+Every slide created after this call uses `EXECUTIVE`. Without a call to
+`configure(template=...)`, banners uses `Template()`, the default template.
+
+## The built-in templates
+
+The same slide drawn with each template:
+
+::: {layout-ncol=2}
+![`Template()` — the default: light slides, orange titles.](../../images/template-default.png)
+
+![`EXECUTIVE` — white, black serif titles, chart mark.](../../images/template-executive.png)
+
+![`INSTITUTIONAL` — navy and pale blue, serif titles.](../../images/template-institutional.png)
+
+![`COSMOS` — dark slides, cyan, violet and pink, space photos.](../../images/template-cosmos.png)
+
+![`VIBRANT` — white, a four-color bar and a different color per section.](../../images/template-vibrant.png)
+
+![`TERRA` — warm sand background, forest green, landscape photos.](../../images/template-terra.png)
+:::
+
+All of them are importable from `banners`:
+
+```python
+from banners import COSMOS, EXECUTIVE, INSTITUTIONAL, TERRA, VIBRANT, Template
+```
+
+## What a template is made of
+
+A `Template` combines three things:
+
+- **Layouts**: where the title, the content, the logo and the bottom bar go on
+  each kind of slide. They are built into banners; the
+  [Layouts](layouts.qmd) page shows how a slide picks one.
+- **A `Palette`**: the colors, by role (title, text, background, bar…). See
+  [Palettes](palettes.qmd).
+- **A `Theme`**: fonts, title weight, icon stroke and a size multiplier. See
+  [Themes](themes.qmd).
+
+On top of those, a template can carry logos, pictures and a few switches:
+
+| Option | What it does |
+|---|---|
+| `logo_on_dark`, `logo_on_light` | Logo drawn on dark slides (cover, closing) and on light ones. A URL, a file path or raw bytes. |
+| `mark` | Small symbol in the top-right corner of content slides: an image or an icon name such as `"chart"`. |
+| `cover_image`, `divider_image` | Photo used by every cover, or every divider, unless the slide sets its own. |
+| `divider_icon` | Large icon on dividers without a photo. |
+| `closing_image` | Picture next to the closing title. |
+| `bar`, `bar_split` | Draw the two-color bar along the bottom edge, and how much of it is the primary color. |
+| `auto_contrast` | Replace a title color that would be hard to read on its background. Turn it off to keep exact brand colors. |
+
+Images given as URLs are loaded by the browser when the slide is shown;
+paths and bytes are embedded in the slide.
+
+## A template of your own
+
+A template is a plain Python object, so a deck can define its own in a
+notebook cell and use it with `configure()`:
+
+```python
+from banners import Palette, Template, Theme, configure
+
+ours = Template(
+    palette=Palette(primary="#0f766e", secondary="#f59e0b"),
+    theme=Theme(heading_font="Georgia, serif"),
+    mark="chart",
+)
+configure(template=ours, team="Data Office", date="2026")
+```
+
+[Your organization's template](../howto/organization-template.qmd) builds a
+complete one, with logos.
+
+## Changing only the colors or the fonts
+
+To keep a template's layouts and change only its colors or fonts, pass a
+palette or a theme to `configure()` instead of building a new template:
+
+```python
+from banners import BLUE, COSMOS, configure
+
+configure(template=COSMOS, palette=BLUE)
+```
+
+The palette given to `configure()` replaces the template's palette as a whole.
+The next pages explain palettes and themes in detail.

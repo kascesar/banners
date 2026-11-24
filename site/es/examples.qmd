@@ -1,0 +1,42 @@
+---
+title: "Ejemplos"
+description: "Dos notebooks completos para leer, ejecutar y copiar."
+---
+
+El repositorio trae dos presentaciones de ejemplo en la carpeta `example/`.
+Clónalo para ejecutarlas:
+
+```bash
+git clone https://github.com/kascesar/banners
+cd banners
+uv sync --extra dev
+```
+
+## Showcase
+
+`example/showcase.py` recorre cada función, una slide a la vez, con el código
+de cada slide al lado.
+
+::: {layout-ncol=1}
+![Tipos de slide y paletas](../images/showcase-1-slide-types.gif)
+
+![Contenido](../images/showcase-2-content-types.gif)
+
+![Fondos](../images/showcase-3-backgrounds.gif)
+:::
+
+```bash
+uv run marimo edit example/showcase.py
+```
+
+## Ondas electromagnéticas
+
+`example/ondas_electromagneticas.py` es una charla completa: las ecuaciones de
+Maxwell, una derivación animada paso a paso de la ecuación de onda y un
+gráfico de la onda resultante. Necesita el extra `manim` y LaTeX.
+
+![La derivación, un paso por clic.](../images/equations.gif)
+
+```bash
+uv run marimo edit example/ondas_electromagneticas.py
+```

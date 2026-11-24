@@ -1,0 +1,80 @@
+---
+title: "A click-through Manim scene"
+description: "Write a Manim scene that advances one idea per click and looks like part of the slide."
+---
+
+This guide writes a Manim scene for a talk: steps that follow the speaker,
+short and direct motion, and colors that match the slide.
+
+## One step per idea
+
+`self.next_section()` starts a new step. With `Manim(..., interactive=True)`,
+each step waits for a click, so the speaker decides when the next idea appears:
+
+```python
+from banners import BLUE, Manim, Section
+from manim import DOWN, RIGHT, Arrow, FadeIn, GrowArrow, RoundedRectangle, Scene, VGroup, rate_functions
+from manim import Text as MText
+
+class Pipeline(Scene):
+    def construct(self):
+        names = ["Ingest", "Clean", "Train"]
+        boxes = VGroup(*[
+            VGroup(
+                RoundedRectangle(width=2.4, height=1, corner_radius=0.12,
+                                 color=BLUE.primary, fill_opacity=0.15),
+                MText(name, font_size=26, color=BLUE.text),
+            )
+            for name in names
+        ]).arrange(RIGHT, buff=1.2)
+        for i, box in enumerate(boxes):
+            self.next_section(f"step_{i}")
+            parts = [FadeIn(box, shift=RIGHT * 0.15)]
+            if i:
+                parts.append(GrowArrow(Arrow(boxes[i - 1].get_right(), box.get_left(),
+                                             buff=0.1, color=BLUE.muted)))
+            self.play(*parts, run_time=0.25, rate_func=rate_functions.ease_out_cubic)
+
+Section(title="Our pipeline", content=[Manim(Pipeline, interactive=True)], palette=BLUE)
+```
+
+## Rules that make a scene present well
+
+- **One change per click.** Each step shows one new idea; the audience reads
+  it while the speaker talks.
+- **Short steps.** Between 0.2 and 0.4 seconds per step, with an ease-out
+  curve (`rate_functions.ease_out_cubic`): the motion starts fast and settles.
+  Long animations make the audience wait for the slide.
+- **No pause at the end.** A step ends when its motion ends; a trailing
+  `self.wait()` only delays the next click.
+- **No decoration.** Every element on screen is part of the explanation.
+- **The slide's colors.** Do not set `self.camera.background_color`: banners
+  draws the scene on the slide's panel color. Take the colors of shapes and
+  text from the palette, as `BLUE.primary` and `BLUE.text` above.
+
+## Names that clash with banners
+
+banners and Manim both export `Text`, and Manim's color constants (such as
+`BLUE`) share names with the banners palettes. Import Manim's under another
+name, as `from manim import Text as MText` above, so a marimo notebook does
+not see two definitions of the same name.
+
+## Scenes that follow any palette
+
+A function that takes `palette` and returns a `Scene` class receives the
+slide's palette from banners:
+
+```python
+from banners import Manim, Section
+from manim import Circle, Create, Scene
+
+def Dot(palette):
+    class _Dot(Scene):
+        def construct(self):
+            self.play(Create(Circle(color=palette.primary)), run_time=0.3)
+    return _Dot
+
+Section(title="Follows the slide", content=[Manim(Dot)])
+```
+
+`banners.scenes.PipelineScene` is built this way.

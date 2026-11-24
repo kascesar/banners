@@ -1,0 +1,67 @@
+---
+title: "Present full screen"
+description: "Turn a notebook into slides and show it full screen, or share it as a file."
+---
+
+This guide covers marimo's slide view, presenting full screen and exporting
+a deck to a single HTML file.
+
+## Turn on the slide layout
+
+marimo can lay out a notebook as slides: each cell output becomes a slide and
+the code is hidden.
+
+1. Open the notebook with `marimo edit deck.py`.
+2. Open the app view (the preview button at the bottom right, or
+   <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>.</kbd>).
+3. In the layout menu of the app view, choose **Slides**.
+
+marimo saves the choice in a `layouts/deck.slides.json` file and records it in
+the notebook header:
+
+```python
+# fragment: the first lines of a notebook that uses the slide layout.
+import marimo
+
+app = marimo.App(width="full", layout_file="layouts/deck.slides.json")
+```
+
+`width="full"` lets the slides use the whole width of the window. Keep the
+`layouts/` folder next to the notebook; without it, marimo shows the notebook
+as a page.
+
+## Present
+
+Run the notebook as an app:
+
+```bash
+marimo run deck.py
+```
+
+marimo opens it in the browser with the slide layout. Press the
+**Fullscreen** button at the bottom right of the slides: the slides fill the
+screen and the arrow keys move between them (outside full screen, use the
+arrows on the sides of the slide). Because banners draws every slide on a
+16:9 canvas sized by the window width, the slides fill a projector without
+changes.
+
+::: {.callout-tip}
+## Check the deck before the talk
+
+Animations are rendered and cached the first time their cell runs. Running
+the deck once before the talk means that, during the talk, every animation
+comes from the cache and appears at once.
+:::
+
+## Share as a file
+
+`marimo export html` runs the notebook and writes a single HTML file that
+opens in any browser, without Python:
+
+```bash
+marimo export html deck.py -o deck.html
+```
+
+Slides, plots, tables, Mermaid diagrams and the click-through players of
+`FlowAnimation` and `Manim` work in the exported file. `AnimatedGraph` does
+not, because it needs the running notebook to answer the clicks.

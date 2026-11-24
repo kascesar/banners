@@ -20,6 +20,7 @@ manim = ["manim>=0.21"]
 [project.urls]
 Homepage = "https://github.com/kascesar/banners"
 Repository = "https://github.com/kascesar/banners"
+Documentation = "https://kascesar.github.io/banners/"
 
 [tool.hatch.build.targets.wheel]
 packages = ["banners"]

@@ -128,3 +128,10 @@ def test_cover_subtitle_follows_a_wrapped_title(cover_image):
     page = Cover(title="TITLE-TEXT", subtitle="SUBTITLE-TEXT", image=cover_image).render().text
     between = page[page.index("TITLE-TEXT"):page.index("SUBTITLE-TEXT")]
     assert "position:absolute" not in between
+
+
+def test_square_logo_does_not_reach_the_cover_title():
+    """A square logo keeps a capped height, so it stays above the title."""
+    configure(template=Template(logo_on_dark=PNG, logo_on_light=PNG))
+    page = Cover(title="T").render().text
+    assert page.count("max-height:") >= 1

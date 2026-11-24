@@ -278,8 +278,11 @@ class Template:
         layers = f"{overlay}," if overlay else ""
         return self._box(x, y, w, h, "", f"background:{layers}url({src}) center/cover no-repeat;")
 
-    def _logo(self, image, x: float, y: float, w: float, style: str = "") -> str:
-        return self._box(x, y, w, None, self._img(image, f"width:100%;height:auto;{style}"))
+    def _logo(self, image, x: float, y: float, w: float, style: str = "", max_h: float = 8) -> str:
+        # The height is capped (in cqw) so a square or tall logo stays inside
+        # its area instead of growing over the title below it.
+        return self._box(x, y, w, None, self._img(
+            image, f"width:auto;max-width:100%;height:auto;max-height:{max_h}cqw;{style}"))
 
     def _dark_logo(self, x: float, y: float, w: float) -> str:
         """Logo for dark backgrounds: `logo_on_dark`, or else `logo_on_light`
@@ -287,11 +290,12 @@ class Template:
         from .icons import ICONS
 
         if self.logo_on_dark is not None:
-            return self._logo(self.logo_on_dark, x, y, w)
+            return self._logo(self.logo_on_dark, x, y, w, max_h=w * 0.45)
         # A named icon is not part of the logo artwork, so the logo is not
         # clipped and the icon is not drawn over it.
         isotype = None if isinstance(self.mark, str) and self.mark in ICONS else self.mark
-        white = self._img(self.logo_on_light, "width:100%;height:auto;filter:brightness(0) invert(1);"
+        white = self._img(self.logo_on_light, f"width:auto;max-width:100%;height:auto;max-height:{w * 0.45:.1f}cqw;"
+                          "filter:brightness(0) invert(1);"
                           + (f"clip-path:inset(0 0 0 {self.logo_mark_width * 100:.1f}%);" if isotype else ""))
         if not white:
             return ""

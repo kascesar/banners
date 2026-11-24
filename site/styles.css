@@ -1,0 +1,13 @@
+/* banners documentation: brand accent and a clear language button. */
+:root { --banners-accent: #e4572e; }
+a { color: #2a6fdb; }
+.navbar { border-bottom: 3px solid var(--banners-accent); }
+.lang-switch {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.15rem 0.8rem !important;
+  margin-left: 0.5rem;
+  font-weight: 600;
+}
+/* Slide pictures: a light frame so white slides stand out from the page. */
+.slide-shot img, img.slide-shot { border: 1px solid #e5e7eb; border-radius: 4px; }

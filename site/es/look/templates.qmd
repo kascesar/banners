@@ -1,0 +1,108 @@
+---
+title: "Templates"
+description: "Un template decide cómo se ve cada slide: layouts, colores, fuentes, logos e imágenes."
+---
+
+Esta página cubre qué es un template, los seis templates que trae banners y
+las opciones que puede fijar un template propio.
+
+## Una línea cambia toda la presentación
+
+Un template dibuja todas las slides de la presentación. Las slides solo
+guardan su contenido (títulos, texto, gráficos); el template decide dónde va
+cada parte y qué colores y fuentes usa. Por eso una sola llamada cambia la
+apariencia de toda la presentación:
+
+```python
+from banners import EXECUTIVE, configure
+
+configure(template=EXECUTIVE)
+```
+
+Cada slide creada después de esta llamada usa `EXECUTIVE`. Sin una llamada a
+`configure(template=...)`, banners usa `Template()`, el template por defecto.
+
+## Los templates incluidos
+
+La misma slide dibujada con cada template:
+
+::: {layout-ncol=2}
+![`Template()` — el de por defecto: slides claras, títulos naranjos.](../../images/template-default.png)
+
+![`EXECUTIVE` — blanco, títulos negros con serifa, ícono de gráfico.](../../images/template-executive.png)
+
+![`INSTITUTIONAL` — azul marino y celeste, títulos con serifa.](../../images/template-institutional.png)
+
+![`COSMOS` — slides oscuras, cian, violeta y rosado, fotos del espacio.](../../images/template-cosmos.png)
+
+![`VIBRANT` — blanco, una barra de cuatro colores y un color distinto por sección.](../../images/template-vibrant.png)
+
+![`TERRA` — fondo arena, verde bosque, fotos de paisajes.](../../images/template-terra.png)
+:::
+
+Todos se importan desde `banners`:
+
+```python
+from banners import COSMOS, EXECUTIVE, INSTITUTIONAL, TERRA, VIBRANT, Template
+```
+
+## De qué está hecho un template
+
+Un `Template` combina tres cosas:
+
+- **Layouts**: dónde van el título, el contenido, el logo y la barra inferior
+  en cada tipo de slide. Vienen incluidos en banners; la página de
+  [Layouts](layouts.qmd) muestra cómo una slide elige el suyo.
+- **Una `Palette`**: los colores, por rol (título, texto, fondo, barra…). Ver
+  [Paletas](palettes.qmd).
+- **Un `Theme`**: fuentes, peso de los títulos, grosor de los íconos y un
+  multiplicador de tamaño. Ver [Temas](themes.qmd).
+
+Además, un template puede llevar logos, imágenes y algunos interruptores:
+
+| Opción | Qué hace |
+|---|---|
+| `logo_on_dark`, `logo_on_light` | Logo dibujado en las slides oscuras (portada, cierre) y en las claras. Una URL, una ruta de archivo o bytes. |
+| `mark` | Símbolo pequeño en la esquina superior derecha de las slides de contenido: una imagen o el nombre de un ícono, como `"chart"`. |
+| `cover_image`, `divider_image` | Foto que usan todas las portadas, o todos los separadores, salvo que la slide fije la suya. |
+| `divider_icon` | Ícono grande en los separadores sin foto. |
+| `closing_image` | Imagen junto al título de cierre. |
+| `bar`, `bar_split` | Dibujar la barra de dos colores en el borde inferior, y cuánto de ella ocupa el color primario. |
+| `auto_contrast` | Reemplazar un color de título que se leería mal sobre su fondo. Desactívalo para conservar los colores exactos de una marca. |
+
+El navegador carga las imágenes dadas como URL cuando muestra la slide; las
+rutas y los bytes quedan incrustados en la slide.
+
+## Un template propio
+
+Un template es un objeto de Python común, así que una presentación puede
+definir el suyo en una celda del notebook y usarlo con `configure()`:
+
+```python
+from banners import Palette, Template, Theme, configure
+
+nuestro = Template(
+    palette=Palette(primary="#0f766e", secondary="#f59e0b"),
+    theme=Theme(heading_font="Georgia, serif"),
+    mark="chart",
+)
+configure(template=nuestro, team="Oficina de Datos", date="2026")
+```
+
+[El template de tu organización](../howto/organization-template.qmd) arma uno
+completo, con logos.
+
+## Cambiar solo los colores o las fuentes
+
+Para conservar los layouts de un template y cambiar solo sus colores o sus
+fuentes, pasa una paleta o un tema a `configure()` en vez de crear un template
+nuevo:
+
+```python
+from banners import BLUE, COSMOS, configure
+
+configure(template=COSMOS, palette=BLUE)
+```
+
+La paleta que recibe `configure()` reemplaza completa la paleta del template.
+Las páginas siguientes explican en detalle las paletas y los temas.

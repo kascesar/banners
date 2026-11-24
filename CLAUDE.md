@@ -69,7 +69,9 @@ make test                        # pytest (manim tests skipped)
 make check                       # lint + test
 
 # Docs
-make docs                        # pdoc → docs/
+make docs                        # Quarto site (site/ → site/_site/) + pdoc API under api/
+make docs-preview                # live preview of the site while writing
+make docs-images                 # regenerate the site pictures (Playwright)
 
 # Release: .github/workflows/release.yml publishes to PyPI on a `v*` tag.
 # 1. Bump `version` in pyproject.toml (e.g. 0.2.3) and commit it.
@@ -117,6 +119,7 @@ banners/
 test/                # Visual reference notebooks (marimo), one per feature
 example/             # Demo decks (showcase, ondas_electromagneticas)
 example/layouts/     # marimo slide-layout files (*.slides.json)
+site/                # Documentation site (Quarto): en/ and es/ hold the same pages
 ```
 
 ### `Slide` base class (`slide.py`)
@@ -237,6 +240,17 @@ A factory function (not a class) that imports manim lazily and returns a `_Pipel
 ## Adding a new scene
 
 Add a factory function to `banners/scenes/` that lazily imports manim and returns a `Scene` subclass. Export from `banners/scenes/__init__.py`. Use `self.next_section("name")` for click-advance steps.
+
+## Documentation site (`site/`)
+
+A Quarto website in English (`site/en/`) and Spanish (`site/es/`). Both folders
+hold the same pages with the same file names (`tests/test_site.py` checks it);
+`site/lang-switch.html` adds the language button that opens the same page in
+the other language, and each language has its own sidebar in `_quarto.yml`.
+Code blocks are not executed by Quarto: `tests/test_site.py` runs every
+```` ```python ```` block (a block starting with `# fragment` is skipped).
+Pictures live in `site/images/` and come from `make docs-images`. A change to
+the public API updates the matching page in both languages.
 
 ## Conventions
 

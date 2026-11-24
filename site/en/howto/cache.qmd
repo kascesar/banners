@@ -1,0 +1,52 @@
+---
+title: "Cache and speed"
+description: "Where rendered animations are stored, when they are rendered again, and how to keep a deck fast."
+---
+
+This guide covers the render cache of `Manim` and `FlowAnimation` and the
+settings that keep a deck quick to open.
+
+## Where the cache lives
+
+The first time a cell with an animation runs, Manim renders it, which takes
+from one to a few seconds. banners stores the result in
+
+```
+~/.cache/banners/manim/
+```
+
+and later runs read it from there at once, also after restarting marimo.
+
+## When an animation is rendered again
+
+The cache key includes everything that changes the picture:
+
+- the source code of the scene (for a scene defined in a notebook cell, its
+  compiled code), so editing the scene renders it again;
+- `quality`, `format` and `interactive`;
+- for `FlowAnimation`, the nodes, the edges and the direction;
+- the palette of the slide, so the same scene on a slide with another palette
+  is a different render.
+
+Code outside the scene that the scene reads at run time, such as a global
+variable or a data file, is not part of the key. After changing it, clear the
+cache.
+
+## Clear the cache
+
+Deleting the folder is safe; animations are rendered again when needed:
+
+```bash
+rm -rf ~/.cache/banners/manim
+```
+
+## Keep a deck fast
+
+- **Work in `quality="low"`** and switch to `"medium"` or `"high"` for the
+  final version only.
+- **Prefer `interactive=True` or `format="mp4"` to long GIFs.** A GIF stores
+  every frame as an image: a few seconds at high quality can weigh tens of
+  megabytes and exceed marimo's output limit, which then shows "Your output
+  is too large" instead of the animation. MP4 is a fraction of that size.
+- **Render once before the talk**, so every animation comes from the cache
+  during the presentation.

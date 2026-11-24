@@ -1,0 +1,46 @@
+# Publishes the documentation site (site/) to GitHub Pages on every push to main.
+# The guide is rendered by Quarto; pdoc adds the API reference under api/; the
+# result is pushed to the gh-pages branch, which GitHub Pages serves.
+name: Site
+
+on:
+  push:
+    branches: [main]
+  # Allows publishing by hand from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  # Needed to push the rendered site to the gh-pages branch.
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      # Base dependencies only: pdoc imports banners, and the dev extra would pull
+      # manim, which needs system libraries that the docs do not use.
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Render the guide
+        run: quarto render site
+
+      - name: Add the API reference
+        run: uv run --with pdoc pdoc --mermaid --math banners -o site/_site/api --docformat google
+
+      # --no-render publishes site/_site as it is, including api/.
+      - name: Publish to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          quarto publish gh-pages site --no-render --no-prompt --no-browser
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -91,3 +91,7 @@ tramp
 
 # Private templates and brand assets (logos, photos) — keep out of the public repo
 private/
+
+# Documentation site: rendered output and Quarto cache
+site/_site/
+site/.quarto/

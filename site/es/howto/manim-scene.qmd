@@ -1,0 +1,82 @@
+---
+title: "Una escena Manim paso a paso"
+description: "Escribe una escena de Manim que avance una idea por clic y se vea como parte de la slide."
+---
+
+Esta guía escribe una escena de Manim para una charla: pasos que siguen al
+expositor, movimiento corto y directo, y colores que combinan con la slide.
+
+## Un paso por idea
+
+`self.next_section()` inicia un paso nuevo. Con `Manim(..., interactive=True)`,
+cada paso espera un clic, así que el expositor decide cuándo aparece la idea
+siguiente:
+
+```python
+from banners import BLUE, Manim, Section
+from manim import DOWN, RIGHT, Arrow, FadeIn, GrowArrow, RoundedRectangle, Scene, VGroup, rate_functions
+from manim import Text as MText
+
+class Pipeline(Scene):
+    def construct(self):
+        nombres = ["Ingesta", "Limpieza", "Entrenamiento"]
+        cajas = VGroup(*[
+            VGroup(
+                RoundedRectangle(width=2.4, height=1, corner_radius=0.12,
+                                 color=BLUE.primary, fill_opacity=0.15),
+                MText(nombre, font_size=26, color=BLUE.text),
+            )
+            for nombre in nombres
+        ]).arrange(RIGHT, buff=1.2)
+        for i, caja in enumerate(cajas):
+            self.next_section(f"paso_{i}")
+            partes = [FadeIn(caja, shift=RIGHT * 0.15)]
+            if i:
+                partes.append(GrowArrow(Arrow(cajas[i - 1].get_right(), caja.get_left(),
+                                              buff=0.1, color=BLUE.muted)))
+            self.play(*partes, run_time=0.25, rate_func=rate_functions.ease_out_cubic)
+
+Section(title="Nuestro pipeline", content=[Manim(Pipeline, interactive=True)], palette=BLUE)
+```
+
+## Reglas para que una escena se presente bien
+
+- **Un cambio por clic.** Cada paso muestra una idea nueva; la audiencia la
+  lee mientras habla el expositor.
+- **Pasos cortos.** Entre 0,2 y 0,4 segundos por paso, con una curva que
+  desacelera al final (`rate_functions.ease_out_cubic`): el movimiento parte
+  rápido y se asienta. Las animaciones largas hacen esperar a la audiencia.
+- **Sin pausa al final.** Un paso termina cuando termina su movimiento; un
+  `self.wait()` al final solo retrasa el clic siguiente.
+- **Sin adornos.** Cada elemento en pantalla es parte de la explicación.
+- **Los colores de la slide.** No fijes `self.camera.background_color`:
+  banners dibuja la escena sobre el color del panel de la slide. Toma los
+  colores de las formas y los textos de la paleta, como `BLUE.primary` y
+  `BLUE.text` arriba.
+
+## Nombres que chocan con banners
+
+banners y Manim exportan ambos `Text`, y las constantes de color de Manim
+(como `BLUE`) tienen los mismos nombres que las paletas de banners. Importa
+las de Manim con otro nombre, como `from manim import Text as MText` arriba,
+para que un notebook de marimo no vea dos definiciones del mismo nombre.
+
+## Escenas que siguen cualquier paleta
+
+Una función que recibe `palette` y devuelve una clase `Scene` recibe de
+banners la paleta de la slide:
+
+```python
+from banners import Manim, Section
+from manim import Circle, Create, Scene
+
+def Punto(palette):
+    class _Punto(Scene):
+        def construct(self):
+            self.play(Create(Circle(color=palette.primary)), run_time=0.3)
+    return _Punto
+
+Section(title="Sigue a la slide", content=[Manim(Punto)])
+```
+
+`banners.scenes.PipelineScene` está construida así.

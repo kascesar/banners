@@ -1,0 +1,56 @@
+---
+title: "Caché y velocidad"
+description: "Dónde se guardan las animaciones dibujadas, cuándo se vuelven a dibujar y cómo mantener rápida una presentación."
+---
+
+Esta guía cubre la caché de renders de `Manim` y `FlowAnimation` y los ajustes
+que hacen que una presentación abra rápido.
+
+## Dónde vive la caché
+
+La primera vez que se ejecuta una celda con una animación, Manim la dibuja, lo
+que toma entre uno y varios segundos. banners guarda el resultado en
+
+```
+~/.cache/banners/manim/
+```
+
+y las ejecuciones siguientes lo leen de ahí de inmediato, también después de
+reiniciar marimo.
+
+## Cuándo se vuelve a dibujar una animación
+
+La clave de la caché incluye todo lo que cambia la imagen:
+
+- el código fuente de la escena (para una escena definida en una celda del
+  notebook, su código compilado), así que editar la escena la vuelve a
+  dibujar;
+- `quality`, `format` e `interactive`;
+- en `FlowAnimation`, los nodos, las conexiones y la dirección;
+- la paleta de la slide, así que la misma escena en una slide con otra paleta
+  es un render distinto.
+
+El código fuera de la escena que la escena lee al ejecutarse, como una
+variable global o un archivo de datos, no es parte de la clave. Después de
+cambiarlo, limpia la caché.
+
+## Limpiar la caché
+
+Borrar la carpeta es seguro; las animaciones se vuelven a dibujar cuando se
+necesitan:
+
+```bash
+rm -rf ~/.cache/banners/manim
+```
+
+## Mantener rápida una presentación
+
+- **Trabaja con `quality="low"`** y cambia a `"medium"` o `"high"` solo para la
+  versión final.
+- **Prefiere `interactive=True` o `format="mp4"` a los GIF largos.** Un GIF
+  guarda cada cuadro como imagen: unos segundos en alta calidad pueden pesar
+  decenas de megabytes y superar el límite de salida de marimo, que entonces
+  muestra "Your output is too large" en vez de la animación. Un MP4 pesa una
+  fracción de eso.
+- **Dibuja todo una vez antes de la charla**, para que cada animación salga de
+  la caché durante la presentación.
