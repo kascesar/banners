@@ -1,12 +1,12 @@
-"""Módulo de contenido para slides.
+"""Content elements for slides.
 
-Clases disponibles:
-    Text   — Texto en Markdown.
-    Image  — Imagen desde path, bytes o URL.
-    Graph  — Diagrama Mermaid.
-    Table  — Tabla desde un pandas DataFrame.
-    Plot   — Figura de matplotlib o plotly.
-    Manim  — Animación renderizada con Manim (requiere `banners[manim]`).
+Available classes:
+    Text   — Markdown text.
+    Image  — Image from a path, bytes or URL.
+    Graph  — Mermaid diagram.
+    Table  — Table from a pandas DataFrame.
+    Plot   — matplotlib or plotly figure.
+    Manim  — Animation rendered with Manim (requires `marimo-banners[manim]`).
 """
 
 from .animated_graph import AnimatedGraph

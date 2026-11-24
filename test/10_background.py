@@ -1,5 +1,5 @@
 """
-10_background.py — background: color sólido, gradiente e imagen de fondo.
+10_background.py — background: solid color, gradient and background image.
 Run with: uv run marimo edit test/10_background.py
 """
 
@@ -24,10 +24,10 @@ def _():
 @app.cell
 def _(mo):
     mo.md(r"""
-    # `background` — Fondo por diapositiva
+    # `background` — Per-slide background
 
-    El parámetro `background` acepta un objeto `Background` que pinta el fondo
-    del contenedor completo del slide (banner + contenido).
+    The `background` parameter takes a `Background` object that paints the
+    background of the whole slide container (banner + content).
 
     ```python
     from banners import Background
@@ -37,12 +37,12 @@ def _(mo):
     Cover(title="Demo", background=Background.image("assets/photo.jpg"))
     ```
 
-    ## Tres modos
+    ## Three modes
 
-    | Método | Parámetros clave |
+    | Method | Key parameters |
     |--------|-----------------|
-    | `Background.color(c)` | color CSS: hex, rgb, nombre |
-    | `Background.gradient(start, end, *, mid, angle)` | 2 o 3 stops, ángulo en grados |
+    | `Background.color(c)` | CSS color: hex, rgb, name |
+    | `Background.gradient(start, end, *, mid, angle)` | 2 or 3 stops, angle in degrees |
     | `Background.image(src, *, overlay)` | path / URL / bytes; overlay rgba |
     """)
     return
@@ -124,7 +124,7 @@ def _(Image, Text):
 @app.cell
 def _(mo):
     mo.md("""
-    ## Color sólido
+    ## Solid color
     """)
     return
 
@@ -132,7 +132,7 @@ def _(mo):
 @app.cell
 def _(Background, Cover, content):
     Cover(
-        title="Color sólido",
+        title="Solid color",
         subtitle="background=Background.color('#0f172a')",
         background=Background.color("#0f172a"),
         content=content
@@ -143,8 +143,8 @@ def _(Background, Cover, content):
 @app.cell
 def _(Background, Section, content):
     Section(
-        title="Color sólido en Section",
-        subtitle="Fondo oscuro neutro",
+        title="Solid color on Section",
+        subtitle="Neutral dark background",
         background=Background.color("#111827"),
         content=content,
         content_kind="success"
@@ -155,7 +155,7 @@ def _(Background, Section, content):
 @app.cell
 def _(mo):
     mo.md("""
-    ## Gradiente personalizado
+    ## Custom gradient
     """)
     return
 
@@ -163,7 +163,7 @@ def _(mo):
 @app.cell
 def _(Background, Cover, content):
     Cover(
-        title="Gradiente 2 colores",
+        title="Two-color gradient",
         subtitle="angle=135 (default)",
         background=Background.gradient("#0d1b2a", "#4a1a6e"),
         content=content,
@@ -174,8 +174,8 @@ def _(Background, Cover, content):
 @app.cell
 def _(Background, Intro, content):
     Intro(
-        title="Gradiente 3 colores",
-        subtitle="Con mid-stop a 50%",
+        title="Three-color gradient",
+        subtitle="With a mid stop at 50%",
         background=Background.gradient("#0d1b2a", "#1b4332", mid="#1a3a2a", angle=45),
         content=content,
     ).render()
@@ -185,7 +185,7 @@ def _(Background, Intro, content):
 @app.cell
 def _(Background, Section, content):
     Section(
-        title="Gradiente horizontal",
+        title="Horizontal gradient",
         subtitle="angle=90",
         background=Background.gradient("#1a0533", "#0d1b4a", angle=90),
         content=content,
@@ -196,7 +196,7 @@ def _(Background, Section, content):
 @app.cell
 def _(mo):
     mo.md("""
-    ## Imagen de fondo
+    ## Background image
     """)
     return
 
@@ -204,8 +204,8 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md("""
-    > Para probar con imagen local, reemplaza `IMAGE_PATH` con la ruta a un archivo
-    > `.jpg` o `.png` en tu sistema.
+    > To test with a local image, replace `IMAGE_PATH` with the path to a `.jpg`
+    > or `.png` file on your system.
     """)
     return
 
@@ -214,8 +214,8 @@ def _(mo):
 def _(Background, Cover, IMAGE_PATH, content):
 
     Cover(
-        title="Imagen local",
-        subtitle="Overlay por defecto: rgba(0,0,0,0.55)",
+        title="Local image",
+        subtitle="Default overlay: rgba(0,0,0,0.55)",
         background=Background.image(IMAGE_PATH),
         content=content,
     ).render()
@@ -225,7 +225,7 @@ def _(Background, Cover, IMAGE_PATH, content):
 @app.cell
 def _(Background, Cover, IMAGE_PATH, content):
     Cover(
-        title="Imagen — overlay más oscuro",
+        title="Image — darker overlay",
         subtitle="overlay='rgba(.5,0,.5,0.2)'",
         background=Background.image(IMAGE_PATH, overlay="rgba(.5,0,.5,0.2)"),
         content=content
@@ -236,8 +236,8 @@ def _(Background, Cover, IMAGE_PATH, content):
 @app.cell
 def _(Background, Closing, IMAGE_PATH, content):
     Closing(
-        title="Sin overlay",
-        subtitle="overlay=None — imagen a full",
+        title="No overlay",
+        subtitle="overlay=None — full image",
         background=Background.image(IMAGE_PATH, overlay=None),
         content=content,
     ).render()
@@ -247,7 +247,7 @@ def _(Background, Closing, IMAGE_PATH, content):
 @app.cell
 def _(mo):
     mo.md("""
-    ## Sin `background` — sin regresión
+    ## No `background` — no regression
     """)
     return
 
@@ -255,8 +255,8 @@ def _(mo):
 @app.cell
 def _(Cover, PURPLE, content):
     Cover(
-        title="Palette por defecto",
-        subtitle="Sin background — usa palette normal",
+        title="Default palette",
+        subtitle="No background — uses the regular palette",
         palette=PURPLE,
         content=content,
     ).render()
@@ -266,8 +266,8 @@ def _(Cover, PURPLE, content):
 @app.cell
 def _(Background, Section, content):
     Section(
-        title="Section sin background",
-        subtitle="Comportamiento original sin cambios",
+        title="Section without background",
+        subtitle="Original behavior unchanged",
         content=content,
         background=Background.color("#B3AFC7")
     ).render()

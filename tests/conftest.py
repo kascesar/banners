@@ -1,10 +1,10 @@
-"""Fixtures comunes de la suite de pruebas unitarias.
+"""Shared fixtures for the unit test suite.
 
-Requisito previo: instalar el extra `dev` (`uv sync --extra dev`).
-Este módulo define fixtures que pytest aplica a todas las pruebas de `tests/`.
-El estado global de `banners.config` se restaura después de cada prueba, de modo
-que una prueba que llama a `configure()` no altera a las siguientes.
-Uso: `uv run pytest`.
+Prerequisite: install the `dev` extra (`uv sync --extra dev`).
+This module defines fixtures that pytest applies to every test in `tests/`.
+The global state of `banners.config` is restored after each test, so a test
+that calls `configure()` does not affect the ones that follow.
+Usage: `make test`.
 """
 
 import copy
@@ -16,14 +16,14 @@ from banners import config
 
 @pytest.fixture(autouse=True)
 def restore_config_state():
-    """Guarda `banners.config._state` antes de cada prueba y lo restaura al final.
+    """Save `banners.config._state` before each test and restore it afterwards.
 
-    `_state` es un diccionario global del módulo, y `configure()` y `Section`
-    lo modifican. Sin esta restauración el resultado de una prueba dependería del
-    orden en que se ejecutan las anteriores.
+    `_state` is a module-level dictionary that `configure()` and `Section`
+    modify. Without this restore, the result of a test would depend on the
+    order in which the previous tests ran.
 
     Returns:
-        Generador que entrega el control a la prueba y luego restaura el estado.
+        A generator that hands control to the test and then restores the state.
     """
     snapshot = copy.deepcopy(config._state)
     yield

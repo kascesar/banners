@@ -1,16 +1,16 @@
-# Publica marimo-banners en PyPI cada vez que se sube un tag `vX.Y.Z`.
+# Publishes marimo-banners to PyPI every time a `vX.Y.Z` tag is pushed.
 #
-# La publicación usa Trusted Publishing: PyPI confía en el token OIDC que GitHub
-# emite para este workflow, así que no hay tokens de API guardados en secrets.
-# Para que funcione, el dueño del proyecto en PyPI debe registrar una vez el
-# publicador en https://pypi.org/manage/project/marimo-banners/settings/publishing/
-# con estos datos:
+# Publishing uses Trusted Publishing: PyPI trusts the OIDC token that GitHub
+# issues for this workflow, so no API tokens are stored in secrets.
+# For this to work, the project owner on PyPI registers the publisher once at
+# https://pypi.org/manage/project/marimo-banners/settings/publishing/
+# with these values:
 #   Owner: kascesar · Repository: banners · Workflow: release.yml · Environment: pypi
 #
-# Los tags con `rc` (por ejemplo `v0.2.3rc1`) se publican en TestPyPI en vez de
-# PyPI. Para eso se registra el mismo publicador, con los mismos datos, en
+# Tags containing `rc` (for example `v0.2.3rc1`) are published to TestPyPI instead
+# of PyPI. For that, the same publisher is registered, with the same values, at
 # https://test.pypi.org/manage/project/marimo-banners/settings/publishing/
-# (si el proyecto aún no existe en TestPyPI, se registra como "pending publisher").
+# (if the project does not exist on TestPyPI yet, register it as a "pending publisher").
 name: release
 
 on:
@@ -20,11 +20,11 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    # Entorno de GitHub con el que se registra el publicador en PyPI; GitHub lo
-    # crea automáticamente en la primera ejecución si no existe.
+    # GitHub environment the PyPI publisher is registered with; GitHub creates it
+    # automatically on the first run if it does not exist.
     environment: pypi
     permissions:
-      # Necesario para que GitHub emita el token OIDC que usa Trusted Publishing.
+      # Required for GitHub to issue the OIDC token used by Trusted Publishing.
       id-token: write
       contents: read
     steps:
@@ -32,24 +32,24 @@ jobs:
 
       - uses: astral-sh/setup-uv@v6
 
-      # El tag sin la `v` debe coincidir con `project.version` de pyproject.toml;
-      # si no coincide, el job falla antes de construir nada.
-      - name: Verificar que el tag coincide con la versión
+      # The tag without the `v` must match `project.version` in pyproject.toml;
+      # otherwise the job fails before building anything.
+      - name: Check that the tag matches the version
         run: |
           tag="${GITHUB_REF_NAME#v}"
           version="$(uv version --short)"
           if [ "$tag" != "$version" ]; then
-            echo "::error::El tag $GITHUB_REF_NAME no coincide con la versión $version de pyproject.toml"
+            echo "::error::Tag $GITHUB_REF_NAME does not match version $version in pyproject.toml"
             exit 1
           fi
 
-      - name: Construir sdist y wheel
+      - name: Build sdist and wheel
         run: uv build
 
-      - name: Publicar en TestPyPI
+      - name: Publish to TestPyPI
         if: contains(github.ref_name, 'rc')
         run: uv publish --trusted-publishing always --publish-url https://test.pypi.org/legacy/
 
-      - name: Publicar en PyPI
+      - name: Publish to PyPI
         if: ${{ !contains(github.ref_name, 'rc') }}
         run: uv publish --trusted-publishing always

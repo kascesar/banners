@@ -4,6 +4,7 @@ Status: `[ ]` pending · `[x]` done · `[!]` blocked (reason written below it)
 
 Rules for Claude Code are in `CLAUDE.md` → "Working by milestones".
 One milestone per session, one branch per milestone.
+The implementation plan of each milestone is saved in `plans/<id>-<slug>.md`.
 
 ---
 
@@ -71,7 +72,7 @@ Create a pytest suite in `tests/` (not `test/`, which holds marimo notebooks).
 - Locally, the exact commands used by the workflow succeed.
 - After push, the workflow run is green (César verifies on GitHub).
 
-Pendiente de verificación de César: que el workflow corra verde tras el push.
+Verified: the CI workflow runs green on GitHub (Python 3.10 and 3.12).
 
 ---
 
@@ -90,15 +91,15 @@ Make sure every notebook in `test/` and `example/` at least executes without err
 - `uv run pytest tests/test_notebooks.py` → green for all non-manim notebooks.
 - `uv run pytest -m manim` → green locally on César's Fedora (with system libs installed).
 
-Pendiente de verificación de César: uv run pytest -m manim en su Fedora con las libs del sistema
-(`example/ondas_electromagneticas.py` falla con `ValueError: latex error converting to dvi`
-porque falta la clase LaTeX `standalone.cls`, que usa la plantilla por defecto de `MathTex`;
-`kpsewhich standalone.cls` no encuentra nada y `dvisvgm` tampoco está en el PATH.
-`test/08_manim.py` y `test/09_flow_animation.py` pasan; `example/showcase.py` queda xfail
-por el error anotado en el Backlog).
+Pending verification by César: `uv run pytest -m manim` on César's Fedora machine with the system libraries
+(`example/ondas_electromagneticas.py` fails with `ValueError: latex error converting to dvi`
+because the LaTeX class `standalone.cls`, used by the default `MathTex` template, is missing;
+`kpsewhich standalone.cls` finds nothing and `dvisvgm` is not on the PATH either.
+`test/08_manim.py` and `test/09_flow_animation.py` pass; `example/showcase.py` stays xfail
+because of the error recorded in the Backlog).
 
-La prueba `tests/test_notebooks.py` entra al CI de M3 sin cambios en el workflow: el CI
-ejecuta `uv run pytest` y `addopts = "-m 'not manim'"` deja fuera los notebooks con manim.
+`tests/test_notebooks.py` joins the M3 CI without workflow changes: the CI runs
+`uv run pytest` and `addopts = "-m 'not manim'"` leaves the manim notebooks out.
 
 ---
 
@@ -115,7 +116,7 @@ ejecuta `uv run pytest` y `addopts = "-m 'not manim'"` deja fuera los notebooks 
 - César configures the Trusted Publisher on PyPI and a test tag publishes
   (can be tested first against TestPyPI).
 
-Pendiente de verificación de César: configurar el Trusted Publisher en PyPI (y TestPyPI si aplica) y publicar con un tag de prueba.
+Verified on 2026-11-23: the Trusted Publisher is registered on PyPI and the `v0.4.0` tag published 0.4.0. TestPyPI (`rc` tags) has not been tried yet.
 
 ---
 
@@ -123,36 +124,39 @@ Pendiente de verificación de César: configurar el Trusted Publisher en PyPI (y
 
 Unplanned items found while working. Promote to a milestone when relevant.
 
-- `banners/scenes/pipeline.py` y otros mensajes de `ImportError` sugieren `uv pip install 'banners[manim]'`,
-  pero el paquete en PyPI se llama `marimo-banners`.
-- `AnimatedGraph._parse` pierde la etiqueta del nodo destino de una arista: `A --> B[Validar]`
-  deja `B` con etiqueta `"B"`. `_edge_re` no está anclado al final de la línea y el grupo
-  perezoso de la etiqueta acepta vacío. Se nota en `test/05_animated_graph.py` (`D[Load]`
-  aparece como "D"). Prueba: `tests/test_animated_graph.py::test_parse_destination_label` (xfail).
-- `background._parse_first_color` busca cada formato en todo el string en orden fijo
-  (`#rrggbbaa`, `#rrggbb`, `#rgba`, `#rgb`, `rgb()`), así que en un gradiente con formatos
-  mezclados no gana el primer color: `linear-gradient(#fff, #000000)` da negro y el texto
-  automático queda blanco sobre un inicio blanco. Prueba:
+- `banners/scenes/pipeline.py` and other `ImportError` messages suggest `uv pip install 'banners[manim]'`,
+  but the package on PyPI is called `marimo-banners`.
+- `AnimatedGraph._parse` loses the label of an edge destination node: `A --> B[Validate]`
+  leaves `B` labeled `"B"`. `_edge_re` is not anchored to the end of the line and the lazy
+  label group accepts an empty match. It shows in `test/05_animated_graph.py` (`D[Load]`
+  appears as "D"). Test: `tests/test_animated_graph.py::test_parse_destination_label` (xfail).
+- `background._parse_first_color` searches each format over the whole string in a fixed order
+  (`#rrggbbaa`, `#rrggbb`, `#rgba`, `#rgb`, `rgb()`), so in a gradient with mixed formats the
+  first color does not win: `linear-gradient(#fff, #000000)` yields black and the automatic
+  text turns white over a white start. Test:
   `tests/test_background.py::test_parse_first_color_gradient_mixed_formats_first_wins` (xfail).
-- `test/04_graph.py` y `test/05_animated_graph.py` no compilan (`SyntaxError`): la celda de
-  documentación usa `mo.md(r"""...""")` y el ejemplo de código de adentro contiene otra
-  triple comilla (`Graph("""...`), que cierra el string antes de tiempo. Prueba:
+- `test/04_graph.py` and `test/05_animated_graph.py` do not compile (`SyntaxError`): the
+  documentation cell uses `mo.md(r"""...""")` and the code example inside it contains another
+  triple quote (`Graph("""...`), which closes the string too early. Test:
   `tests/test_notebooks.py` (xfail).
-- `test/07_plot.py` no se ejecuta: varias celdas importan `matplotlib.pyplot as plt` y marimo
-  lanza `MultipleDefinitionError`. Prueba: `tests/test_notebooks.py` (xfail).
-- `example/showcase.py` falla con `NameError: name 'MathTex' is not defined`: la celda de
-  `BasicScene` recibe `MathTex`, `FadeOut` y `MW` como parámetros, pero ninguna celda los
-  define (la celda de imports solo trae `Scene`, `Text as MT`, `Write`, `FadeIn`, `Create`,
-  `Line`, `LEFT`, `RIGHT` y `UP`). Prueba: `tests/test_notebooks.py` (xfail, marca `manim`).
-- `Slide._icon_src` desactiva la verificación TLS (`check_hostname = False`,
-  `verify_mode = ssl.CERT_NONE`) al descargar íconos e imágenes por URL, así que acepta
-  certificados inválidos o suplantados. Afecta a `icon=` y a `Background.image(url)`.
-- Regenerar los GIFs del README (`demo-1-slide-types.gif`, `demo-2-content-types.gif`,
-  `demo-3-backgrounds.gif`) con el diseño editorial de la 0.3; hoy muestran el estilo 0.2
-  (el README lo advierte en una nota).
-- Los textos de los notebooks de `test/` describen el diseño anterior (por ejemplo,
-  `test/01_intro.py` dice "Compact gradient banner" y "Dark panel with left border").
-- (Opcional) `configure(font=...)` para definir una tipografía corporativa en todas las slides.
+- `test/07_plot.py` does not run: several cells import `matplotlib.pyplot as plt` and marimo
+  raises `MultipleDefinitionError`. Test: `tests/test_notebooks.py` (xfail).
+- `example/showcase.py` fails with `NameError: name 'MathTex' is not defined`: the
+  `BasicScene` cell takes `MathTex`, `FadeOut` and `MW` as parameters, but no cell defines
+  them (the imports cell only brings `Scene`, `Text as MT`, `Write`, `FadeIn`, `Create`,
+  `Line`, `LEFT`, `RIGHT` and `UP`). Test: `tests/test_notebooks.py` (xfail, `manim` marker).
+- `Slide._icon_src` disables TLS verification (`check_hostname = False`,
+  `verify_mode = ssl.CERT_NONE`) when downloading icons and images by URL, so it accepts
+  invalid or spoofed certificates. It affects `icon=` and `Background.image(url)`.
+- Regenerate the README GIFs (`demo-1-slide-types.gif`, `demo-2-content-types.gif`,
+  `demo-3-backgrounds.gif`) with the 0.3 editorial design; today they show the 0.2 style
+  (the README warns about it in a note).
+- The texts of the `test/` notebooks describe the previous design (for example,
+  `test/01_intro.py` says "Compact gradient banner" and "Dark panel with left border").
+- A local `make publish` would put `.claude/settings.local.json` in the sdist: hatch only
+  reads the project `.gitignore`, not the user's global git ignore file. The CI release
+  builds from a clean checkout and is not affected. Fix: an `exclude` rule in `pyproject.toml`.
+- (Optional) `configure(font=...)` to set a corporate typeface on every slide.
 
 ---
 
@@ -160,9 +164,9 @@ Unplanned items found while working. Promote to a milestone when relevant.
 
 | Date | Milestone | Branch | Summary |
 |------|-----------|--------|---------|
-| 2026-11-23 | M1 | `milestone/m1-repo-hygiene` | Quita `layout_file` roto de `test/08_manim.py`, borra `layouts/test.slides.json` y `README.org`; agrega ruff y corrige sus hallazgos. |
-| 2026-11-23 | M2 | `milestone/m2-unit-tests` | Suite pytest en `tests/` (64 pruebas + 2 xfail por errores anotados en el Backlog), fixture de `_state`, marca `manim`. |
-| 2026-11-23 | M3 | `milestone/m3-ci` | Workflow `.github/workflows/ci.yml` (Python 3.10 y 3.12, `uv sync --locked` sin extras, `ruff check` y `pytest`) y badge de CI en el README. |
-| 2026-11-23 | M4 | `milestone/m4-notebook-smoke` | Prueba de humo `tests/test_notebooks.py` que ejecuta los 12 notebooks (4 con marca `manim`, 4 xfail por errores anotados en el Backlog). |
-| 2026-11-23 | M5 | `milestone/m5-release` | Workflow `release.yml` que publica en PyPI con Trusted Publishing al subir un tag `v*` (TestPyPI si el tag contiene `rc`) y falla si el tag no coincide con la versión; pasos de release en `CLAUDE.md`. |
-| 2026-11-23 | — | `design/editorial` | Rediseño editorial de las slides (patch de César) más correcciones visuales: íconos sin superposición, contraste en fondos oscuros, tamaño del resumen de `Intro`; docstrings, README con "Upgrading from 0.2" y versión 0.3.0. |
+| 2026-11-23 | M1 | `milestone/m1-repo-hygiene` | Removes the broken `layout_file` from `test/08_manim.py`, deletes `layouts/test.slides.json` and `README.org`; adds ruff and fixes its findings. |
+| 2026-11-23 | M2 | `milestone/m2-unit-tests` | pytest suite in `tests/` (64 tests + 2 xfail for errors recorded in the Backlog), `_state` fixture, `manim` marker. |
+| 2026-11-23 | M3 | `milestone/m3-ci` | Workflow `.github/workflows/ci.yml` (Python 3.10 and 3.12, `uv sync --locked` without extras, `ruff check` and `pytest`) and CI badge in the README. |
+| 2026-11-23 | M4 | `milestone/m4-notebook-smoke` | Smoke test `tests/test_notebooks.py` that runs the 12 notebooks (4 with the `manim` marker, 4 xfail for errors recorded in the Backlog). |
+| 2026-11-23 | M5 | `milestone/m5-release` | Workflow `release.yml` that publishes to PyPI with Trusted Publishing when a `v*` tag is pushed (TestPyPI if the tag contains `rc`) and fails if the tag does not match the version; release steps in `CLAUDE.md`. |
+| 2026-11-23 | — | `design/editorial` | Editorial redesign of the slides (César's patch) plus visual fixes: icons without overlap, contrast on dark backgrounds, `Intro` summary size; docstrings, README with "Upgrading from 0.2" and version 0.3.0. |

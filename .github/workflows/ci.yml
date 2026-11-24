@@ -1,5 +1,5 @@
-# Integración continua: ejecuta el linter (ruff) y las pruebas unitarias (pytest)
-# en cada push y en cada pull request.
+# Continuous integration: runs the linter (ruff) and the unit tests (pytest)
+# on every push and every pull request.
 name: CI
 
 on:
@@ -10,32 +10,32 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
-      # false: si falla una versión de Python, las demás siguen corriendo y se ve
-      # el resultado de cada una.
+      # false: if one Python version fails, the others keep running and each
+      # result is reported.
       fail-fast: false
       matrix:
-        # Versión mínima soportada (requires-python = ">=3.10") y una reciente.
+        # Minimum supported version (requires-python = ">=3.10") and a recent one.
         python-version: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
-      # Instala uv y fija la versión de Python de la matriz para los pasos siguientes.
+      # Installs uv and pins the matrix Python version for the following steps.
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Instala solo las dependencias base desde uv.lock, sin extras. El extra `dev`
-      # incluye manim, que necesita librerías del sistema (cairo, pango) y no se usa
-      # aquí. --locked falla si uv.lock no corresponde a pyproject.toml.
-      - name: Instalar dependencias
+      # Installs only the base dependencies from uv.lock, without extras. The `dev`
+      # extra includes manim, which needs system libraries (cairo, pango) and is not
+      # used here. --locked fails if uv.lock does not match pyproject.toml.
+      - name: Install dependencies
         run: uv sync --locked
 
-      # ruff se agrega solo para este comando con --with, sin tocar uv.lock.
+      # ruff is added for this command only with --with, without touching uv.lock.
       - name: Ruff
         run: uv run --with ruff ruff check banners tests
 
-      # pytest se agrega igual que ruff. Omite las pruebas marcadas `manim`
-      # (addopts en pyproject.toml). pandas no es dependencia de la librería, pero
-      # los notebooks de tests/test_notebooks.py lo importan (p. ej. test/06_table.py).
+      # pytest is added the same way as ruff. Tests marked `manim` are skipped
+      # (addopts in pyproject.toml). pandas is not a library dependency, but the
+      # notebooks run by tests/test_notebooks.py import it (e.g. test/06_table.py).
       - name: Pytest
         run: uv run --with pytest --with pandas pytest

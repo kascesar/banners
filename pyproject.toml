@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "marimo-banners"
 version = "0.4.0"
-description = "Presentaciones composables para marimo"
+description = "Composable presentations for marimo"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -24,29 +24,29 @@ Repository = "https://github.com/kascesar/banners"
 [tool.hatch.build.targets.wheel]
 packages = ["banners"]
 
-# Linter. Se ejecuta con `uv run ruff check banners`.
+# Linter. Run it with `make lint`.
 [tool.ruff]
-# Largo máximo de línea; las líneas más largas se reportan como error.
+# Maximum line length; longer lines are reported as errors.
 line-length = 100
-# Versión mínima de Python soportada; ruff no sugiere sintaxis más nueva que esta.
+# Minimum supported Python version; ruff does not suggest syntax newer than this.
 target-version = "py310"
 
 [tool.ruff.lint]
-# Reglas desactivadas. RUF022 ordenaría alfabéticamente los `__all__`, pero pdoc
-# usa ese orden para la documentación y los `__all__` están agrupados a propósito.
+# Disabled rules. RUF022 would sort `__all__` alphabetically, but pdoc uses that
+# order for the documentation and `__all__` is grouped on purpose.
 ignore = ["RUF022"]
 
 [tool.ruff.lint.isort]
-# true: `from x import a, b as c` queda en un solo bloque; false: ruff separa cada
-# import con alias en su propio `from x import (...)`.
+# true: `from x import a, b as c` stays in one statement; false: ruff splits every
+# aliased import into its own `from x import (...)`.
 combine-as-imports = true
 
-# Pruebas unitarias. Se ejecutan con `uv run pytest`.
+# Unit tests. Run them with `make test`.
 [tool.pytest.ini_options]
-# Carpeta con las pruebas pytest; `test/` contiene notebooks de marimo y no se recorre.
+# Folder with the pytest tests; `test/` holds marimo notebooks and is not collected.
 testpaths = ["tests"]
-# "-m 'not manim'" omite por defecto las pruebas que necesitan manim y las librerías
-# del sistema; `uv run pytest -m manim` ejecuta solo esas.
+# "-m 'not manim'" skips by default the tests that need manim and the system
+# libraries; `uv run pytest -m manim` runs only those.
 addopts = "-m 'not manim'"
-# Marcas declaradas; pytest falla con una marca no listada aquí.
-markers = ["manim: requiere manim y las librerías del sistema (cairo, pango, ffmpeg)"]
+# Declared markers; pytest fails on a marker not listed here.
+markers = ["manim: needs manim and the system libraries (cairo, pango, ffmpeg)"]
