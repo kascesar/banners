@@ -327,25 +327,62 @@ research below.
 
 ## [ ] M9 — Short, striking README
 
-**Needs a brainstorming pass before planning**: César finds the current README
-(408 lines) confusing and disordered, and says it does not show off what
-banners really does. He wants it much shorter and much more striking. Which
-features lead, and what "striking" looks like, are still open.
+The README is the first thing people see on GitHub and PyPI. Its job is to make
+them want to try banners, not to document it: the how-to guide moves to a
+GitHub Pages site (M11). The current README (445 lines, three GIFs in the 0.2
+style) reads as a reference manual.
 
-In scope:
-- Rewrite `README.md` around the 0.5 model from M6 (Template = Palette + Theme
-  + layouts) and the M8 animations; detailed API reference moves to the pdoc
-  docs instead of the README.
-- Regenerate the demo GIFs (`demo-1-slide-types.gif`, `demo-2-content-types.gif`,
-  `demo-3-backgrounds.gif`), which still show the 0.2 style.
-- Update the texts of the `test/` notebooks, which describe the old design.
-- No organization brand assets in the README or the GIFs (public repository).
+Design (approved by César, 2026-11-24):
+- **Short.** A one-line pitch, install, a quick start of a few lines, the two
+  galleries below, and links to the docs. No API reference, no upgrade notes
+  beyond one line pointing to the changelog section of the docs.
+- **Template gallery, 2×3.** The same slide (a `Section` with a title, three
+  bullets and a small matplotlib chart) rendered with the six public templates:
+  default `Template()`, `EXECUTIVE`, `INSTITUTIONAL`, `COSMOS`, `VIBRANT`,
+  `TERRA`. `BECH` is never shown (it imitates a real bank).
+- **Showcase GIFs, one per row (1×3).** One GIF per part of
+  `example/showcase.py` (01 slide types, 02 content types, 03 backgrounds).
+  Hard cuts between slides, no transitions, about 1.5 s per slide, looping.
+- **Generated, not hand-made.** A script renders the slides in headless
+  Chromium (Playwright) and writes PNGs and GIFs to `media/`; `make
+  readme-images` runs it. The old root GIFs are deleted.
+- **Absolute image URLs** (`raw.githubusercontent.com/.../main/media/...`),
+  because PyPI does not resolve relative paths.
+- No organization brand assets in the README or the images.
 
-**Acceptance criteria (provisional)**
-- Every code example in the README runs against the current API (checked by a
-  test that extracts and executes the README code blocks).
-- The GIFs show the 0.5 look.
+Out of scope: the texts of the `test/` notebooks and the detailed usage guide
+(both go to M11).
+
+**Acceptance criteria**
+- `README.md` is at most 120 lines.
+- Every Python code block in the README runs against the current API, checked
+  by a test that extracts and executes them.
+- `make readme-images` regenerates the 6 template PNGs and the 3 GIFs; every
+  GIF has hard cuts (no frame blends two slides).
 - César approves the README rendered on GitHub.
+
+---
+
+## [ ] M10 — Templates for open-source projects
+
+Presets themed after open-source projects (Debian first; candidates: Fedora,
+Ubuntu, marimo, NumPy, pandas, matplotlib, Hydra), with the project name and
+its logo linked from an official or Wikimedia Commons URL, never stored in the
+repo. **Needs research before planning**: each project's trademark or logo
+policy decides whether a preset may use its name, colors and logo. Debian's
+"Open Use Logo" has a free license; Fedora (Red Hat), Ubuntu (Canonical) and
+Hydra (Meta) are trademarks with restrictive policies; the others are
+unverified. Only projects whose policy allows it get a preset.
+
+---
+
+## [ ] M11 — Usage guide on GitHub Pages
+
+A GitHub Pages site with the detailed guide that leaves the README in M9:
+installation, slides, content elements, palettes, themes, templates,
+backgrounds, animations, and the API reference (pdoc). Includes rewriting the
+texts of the `test/` notebooks, which describe the old design. Needs a
+brainstorming pass before planning.
 
 ---
 
@@ -368,7 +405,7 @@ Unplanned items found while working. Promote to a milestone when relevant.
   them, so the values are silently ignored. Either draw them or remove the parameters.
 - `Closing` stats values use a fixed `font-weight:700` instead of `Theme.title_weight`.
 - `test/01_intro.py` and `example/showcase.py` prose still describes the removed `icon`
-  parameter and the `start`/`mid`/`end` palette (M9 rewrites the notebook texts).
+  parameter and the `start`/`mid`/`end` palette (M11 rewrites the notebook texts).
 - A local `make publish` would put `.claude/settings.local.json` in the sdist: hatch only
   reads the project `.gitignore`, not the user's global git ignore file. The CI release
   builds from a clean checkout and is not affected. Fix: an `exclude` rule in `pyproject.toml`.
