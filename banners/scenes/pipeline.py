@@ -1,11 +1,13 @@
 """PipelineScene — animated data pipeline diagram for Manim."""
 
 
-def PipelineScene():
+def PipelineScene(palette=None):
     """Return a Manim Scene that builds a data pipeline step by step.
 
     Each `next_section()` call marks a click-advance point when used with
-    `Manim(PipelineScene, interactive=True)`.
+    `Manim(PipelineScene, interactive=True)`. On a slide, `Manim` passes the
+    slide palette; every click is one 0.25 s ease-out entrance, like
+    `FlowAnimation`.
 
     Stages rendered in sequence:
     1. Raw node appears
@@ -14,6 +16,15 @@ def PipelineScene():
     4. Join node merging both branches
     5. Load node + final arrow
     6. Status labels appear on each node
+
+    Args:
+        palette: Colors of the scene: stages cycle `section_colors` (else
+            `primary` and `secondary`), names use `text`, sublabels and arrows
+            `muted`. `None` uses the default `Palette()`. The background is
+            set by `Manim` (`palette.panel`).
+
+    Returns:
+        A `Scene` subclass with 7 sections: the title and 6 stages.
 
     Requires `manim` to be installed:
     ```bash
@@ -28,110 +39,94 @@ def PipelineScene():
         Manim(PipelineScene, interactive=True).render()
         ```
     """
+
     try:
         from manim import (
-            BLUE,
             DOWN,
-            GRAY,
             LEFT,
-            ORANGE,
             ORIGIN,
             RIGHT,
             UP,
-            WHITE,
-            YELLOW,
             Arrow,
-            Create,
             FadeIn,
             GrowArrow,
-            ManimColor,
             RoundedRectangle,
             Scene,
             Text,
             VGroup,
-            Write,
+            rate_functions,
         )
     except ImportError as e:
-        raise ImportError("manim is required. Run: uv pip install 'banners[manim]'") from e
+        raise ImportError("manim is required. Run: uv pip install 'marimo-banners[manim]'") from e
 
-    ACCENT   = ManimColor("#ea580c")
-    NODE_BG  = ManimColor("#1c1c1c")
-    OK_COLOR = ManimColor("#22c55e")
+    from banners.content.flow_animation import SHIFT, STEP_TIME, node_colors
+    from banners.palette import Palette
 
-    def make_node(label: str, sublabel: str = "", color=WHITE, width=2.4, height=0.75):
+    pal = palette or Palette()
+    raw_c, val_c, tr_c, join_c, load_c = node_colors(pal, 5)
+
+    def make_node(label: str, sublabel: str, color, width=2.4, height=0.75):
+        """Build one stage: a tinted rounded box with its name and sublabel."""
         box = RoundedRectangle(
             corner_radius=0.12, width=width, height=height,
-            fill_color=NODE_BG, fill_opacity=1,
+            fill_color=color, fill_opacity=0.15,
             stroke_color=color, stroke_width=2.5,
         )
-        txt = Text(label, font_size=22, color=color)
-        group = VGroup(box, txt)
-        if sublabel:
-            sub = Text(sublabel, font_size=14, color=GRAY)
-            sub.next_to(txt, DOWN, buff=0.05)
-            group.add(sub)
+        txt = Text(label, font_size=22, color=pal.text, weight="BOLD")
+        sub = Text(sublabel, font_size=14, color=pal.muted)
+        sub.next_to(txt, DOWN, buff=0.05)
+        group = VGroup(box, VGroup(txt, sub).move_to(box))
         group.move_to(ORIGIN)
         return group
 
+    def arrow(start, end):
+        """Connector between two stages."""
+        return Arrow(start, end, buff=0.1, color=pal.muted, stroke_width=2)
+
     class _PipelineScene(Scene):
+        def step(self, *animations):
+            """Play one click: a single short ease-out animation group."""
+            self.play(*animations, run_time=STEP_TIME, rate_func=rate_functions.ease_out_cubic)
+
         def construct(self):
-            title = Text("Data Pipeline", font_size=32, color=ACCENT)
+            title = Text("Data Pipeline", font_size=32, color=pal.primary, weight="BOLD")
             title.to_edge(UP, buff=0.3)
-            self.play(FadeIn(title))
+            self.step(FadeIn(title, shift=DOWN * SHIFT))
 
-            # ── Step 1: Raw ────────────────────────────────────────────────
             self.next_section("raw")
-            raw = make_node("Raw Data", "S3 bucket", color=WHITE)
-            raw.shift(LEFT * 4.5)
-            self.play(Create(raw))
+            raw = make_node("Raw Data", "S3 bucket", raw_c).shift(LEFT * 4.5)
+            self.step(FadeIn(raw, shift=RIGHT * SHIFT))
 
-            # ── Step 2: Validate ───────────────────────────────────────────
             self.next_section("validate")
-            val = make_node("Validate", "schema + nulls", color=YELLOW)
-            val.shift(LEFT * 1.8)
-            a1 = Arrow(raw.get_right(), val.get_left(), buff=0.1,
-                       color=GRAY, stroke_width=2)
-            self.play(GrowArrow(a1), FadeIn(val))
+            val = make_node("Validate", "schema + nulls", val_c).shift(LEFT * 1.8)
+            self.step(FadeIn(val, shift=RIGHT * SHIFT), GrowArrow(arrow(raw.get_right(), val.get_left())))
 
-            # ── Step 3: Parallel branches ──────────────────────────────────
             self.next_section("branches")
-            tr_a = make_node("Transform A", "feature eng.", color=BLUE, width=2.6)
-            tr_b = make_node("Transform B", "outlier filter", color=BLUE, width=2.6)
-            tr_a.shift(RIGHT * 0.9 + UP * 1.1)
-            tr_b.shift(RIGHT * 0.9 + DOWN * 1.1)
-            a2a = Arrow(val.get_right(), tr_a.get_left(), buff=0.1,
-                        color=GRAY, stroke_width=2)
-            a2b = Arrow(val.get_right(), tr_b.get_left(), buff=0.1,
-                        color=GRAY, stroke_width=2)
-            self.play(GrowArrow(a2a), GrowArrow(a2b), FadeIn(tr_a), FadeIn(tr_b))
+            tr_a = make_node("Transform A", "feature eng.", tr_c, width=2.6).shift(RIGHT * 0.9 + UP * 1.1)
+            tr_b = make_node("Transform B", "outlier filter", tr_c, width=2.6).shift(RIGHT * 0.9 + DOWN * 1.1)
+            self.step(
+                FadeIn(VGroup(tr_a, tr_b), shift=RIGHT * SHIFT),
+                GrowArrow(arrow(val.get_right(), tr_a.get_left())),
+                GrowArrow(arrow(val.get_right(), tr_b.get_left())),
+            )
 
-            # ── Step 4: Join ───────────────────────────────────────────────
             self.next_section("join")
-            join = make_node("Join", "concat + dedup", color=ORANGE)
-            join.shift(RIGHT * 3.6)
-            a3a = Arrow(tr_a.get_right(), join.get_left(), buff=0.1,
-                        color=GRAY, stroke_width=2)
-            a3b = Arrow(tr_b.get_right(), join.get_left(), buff=0.1,
-                        color=GRAY, stroke_width=2)
-            self.play(GrowArrow(a3a), GrowArrow(a3b), FadeIn(join))
+            join = make_node("Join", "concat + dedup", join_c).shift(RIGHT * 3.6)
+            self.step(
+                FadeIn(join, shift=RIGHT * SHIFT),
+                GrowArrow(arrow(tr_a.get_right(), join.get_left())),
+                GrowArrow(arrow(tr_b.get_right(), join.get_left())),
+            )
 
-            # ── Step 5: Load ───────────────────────────────────────────────
             self.next_section("load")
-            load = make_node("Load", "Athena table", color=ACCENT)
-            load.shift(RIGHT * 5.8)
-            a4 = Arrow(join.get_right(), load.get_left(), buff=0.1,
-                       color=ACCENT, stroke_width=2.5)
-            self.play(GrowArrow(a4), FadeIn(load))
+            load = make_node("Load", "Athena table", load_c).shift(RIGHT * 5.8)
+            self.step(FadeIn(load, shift=RIGHT * SHIFT), GrowArrow(arrow(join.get_right(), load.get_left())))
 
-            # ── Step 6: Status labels ──────────────────────────────────────
             self.next_section("status")
-            ok_nodes = [raw, val, tr_a, tr_b, join, load]
-            labels = []
-            for node in ok_nodes:
-                lbl = Text("✓", font_size=18, color=OK_COLOR)
-                lbl.next_to(node, UP, buff=0.08)
-                labels.append(lbl)
-            self.play(*[Write(l) for l in labels])
-            self.wait(1)
+            checks = VGroup(*[
+                Text("✓", font_size=18, color=pal.primary).next_to(node, UP, buff=0.08)
+                for node in (raw, val, tr_a, tr_b, join, load)
+            ])
+            self.step(FadeIn(checks, shift=UP * SHIFT))
 
     return _PipelineScene

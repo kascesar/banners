@@ -115,3 +115,25 @@ def test_pipeline_scene_renders_sections():
     m = Manim(PipelineScene, interactive=True)
     m.render()
     assert len(list((Manim._cache_root() / m._cache_key()).glob("*.mp4"))) == 7
+
+
+def test_pipeline_factory_accepts_palette():
+    """`PipelineScene` takes the palette so `Manim` can pass the slide colors."""
+    import inspect
+
+    from banners.scenes import PipelineScene
+
+    assert "palette" in inspect.signature(PipelineScene).parameters
+
+
+@pytest.mark.manim
+def test_pipeline_steps_are_short():
+    """Every click of `PipelineScene` lasts at most 0.3 s."""
+    from banners.scenes import PipelineScene
+    from tests.test_flow_palette import section_durations
+
+    m = Manim(PipelineScene, interactive=True)
+    m.render()
+    durations = section_durations(m)
+    assert len(durations) == 7
+    assert all(d <= 0.3 for d in durations), durations
