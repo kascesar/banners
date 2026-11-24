@@ -17,16 +17,16 @@ The slide below is the same Python object every time; only `configure(template=.
 
 <table>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-default.png" alt="Default template"><br><sub><code>Template()</code></sub></td>
-    <td><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-executive.png" alt="EXECUTIVE template"><br><sub><code>EXECUTIVE</code></sub></td>
+    <td><sub><code>Template()</code></sub><br><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-default.png" alt="Default template"></td>
+    <td><sub><code>EXECUTIVE</code></sub><br><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-executive.png" alt="EXECUTIVE template"></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-institutional.png" alt="INSTITUTIONAL template"><br><sub><code>INSTITUTIONAL</code></sub></td>
-    <td><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-cosmos.png" alt="COSMOS template"><br><sub><code>COSMOS</code></sub></td>
+    <td><sub><code>INSTITUTIONAL</code></sub><br><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-institutional.png" alt="INSTITUTIONAL template"></td>
+    <td><sub><code>COSMOS</code></sub><br><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-cosmos.png" alt="COSMOS template"></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-vibrant.png" alt="VIBRANT template"><br><sub><code>VIBRANT</code></sub></td>
-    <td><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-terra.png" alt="TERRA template"><br><sub><code>TERRA</code></sub></td>
+    <td><sub><code>VIBRANT</code></sub><br><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-vibrant.png" alt="VIBRANT template"></td>
+    <td><sub><code>TERRA</code></sub><br><img src="https://raw.githubusercontent.com/kascesar/banners/main/media/template-terra.png" alt="TERRA template"></td>
   </tr>
 </table>
 
@@ -47,7 +47,10 @@ from banners import TERRA, Closing, Cover, Section, Text, configure
 configure(template=TERRA, team="Analytics Team", date="2026")
 
 Cover(title="Churn Prediction v2", subtitle="Model migration and deployment.")
-Section(title="Results", content=[Text("**Accuracy** — 91% AUC."), Text("**Latency** — p99 under 30 ms.")])
+Section(title="Results", content=[
+    Text("**Accuracy** — 91% AUC."),
+    Text("**Latency** — p99 under 30 ms."),
+])
 Closing(title="One framework for all models.")
 ```
 
