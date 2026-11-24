@@ -39,7 +39,8 @@ class Section(Slide):
             `"size"` (CSS height, default `"28px"`).
         image: Photo for the slide. Only used by a `Template`: a divider with
             the photo on the right half, or a content slide with the photo on
-            the left half. Ignored by the default editorial style.
+            the left half. Ignored by the default editorial style. `False` hides
+            the template's default `divider_image` on this slide.
 
     Example:
         ```python

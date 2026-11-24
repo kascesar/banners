@@ -66,7 +66,8 @@ banners/
   palette.py         # Palette / SectionPalette dataclasses + 5 presets
   background.py      # Background: color / gradient / image + automatic text contrast
   slide.py           # Slide base class — layout engine lives here
-  template.py        # Template: fixed 16:9 canvas renderer (corporate PowerPoint style)
+  template.py        # Template: fixed 16:9 canvas renderer + presets (BECH, EXECUTIVE, …)
+  icons.py           # Original line icons as SVG data URIs (used by templates)
   slides/            # Cover, Intro, Section, Closing — each overrides _render_banner()
   content/           # Leaf content elements — each has a .render() method
   scenes/            # Reusable Manim Scene factories (e.g. PipelineScene)
@@ -96,6 +97,8 @@ positioned boxes in % of the slide and font sizes in `cqw` (`SIZES`, taken from
 PowerPoint point sizes). Layout is chosen by slide type and content (see the
 module docstring). `Cover.image` and `Section.image` are only used by templates.
 Never commit organization brand assets (logos, photos) to this public repo.
+Preset photos must be public domain, contain no people, and be linked
+(Wikimedia Commons `Special:FilePath` URLs), never stored in the repo.
 
 ### Global config (`config.py`)
 

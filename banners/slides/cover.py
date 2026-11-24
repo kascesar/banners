@@ -30,7 +30,8 @@ class Cover(Slide):
         icon: Institutional icon placed at the right of the title block. Pass a dict with keys `"src"` (path, URL, or bytes) and
             optionally `"size"` (CSS height, default `"40px"`).
         image: Photo for the cover. Only used by a `Template` (photo cover
-            layout); ignored by the default editorial style.
+            layout); ignored by the default editorial style. `False` hides the
+            template's default `cover_image` on this slide.
 
     Example:
         ```python

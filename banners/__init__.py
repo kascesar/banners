@@ -24,10 +24,11 @@ Cover(
 from .background import Background
 from .config import configure
 from .content import AnimatedGraph, FlowAnimation, Graph, Image, Manim, Plot, Table, Text
+from .icons import ICONS, icon
 from .palette import BLUE, GRAY, GREEN, ORANGE, PURPLE, Palette, SectionPalette
 from .slide import Slide
 from .slides import Closing, Cover, Intro, Section
-from .template import Template
+from .template import BECH, COSMOS, EXECUTIVE, INSTITUTIONAL, PRESETS, TERRA, VIBRANT, Template
 
 __all__ = [
     "configure",
@@ -37,4 +38,6 @@ __all__ = [
     "Palette", "SectionPalette", "ORANGE", "BLUE", "GREEN", "PURPLE", "GRAY",
     "Background",
     "Template",
+    "BECH", "EXECUTIVE", "INSTITUTIONAL", "COSMOS", "VIBRANT", "TERRA", "PRESETS",
+    "icon", "ICONS",
 ]

@@ -352,6 +352,36 @@ from banners.template import BECH
 configure(template=BECH, team="Analítica Avanzada", date="Noviembre 2026")
 ```
 
+## Built-in templates
+
+```python
+from banners.template import EXECUTIVE, INSTITUTIONAL, COSMOS, VIBRANT, TERRA, PRESETS
+configure(template=COSMOS)
+```
+
+| Template | Style | Photos |
+|----------|-------|--------|
+| `EXECUTIVE` | Sober, graphite on white, serif titles, monochrome line icons, no bar | — |
+| `INSTITUTIONAL` | Formal navy + steel blue, serif titles, monochrome icons | — |
+| `COSMOS` | Dark, cyan/violet/pink, section colors | NASA, public domain: Hubble *Pillars of Creation* (cover), Apollo 17 *Earth* (dividers) |
+| `VIBRANT` | White, four-color bar, colored icons, one color per section | — |
+| `TERRA` | Earthy greens and terracotta, serif titles | U.S. National Park Service, public domain: Grand Canyon (cover) |
+| `BECH` | BancoEstado deck | — (logos from Wikimedia Commons) |
+
+Photos are linked from Wikimedia Commons and loaded by the browser; none are
+stored in the repository. They contain no people. NPS photos must not be used
+to imply endorsement by the National Park Service.
+
+Icons come from `banners.icons` (original line icons, inline SVG, no network):
+`Template(mark="chart", divider_icon="layers")`. Customize any preset with
+`dataclasses.replace(COSMOS, cover_image="my_photo.jpg")`. A single slide
+drops the preset photo with `image=False`, for example `Section(title="Agenda", image=False)`.
+
+Other template options: `heading_font`, `cover_image`, `divider_image`,
+`divider_icon`, `icon_color`, `bar_colors`, `section_colors`, `panel`, and
+`auto_contrast` (titles below a 3:1 contrast ratio fall back to a readable
+color; off in `BECH` to keep the brand orange).
+
 Keep brand assets (logos, photos) out of public repositories: define your
 `Template` in a private module next to your notebooks. `configure(template=None)`
 goes back to the editorial style. `Template(scale=1.1)` enlarges every font.
