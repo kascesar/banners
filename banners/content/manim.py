@@ -7,6 +7,7 @@ import hashlib
 import inspect
 import io
 import json
+import marshal
 import tempfile
 from pathlib import Path
 from typing import ClassVar
@@ -39,6 +40,9 @@ class Manim:
         interactive: When ``True``, the scene is rendered section by section
             and a click-to-advance widget is returned. The scene must define
             steps with ``self.next_section("name")``.
+        autoplay: Interactive mode advances by itself at the end of each
+            section. A static ``"mp4"`` plays by itself, muted and looping.
+            Defaults to ``False``.
         palette: Colors for the render. The background is ``palette.panel``
             (a scene may still set its own) and the player controls use
             ``muted`` and ``primary``. ``None`` uses the default ``Palette()``;
@@ -130,8 +134,14 @@ class Manim:
     def _cache_key(self) -> str:
         try:
             src = inspect.getsource(self.scene)
-        except OSError:
-            src = self.scene.__qualname__
+        except (OSError, TypeError):
+            # Classes defined in a marimo cell have no source file: use their
+            # compiled methods and attributes, so an edit invalidates the cache.
+            src = self.scene.__qualname__ + "".join(
+                f"|{name}={marshal.dumps(value.__code__).hex() if hasattr(value, '__code__') else value!r}"
+                for name, value in sorted(vars(self.scene).items())
+                if not name.startswith("__")
+            )
         raw = (
             f"{src}|{self.quality}|{self.format}|{self.interactive}|{self._extra_key}"
             f"|{self._palette!r}|fps={FRAME_RATE}"
@@ -203,7 +213,10 @@ class Manim:
                 return mo.callout(mo.md("Manim rendered but no output file was found."), kind="danger")
             cache_file.write_bytes(data)
 
-        return mo.image(data) if self.format in ("gif", "png") else mo.video(data)
+        if self.format in ("gif", "png"):
+            return mo.image(data)
+        # Browsers only autoplay muted videos; an autoplaying clip also loops.
+        return mo.video(data, autoplay=self.autoplay, muted=self.autoplay, loop=self.autoplay)
 
     def _render_interactive(self, tempconfig):
         """Render each section as mp4 and return a click-to-advance anywidget."""

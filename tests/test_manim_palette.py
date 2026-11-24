@@ -137,3 +137,37 @@ def test_pipeline_steps_are_short():
     durations = section_durations(m)
     assert len(durations) == 7
     assert all(d <= 0.3 for d in durations), durations
+
+
+class _CachedScene:
+    """Stand-in scene class; its render is served from the cache."""
+
+
+def test_static_mp4_autoplay(monkeypatch, tmp_path):
+    """A static MP4 with autoplay=True plays by itself, muted and looping."""
+    monkeypatch.setattr(Manim, "_cache_root", staticmethod(lambda: tmp_path))
+    m = Manim(_CachedScene, format="mp4", autoplay=True)
+    (tmp_path / f"{m._cache_key()}.mp4").write_bytes(b"\x00")
+    html = m._render_static(tempconfig=None).text
+    assert "autoplay" in html and "muted" in html and "loop" in html
+
+
+def _scene_without_source(body: str):
+    """Build a scene class with no source file, as marimo cells do.
+
+    Args:
+        body: The value returned by `construct`.
+
+    Returns:
+        The class.
+    """
+    namespace = {}
+    exec(f"class EditedScene:\n    def construct(self):\n        return {body!r}\n", namespace)  # noqa: S102 - a class with no source file, like a marimo cell
+    return namespace["EditedScene"]
+
+
+def test_editing_a_scene_without_source_changes_the_cache_key():
+    """A scene edited in a marimo cell is rendered again, not served from the cache."""
+    before = Manim(_scene_without_source("circle"))._cache_key()
+    after = Manim(_scene_without_source("square"))._cache_key()
+    assert before != after
