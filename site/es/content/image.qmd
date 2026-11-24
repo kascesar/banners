@@ -1,4 +1,45 @@
 ---
 title: "Image"
+description: "Una imagen desde un archivo, una URL o bytes."
 ---
 
+Esta página cubre `Image`, el elemento para imágenes dentro de una slide.
+
+## Ejemplo
+
+```python
+from banners import Image, Section, Text
+
+Section(
+    title="Imagen",
+    content=[
+        Image("https://commons.wikimedia.org/wiki/Special:FilePath/The_Earth_seen_from_Apollo_17.jpg?width=1600"),
+        Text("Una ruta, una URL o bytes."),
+    ],
+)
+```
+
+![](../../images/content-image.png){width=80%}
+
+Una imagen seguida de texto toma el [layout de visual y texto](../look/layouts.qmd):
+la imagen a la izquierda y la explicación a la derecha.
+
+## Fuentes
+
+| Fuente | Ejemplo | Notas |
+|---|---|---|
+| Ruta de archivo | `Image("img/arquitectura.png")` | Relativa a donde corre marimo. |
+| Bytes | `Image(Path("img/arquitectura.png").read_bytes())` | Viaja con la salida del notebook; sirve cuando se exporta la presentación. |
+| URL | `Image("https://…/foto.jpg")` | Se carga desde la web. |
+
+## Opciones
+
+| Argumento | Por defecto | Significado |
+|---|---|---|
+| `src` | — | La imagen: una ruta, bytes o una URL. |
+| `width` | `"100%"` | Ancho en CSS, como `"80%"` o `"400px"`. |
+| `alt` | `""` | Texto que leen los lectores de pantalla y que aparece si la imagen no carga. |
+
+Para una foto que ocupe media slide, el argumento `image=` de
+[`Section`](../slides/section.qmd) da un mejor resultado que una `Image` en el
+contenido.

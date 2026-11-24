@@ -275,6 +275,23 @@ Section(title="Manim", content=[Manim(ShapeScene, interactive=True)])
 """, "Manim", 1, 1600),
 }
 
+# Widgets that need the marimo kernel (AnimatedGraph) are recorded from a live
+# `marimo run` server: image name -> snippet. Each node is clicked in turn.
+LIVE: dict[str, str] = {
+    "content-animated-graph": """
+from banners import AnimatedGraph, Section
+Section(
+    title="AnimatedGraph",
+    content=[AnimatedGraph(\"\"\"
+graph LR
+A[Raw data] --> B[Validate]
+B --> C[Train]
+B --> D[Report]
+\"\"\")],
+)
+""",
+}
+
 SETUP = '''
 import marimo
 
@@ -334,6 +351,55 @@ def _returning(snippet: str) -> str:
     return "\n".join(lines)
 
 
+def record_live_gif(browser, snippet: str, out: Path, port: int = 2741, step_ms: int = 900) -> None:
+    """Record a widget slide served by `marimo run` while its nodes are clicked.
+
+    Args:
+        browser: A Playwright browser.
+        snippet: Code whose last expression is the slide.
+        out: Path of the GIF to write.
+        port: Local port for the temporary marimo server.
+        step_ms: Time between clicks, in milliseconds.
+    """
+    import subprocess
+    import time
+
+    size = {"width": 1600, "height": 1000}
+    with tempfile.TemporaryDirectory() as tmp:
+        notebook = Path(tmp) / "live.py"
+        notebook.write_text(notebook_source({"live": snippet}))
+        server = subprocess.Popen(
+            ["marimo", "run", str(notebook), "--headless", "--port", str(port), "--no-token"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        try:
+            context = browser.new_context(viewport=size, record_video_dir=tmp, record_video_size=size)
+            opened = time.monotonic()
+            page = context.new_page()
+            for _ in range(60):
+                try:
+                    page.goto(f"http://localhost:{port}")
+                    break
+                except Exception:  # noqa: BLE001 - the server is still starting
+                    page.wait_for_timeout(500)
+            page.locator(".ag-node").first.wait_for(timeout=60000)
+            page.wait_for_timeout(1500)
+            slide = page.locator(readme_images.CANVAS).first
+            box = slide.bounding_box()
+            start = time.monotonic() - opened
+            page.wait_for_timeout(step_ms)
+            for node in page.locator(".ag-node").all():
+                node.click()
+                page.wait_for_timeout(step_ms)
+            video = page.video.path()
+            context.close()
+        finally:
+            server.terminate()
+            server.wait()
+        crop = tuple(round(v) for v in (box["x"], box["y"], box["width"], box["height"]))
+        subprocess.run(readme_images.gif_command(Path(video), out, crop, start=start), check=True)
+
+
 def main() -> None:
     """Write every picture of the site to `site/images/`."""
     from PIL import Image
@@ -363,6 +429,8 @@ def main() -> None:
                 )
         for name, (_code, title, clicks, step_ms) in GIFS.items():
             readme_images.record_player_gif(browser, html, IMAGES / f"{name}.gif", title, clicks, step_ms)
+        for name, snippet in LIVE.items():
+            record_live_gif(browser, snippet, IMAGES / f"{name}.gif")
         browser.close()
 
 
