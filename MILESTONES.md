@@ -239,44 +239,80 @@ mixed-format gradients, `Closing` stats weight).
 
 ## [ ] M8 — Professional manim animations, player, and palette-aware plots
 
-**Needs a brainstorming pass before planning**: César wants the manim
-transitions "completely renewed to a much more professional style"; what
-"professional" means concretely (pace, easing, motion style, references he
-likes) is still open, and the acceptance criteria below are provisional.
+Today the manim animations look like a foreign piece on the slide: a fixed navy
+background (`#0f172a`), fixed node colors, a black video stage and gray buttons,
+while M6 made most slides light and palette-driven. Each step also takes 0.5 s
+plus a 0.2 s wait, which feels slow. César wants the animations to belong to the
+deck's palette, be faster and more direct, and render faster, without losing
+their visual appeal. He gave freedom on the motion details, grounded in the
+research below.
 
-What exists today and is in scope:
-- The player (`banners/content/_manim_widget.js`): a black stage that hard-cuts
-  between section videos (double buffer, z-index swap, no cross-fade), and gray
-  `#1f2937` buttons plus an "Auto" toggle under the video.
-- The scenes: `FlowAnimation` (`banners/content/flow_animation.py`) and
-  `PipelineScene` (`banners/scenes/pipeline.py`) build every step with
-  `FadeIn(scale=0.85)` + `Write` at `run_time=0.5`, with their own fixed colors
-  (`_COLORS`, `#9ca3af` details) and background.
-- Colors come from the active M6 palette when one is configured; with no
-  configuration, `Manim` and `FlowAnimation` keep working in a plain cell with
-  their own defaults (content elements must not require `banners.config`).
-- Plots follow the palette (decided with César): today a matplotlib `Plot` does
-  not know which panel it lands on, so each user picks readable colors by hand.
-  The template restyles the figure when it places it on a slide, because only
-  the template knows `palette.panel`: axes, ticks, labels and legend take a color
-  readable on the panel, and only lines and patches that use matplotlib's
-  automatic cycle colors (`C0`, `C1`, …) are recolored with the palette
-  (`primary`, `secondary`, then `section_colors` if any). Colors the user set by
-  hand are kept, and a `Plot` in a plain cell renders exactly as today. `Plot`
-  itself still does not read `banners.config`.
+**Research (2026-11-24)** that sets the motion rules:
+- Duration: most UI animations should last 100–400 ms; at 500 ms they start to
+  feel slow; 200–300 ms for elements entering
+  ([NN/g](https://www.nngroup.com/articles/animation-duration/),
+  [Material Design 3](https://m3.material.io/styles/motion/easing-and-duration/applying-easing-and-duration)).
+- Easing: ease-out for entrances, smooth for moves; no bounce or overshoot
+  ([NN/g](https://www.nngroup.com/articles/animation-duration/),
+  [Apple HIG](https://developer.apple.com/design/human-interface-guidelines/motion)).
+- One focal change per click; no decorative motion; no trailing waits, because
+  the click is the pause; hard cut from the last frame between steps
+  ([manim-slides example](https://raw.githubusercontent.com/jeertmans/manim-slides/main/example.py),
+  [Manim output docs](https://docs.manim.community/en/stable/tutorials/output_and_config.html)).
+- Match the slide by painting the scene background with the slide color; use
+  transparency only when something other than a flat color must show through.
 
-**Acceptance criteria (provisional)**
-- `make check` → green; `uv run pytest -m manim` → green on César's machine.
-- The player and the scenes follow the style agreed in the brainstorming.
-- `FlowAnimation` and `PipelineScene` take their colors from the active palette,
-  and render with defaults when no palette is configured (unit test without manim
-  for the color resolution).
-- A matplotlib figure placed on a slide gets panel-readable axes and text, its
-  automatic-color lines take the palette colors, a hand-set line color is
-  unchanged, and the same `Plot` rendered without a slide is unchanged (unit
-  tests with matplotlib, no manim).
+**Decisions**
+- **Palette hand-off (approach A, chosen by César).** Content elements that can
+  follow the palette implement `_with_palette(palette) -> same type`, which
+  returns a styled copy. `Template._content` calls it before rendering the item.
+  A content element still never reads `banners.config`; a standalone element
+  renders with `Palette()` (the `ORANGE` defaults) for animations, and exactly as
+  today for `Plot`. The palette is part of the manim cache key.
+- **Background (chosen by César):** opaque MP4 painted with `palette.panel`, the
+  color of the box that holds visuals. No transparent video.
+- **FlowAnimation colors:** background `panel`; node colors cycle through
+  `section_colors`, else `(primary, secondary)`; node names in `text`, details
+  and arrows in `muted`.
+- **Motion:** each step plays one `self.play` of **0.25 s**: the node fades in
+  with a short shift and its incoming arrows draw, with `rate_func=ease_out_cubic`.
+  No `Write`, no scale-in, no `self.wait()` at the end of a step.
+- **Frame rate:** 30 fps for every quality (manim's "low" preset is 15 fps,
+  which leaves a 0.25 s step with about 4 frames). Resolutions stay 480p/720p/1080p.
+- **`Manim(scene)` with a custom scene:** banners sets `background_color` to
+  `palette.panel` as a default; the scene keeps any color it sets itself.
+- **`PipelineScene`:** becomes `PipelineScene(palette=None)` with the same motion
+  rules and palette colors. `Manim` accepts a scene factory and calls it with the
+  palette, which also fixes the documented `Manim(PipelineScene, interactive=True)`,
+  broken today with `TypeError: Scene.render() missing 1 required positional argument`.
+- **Player (`_manim_widget.js`):** no black stage; controls take colors from the
+  palette passed by Python (`muted` for idle controls, `primary` for the active
+  autoplay toggle), on a transparent bar, sized relative to the surrounding text.
+- **Plots** (decided with César earlier): the template restyles a matplotlib
+  figure placed on a slide: axes, ticks, labels and legend take a color readable
+  on `panel`; only lines and patches with matplotlib's automatic cycle colors
+  (`C0`, `C1`, …) take the palette colors (`primary`, `secondary`, then
+  `section_colors`). Colors set by hand are kept.
+
+**Non-goals**: transparent video; plotly restyling; new scene types; manim
+upgrade (manim ≥ 0.21 needs Python ≥ 3.11, and banners supports 3.10).
+
+**Acceptance criteria**
+- `make check` → green, with unit tests (no manim) for: `_with_palette` on
+  `FlowAnimation`, `Manim` and `Plot` returns a copy with the palette colors and
+  leaves the original unchanged; the palette changes the manim cache key; the
+  template calls `_with_palette` for items that have it; a figure on a slide gets
+  panel-readable axes and palette colors on automatic lines, a hand-set line
+  color is unchanged, and the same `Plot` outside a slide is unchanged; content
+  modules still do not import `banners.config`.
+- `uv run pytest -m manim` → green, including `Manim(PipelineScene, interactive=True)`
+  rendering one video per section, and a 4-node `FlowAnimation` whose sections
+  each last at most 0.3 s.
+- A cold render of `FlowAnimation(["Ingest", "Validate", "Transform", "Load"], quality="low")`
+  is measured before and after on César's machine (baseline 2.0 s) and the result
+  is written in the closing commit; it must not be slower than the baseline.
 - César reviews `test/08_manim.py`, `test/09_flow_animation.py` and
-  `example/showcase.py` in marimo slide mode.
+  `example/showcase.py` in marimo slide mode, with at least two different palettes.
 
 ---
 
