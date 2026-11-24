@@ -25,7 +25,7 @@ def _():
     from banners.palette import Palette, ORANGE, BLUE, GREEN, PURPLE, GRAY
     from manim import (
         Scene, Text as MT, Write, FadeIn, FadeOut, Create, MathTex,
-        Line, LEFT, RIGHT, UP, WHITE as MW,
+        Line, LEFT, RIGHT, UP,
     )
 
     configure(team="banners", date="2026", palette=ORANGE)
@@ -47,8 +47,8 @@ def _():
         LEFT,
         Line,
         MT,
-        MW,
         Manim,
+        ORANGE,
         MathTex,
         PURPLE,
         Palette,
@@ -68,12 +68,11 @@ def _():
 
 
 @app.cell
-def _(Create, FadeIn, LEFT, Line, MT, Manim, RIGHT, Scene, UP):
+def _(Create, FadeIn, LEFT, Line, MT, Manim, ORANGE, RIGHT, Scene, UP):
     class _Part0Title(Scene):
         def construct(self):
-            self.camera.background_color = "#0f172a"
-            title = MT("Showing marimo-banners", font_size=38, color="#9ca3af")
-            line  = Line(LEFT * 4, RIGHT * 4, color="#374151", stroke_width=1.5).next_to(title, UP * (-1), buff=0.3)
+            title = MT("Showing marimo-banners", font_size=38, color=ORANGE.text)
+            line  = Line(LEFT * 4, RIGHT * 4, color=ORANGE.muted, stroke_width=1.5).next_to(title, UP * (-1), buff=0.3)
             self.play(FadeIn(title, shift=UP * 0.15))
             self.play(Create(line))
             self.wait(1.5)
@@ -83,13 +82,12 @@ def _(Create, FadeIn, LEFT, Line, MT, Manim, RIGHT, Scene, UP):
 
 
 @app.cell
-def _(Create, FadeIn, LEFT, Line, MT, Manim, RIGHT, Scene, UP, Write):
+def _(Create, FadeIn, LEFT, Line, MT, Manim, ORANGE, RIGHT, Scene, UP, Write):
     class _Part1Title(Scene):
         def construct(self):
-            self.camera.background_color = "#0f172a"
             num   = MT("01", font_size=140, color="#ea580c").shift(UP * 0.6)
-            title = MT("Slide Types & Palettes", font_size=38, color="#9ca3af").next_to(num, UP * (-1), buff=0.25)
-            line  = Line(LEFT * 4, RIGHT * 4, color="#374151", stroke_width=1.5).next_to(title, UP * (-1), buff=0.3)
+            title = MT("Slide Types & Palettes", font_size=38, color=ORANGE.text).next_to(num, UP * (-1), buff=0.25)
+            line  = Line(LEFT * 4, RIGHT * 4, color=ORANGE.muted, stroke_width=1.5).next_to(title, UP * (-1), buff=0.3)
             self.play(Write(num), run_time=1.2)
             self.play(FadeIn(title, shift=UP * 0.15))
             self.play(Create(line))
@@ -262,13 +260,12 @@ def _(Cover, Palette, Text, mo):
 
 
 @app.cell
-def _(Create, FadeIn, LEFT, Line, MT, Manim, RIGHT, Scene, UP, Write):
+def _(Create, FadeIn, LEFT, Line, MT, Manim, ORANGE, RIGHT, Scene, UP, Write):
     class _Part2Title(Scene):
         def construct(self):
-            self.camera.background_color = "#0f172a"
             num   = MT("02", font_size=140, color="#1d4ed8").shift(UP * 0.6)
-            title = MT("Content Types", font_size=38, color="#9ca3af").next_to(num, UP * (-1), buff=0.25)
-            line  = Line(LEFT * 4, RIGHT * 4, color="#374151", stroke_width=1.5).next_to(title, UP * (-1), buff=0.3)
+            title = MT("Content Types", font_size=38, color=ORANGE.text).next_to(num, UP * (-1), buff=0.25)
+            line  = Line(LEFT * 4, RIGHT * 4, color=ORANGE.muted, stroke_width=1.5).next_to(title, UP * (-1), buff=0.3)
             self.play(Write(num), run_time=1.2)
             self.play(FadeIn(title, shift=UP * 0.15))
             self.play(Create(line))
@@ -419,16 +416,11 @@ def _(Section, Table, Text, pd):
 @app.cell
 def _(Plot, Section, Text, np, plt):
     _fig, _ax = plt.subplots(figsize=(7, 3.2))
-    _fig.patch.set_facecolor("#0f172a")
-    _ax.set_facecolor("#0f172a")
     _x = np.linspace(0, 10, 300)
-    _ax.plot(_x, np.sin(_x), color="#3b82f6", linewidth=2, label="sin(x)")
-    _ax.plot(_x, np.cos(_x), color="#22c55e", linewidth=2, label="cos(x)")
-    _ax.tick_params(colors="#6b7280")
-    for _sp in _ax.spines.values():
-        _sp.set_color("#374151")
-    _ax.legend(facecolor="#1f2937", edgecolor="#374151", labelcolor="white")
-    _ax.grid(color="#1f2937")
+    _ax.plot(_x, np.sin(_x), linewidth=2, label="sin(x)")
+    _ax.plot(_x, np.cos(_x), linewidth=2, label="cos(x)")
+    _ax.legend()
+    _ax.grid(alpha=0.3)
     plt.tight_layout()
 
     Section(
@@ -475,20 +467,19 @@ def _(FlowAnimation, Section, Text):
 
 
 @app.cell
-def _(FadeOut, MW, Manim, MathTex, Scene, Section, Text, Write):
+def _(FadeOut, Manim, MathTex, ORANGE, Scene, Section, Text, Write):
     class BasicScene(Scene):
         def construct(self):
-            self.camera.background_color = "#0f172a"
             self.next_section("eq1")
-            eq1 = MathTex(r"E = mc^2", font_size=72, color=MW)
+            eq1 = MathTex(r"E = mc^2", font_size=72, color=ORANGE.text)
             self.play(Write(eq1)); self.wait(1)
             self.next_section("eq2")
-            eq2 = MathTex(r"F = ma", font_size=72, color=MW)
+            eq2 = MathTex(r"F = ma", font_size=72, color=ORANGE.text)
             self.play(FadeOut(eq1)); self.play(Write(eq2)); self.wait(1)
             self.next_section("eq3")
             eq3 = MathTex(
                 r"\nabla^2 \mathbf{E} = \frac{1}{c^2}\frac{\partial^2\mathbf{E}}{\partial t^2}",
-                font_size=52, color=MW,
+                font_size=52, color=ORANGE.text,
             )
             self.play(FadeOut(eq2)); self.play(Write(eq3)); self.wait(1)
 
@@ -500,10 +491,8 @@ def _(FadeOut, MW, Manim, MathTex, Scene, Section, Text, Write):
     ```python
     class MyScene(Scene):
     def construct(self):
-        self.camera.background_color = "#0f172a"
-
         self.next_section("step1")   # one click per section
-        self.play(Write(MathTex(r"E = mc^2", color=MW)))
+        self.play(Write(MathTex(r"E = mc^2")))
         self.wait(1)
 
         self.next_section("step2")
@@ -519,13 +508,12 @@ def _(FadeOut, MW, Manim, MathTex, Scene, Section, Text, Write):
 
 
 @app.cell
-def _(Create, FadeIn, LEFT, Line, MT, Manim, RIGHT, Scene, UP, Write):
+def _(Create, FadeIn, LEFT, Line, MT, Manim, ORANGE, RIGHT, Scene, UP, Write):
     class _Part3Title(Scene):
         def construct(self):
-            self.camera.background_color = "#0f172a"
             num   = MT("03", font_size=140, color="#15803d").shift(UP * 0.6)
-            title = MT("Slide Backgrounds", font_size=38, color="#9ca3af").next_to(num, UP * (-1), buff=0.25)
-            line  = Line(LEFT * 4, RIGHT * 4, color="#374151", stroke_width=1.5).next_to(title, UP * (-1), buff=0.3)
+            title = MT("Slide Backgrounds", font_size=38, color=ORANGE.text).next_to(num, UP * (-1), buff=0.25)
+            line  = Line(LEFT * 4, RIGHT * 4, color=ORANGE.muted, stroke_width=1.5).next_to(title, UP * (-1), buff=0.3)
             self.play(Write(num), run_time=1.2)
             self.play(FadeIn(title, shift=UP * 0.15))
             self.play(Create(line))
