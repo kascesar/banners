@@ -64,6 +64,16 @@ Section(
 Closing(title="Un solo marco para todos los modelos.")
 ```
 
+::: {layout-ncol=3}
+![](../images/gs-cover.png)
+
+![](../images/gs-section.png)
+
+![](../images/gs-closing.png)
+:::
+
+Las tres slides que muestran las celdas de arriba.
+
 `configure()` guarda los valores que comparten todas las slides, como el nombre
 del equipo y la fecha, para que las slides no los repitan. Las páginas de
 [Slides](slides/cover.qmd) describen cada tipo de slide y sus opciones.

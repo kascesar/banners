@@ -64,6 +64,16 @@ Section(
 Closing(title="One framework for all models.")
 ```
 
+::: {layout-ncol=3}
+![](../images/gs-cover.png)
+
+![](../images/gs-section.png)
+
+![](../images/gs-closing.png)
+:::
+
+The three slides that the cells above display.
+
 `configure()` stores the values that every slide shares, such as the team name
 and the date, so the slides do not repeat them. The [Slides](slides/cover.qmd)
 pages describe each slide type and its options.

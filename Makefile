@@ -31,6 +31,13 @@ readme-images:
 	$(UV) run playwright install chromium
 	$(UV) run python scripts/readme_images.py
 
+# Pictures of the documentation site (site/images/): still slides and recorded
+# animations, plus a copy of the README media. Needs the dev extra and manim.
+.PHONY: docs-images
+docs-images:
+	$(UV) run playwright install chromium
+	$(UV) run python scripts/docs_images.py
+
 # Development environment exactly as pinned in uv.lock.
 uv-dev:
 	$(UV) sync --extra dev
