@@ -1,4 +1,58 @@
 ---
 title: "Cover"
+description: "La slide de título que abre una presentación."
 ---
 
+Esta página cubre la slide `Cover`: qué muestra, sus opciones y la variante
+con foto.
+
+## Una primera portada
+
+```python
+from banners import Cover, configure
+
+configure(team="Equipo de Analítica", date="2026")
+Cover(title="Predicción de fuga v2", subtitle="Migración y despliegue del modelo.")
+```
+
+![](../../images/cover-basic.png){width=80%}
+
+El template dibuja una portada oscura con el logo, el equipo arriba a la
+derecha, el título, el subtítulo y la fecha. El equipo y la fecha vienen de
+`configure()`, así que todas las portadas de la presentación los muestran sin
+repetirlos.
+
+## Una portada con foto
+
+`image=` pone una foto detrás del título. Acepta una URL, una ruta de archivo
+o bytes:
+
+```python
+from banners import Cover
+
+Cover(
+    title="Observación de la Tierra",
+    subtitle="Diez años de datos satelitales.",
+    image="https://commons.wikimedia.org/wiki/Special:FilePath/The_Earth_seen_from_Apollo_17.jpg?width=1600",
+)
+```
+
+![](../../images/cover-photo.png){width=80%}
+
+Un template puede fijar una foto para todas las portadas con `cover_image`
+(`COSMOS` y `TERRA` lo hacen). `Cover(image=False)` la quita en una slide.
+
+## Opciones
+
+| Argumento | Por defecto | Significado |
+|---|---|---|
+| `title` | — | Título principal de la presentación. |
+| `subtitle` | `""` | Una frase de contexto bajo el título. |
+| `date` | `configure(date=...)` | Fecha que aparece abajo. |
+| `team` | `configure(team=...)` | Línea del equipo o del autor. |
+| `image` | el `cover_image` del template | Foto detrás del título; `False` oculta la foto del template. |
+| `palette` | la paleta de la presentación | Colores solo para esta slide. |
+| `background` | `configure(background=...)` | Fondo del lienzo. |
+
+`content` y `footer` existen para que todos los tipos de slide acepten los
+mismos argumentos, pero el layout de portada no los dibuja.

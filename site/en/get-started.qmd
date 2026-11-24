@@ -82,8 +82,9 @@ pages describe each slide type and its options.
 ## Cell order matters
 
 A `Section` takes its number (`01`, `02`, …) when its cell runs, so sections
-are numbered in the order of the notebook cells. Calling `configure()` starts
-the count again.
+are numbered in the order of the notebook cells, and calling `configure()`
+starts the count again. The number picks the color of each section in
+palettes that have one color per section.
 :::
 
 ## Show it as slides

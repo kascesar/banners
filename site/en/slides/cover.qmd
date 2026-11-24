@@ -1,4 +1,57 @@
 ---
 title: "Cover"
+description: "The title slide that opens a presentation."
 ---
 
+This page covers the `Cover` slide: what it shows, its options and the photo
+variant.
+
+## A first cover
+
+```python
+from banners import Cover, configure
+
+configure(team="Analytics Team", date="2026")
+Cover(title="Churn Prediction v2", subtitle="Model migration and deployment.")
+```
+
+![](../../images/cover-basic.png){width=80%}
+
+The template draws a dark cover with the logo, the team at the top right, the
+title, the subtitle and the date. The team and the date come from
+`configure()`, so every cover of the deck shows the same ones without
+repeating them.
+
+## A cover with a photo
+
+`image=` puts a photo behind the title. It accepts a URL, a file path or bytes:
+
+```python
+from banners import Cover
+
+Cover(
+    title="Earth observation",
+    subtitle="Ten years of satellite data.",
+    image="https://commons.wikimedia.org/wiki/Special:FilePath/The_Earth_seen_from_Apollo_17.jpg?width=1600",
+)
+```
+
+![](../../images/cover-photo.png){width=80%}
+
+A template can set a photo for every cover with `cover_image` (`COSMOS` and
+`TERRA` do). `Cover(image=False)` turns it off for one slide.
+
+## Options
+
+| Argument | Default | Meaning |
+|---|---|---|
+| `title` | — | Main title of the presentation. |
+| `subtitle` | `""` | One sentence of context under the title. |
+| `date` | `configure(date=...)` | Date shown at the bottom. |
+| `team` | `configure(team=...)` | Team or author line. |
+| `image` | the template's `cover_image` | Photo behind the title; `False` hides the template's photo. |
+| `palette` | the deck's palette | Colors for this slide only. |
+| `background` | `configure(background=...)` | Background of the canvas. |
+
+`content` and `footer` exist so that every slide type accepts the same
+arguments, but the cover layout does not draw them.

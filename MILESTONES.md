@@ -448,6 +448,9 @@ Decisions:
 
 Unplanned items found while working. Promote to a milestone when relevant.
 
+- No layout draws the `Section` number since the editorial redesign; it only picks the
+  `section_colors` entry. `example/showcase.py` still titles a slide "Section — auto-numbered
+  slide" and shows `number="A1"` / `number=""` as if they were visible.
 - `banners/scenes/pipeline.py` and other `ImportError` messages suggest `uv pip install 'banners[manim]'`,
   but the package on PyPI is called `marimo-banners`.
 - `AnimatedGraph._parse` loses the label of an edge destination node: `A --> B[Validate]`

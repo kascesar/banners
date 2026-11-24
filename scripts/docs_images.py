@@ -169,10 +169,6 @@ from banners import Section, Template, configure
 configure(template=Template(divider_icon="flow"))
 Section(title="Pipeline architecture", subtitle="How the data moves.")
 """,
-    "section-numbered": """
-from banners import Section, Text
-Section(title="Appendix", number="A1", content=[Text("`number=` replaces the automatic number.")])
-""",
     "closing-basic": """
 from banners import Closing
 Closing(title="One framework for all models.", subtitle="Questions welcome.")

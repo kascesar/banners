@@ -82,8 +82,9 @@ del equipo y la fecha, para que las slides no los repitan. Las páginas de
 ## El orden de las celdas importa
 
 Una `Section` toma su número (`01`, `02`, …) cuando se ejecuta su celda, así
-que las secciones se numeran en el orden de las celdas del notebook. Llamar a
-`configure()` reinicia la cuenta.
+que las secciones se numeran en el orden de las celdas del notebook, y llamar
+a `configure()` reinicia la cuenta. El número elige el color de cada sección
+en las paletas que tienen un color por sección.
 :::
 
 ## Verla como slides
