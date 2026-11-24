@@ -22,7 +22,7 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(r"""
+    mo.md(r'''
     # Graph element
 
     `Graph(diagram)` renders a static [Mermaid](https://mermaid.js.org/) diagram.
@@ -39,7 +39,7 @@ def _(mo):
 
     Supported Mermaid syntax: `graph LR`, `graph TD`, node shapes, edge labels.
     For interactive click-to-highlight, use `AnimatedGraph` instead.
-    """)
+    ''')
     return
 
 

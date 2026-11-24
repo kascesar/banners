@@ -107,8 +107,6 @@ class Slide:
             mime = _EXT_MIME.get(ext, "png")
             req = urllib.request.Request(icon, headers={"User-Agent": "Mozilla/5.0"})
             ctx = ssl.create_default_context()
-            ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
             with urllib.request.urlopen(req, timeout=10, context=ctx) as r:
                 data = r.read()
                 ct = r.headers.get("Content-Type", "")

@@ -51,14 +51,21 @@ def _(mo):
 
 
 @app.cell
+def _():
+    import matplotlib.pyplot as plt
+    import plotly.express as px
+
+    return plt, px
+
+
+@app.cell
 def _(mo):
     mo.md("## matplotlib — line chart")
     return
 
 
 @app.cell
-def _(Plot, Section):
-    import matplotlib.pyplot as plt
+def _(Plot, Section, plt):
     import matplotlib
     matplotlib.rcParams.update({"figure.facecolor": "#0f172a", "axes.facecolor": "#1e293b",
                                  "text.color": "white", "axes.labelcolor": "white",
@@ -93,8 +100,7 @@ def _(mo):
 
 
 @app.cell
-def _(Plot, Section):
-    import matplotlib.pyplot as plt
+def _(Plot, Section, plt):
 
     fig_bar, ax2 = plt.subplots(figsize=(7, 3.5))
     fig_bar.patch.set_facecolor("#0f172a")
@@ -149,8 +155,7 @@ def _(mo):
 
 
 @app.cell
-def _(Plot, Section, pd):
-    import plotly.express as px
+def _(Plot, Section, pd, px):
 
     df_px = pd.DataFrame({
         "Model":   ["Churn v1", "Churn v2", "LTV", "Propensity"],
@@ -180,8 +185,7 @@ def _(mo):
 
 
 @app.cell
-def _(Plot, Section, Text, pd):
-    import plotly.express as px
+def _(Plot, Section, Text, pd, px):
 
     df_scatter = pd.DataFrame({
         "Model":        ["Churn v1", "Churn v2", "LTV", "Propensity"],

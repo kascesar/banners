@@ -35,7 +35,8 @@ jobs:
         run: uv run --with ruff ruff check banners tests
 
       # pytest is added the same way as ruff. Tests marked `manim` are skipped
-      # (addopts in pyproject.toml). pandas is not a library dependency, but the
-      # notebooks run by tests/test_notebooks.py import it (e.g. test/06_table.py).
+      # (addopts in pyproject.toml). pandas and plotly are not library
+      # dependencies, but the notebooks run by tests/test_notebooks.py import them
+      # (test/06_table.py, test/07_plot.py).
       - name: Pytest
-        run: uv run --with pytest --with pandas pytest
+        run: uv run --with pytest --with pandas --with plotly pytest

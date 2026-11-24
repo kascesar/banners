@@ -22,7 +22,7 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(r"""
+    mo.md(r'''
     # AnimatedGraph element
 
     `AnimatedGraph(diagram)` renders a Mermaid `graph LR` / `graph TD` diagram
@@ -45,7 +45,7 @@ def _(mo):
     | `highlight_color` | `"#ea580c"` | Color applied when a node is clicked |
 
     Click any node to highlight it. Click again to deselect.
-    """)
+    ''')
     return
 
 

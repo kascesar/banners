@@ -24,8 +24,8 @@ def _():
     )
     from banners.palette import Palette, ORANGE, BLUE, GREEN, PURPLE, GRAY
     from manim import (
-        Scene, Text as MT, Write, FadeIn, Create,
-        Line, LEFT, RIGHT, UP,
+        Scene, Text as MT, Write, FadeIn, FadeOut, Create, MathTex,
+        Line, LEFT, RIGHT, UP, WHITE as MW,
     )
 
     configure(team="banners", date="2026", palette=ORANGE)
@@ -37,6 +37,7 @@ def _():
         Cover,
         Create,
         FadeIn,
+        FadeOut,
         FlowAnimation,
         GRAY,
         GREEN,
@@ -46,7 +47,9 @@ def _():
         LEFT,
         Line,
         MT,
+        MW,
         Manim,
+        MathTex,
         PURPLE,
         Palette,
         Plot,
