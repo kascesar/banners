@@ -2,7 +2,7 @@
 
 import pytest
 
-from banners import ORANGE, Palette, Template, configure
+from banners import ORANGE, Background, Palette, Template, configure
 from banners.content import Graph, Text
 from banners.slides import Closing, Cover, Intro, Section
 
@@ -105,3 +105,17 @@ def test_bech_preset_links_logos_and_has_no_photos():
 def test_template_default_palette_is_orange():
     """A default `Template` uses the `ORANGE` palette."""
     assert Template().palette == ORANGE
+
+
+def test_inline_code_takes_slide_text_color():
+    """Inline code must be readable on a dark slide background."""
+    html = Section(
+        title="T", background=Background.color("#0f172a"), content=Text("Pass `overlay=None`.")
+    ).render().text
+    assert ":not(pre)>code{color:inherit!important" in html
+
+
+def test_code_block_scales_with_the_slide():
+    """A code block is sized relative to the slide text, with its own line height."""
+    html = Section(title="T", content=Text("```python\nx = 1\n```")).render().text
+    assert "pre{font-size:0.8em!important;line-height:1.45!important" in html

@@ -345,6 +345,12 @@ class Template:
             f".{uid} ul,.{uid} ol{{margin:0!important;padding-left:1.1em!important;}}"
             f".{uid} li{{margin:0 0 0.6em!important;}}"
             f".{uid} li::marker{{color:{accent};}}"
+            # Code is excluded from the inherit rule above (it keeps its monospace
+            # font), so its color and size are set here: inline code takes the
+            # slide text color, code blocks scale with the slide text.
+            f".{uid} :not(pre)>code{{color:inherit!important;font-size:0.9em!important;}}"
+            f".{uid} pre{{font-size:0.8em!important;line-height:1.45!important;}}"
+            f".{uid} pre code{{font-size:inherit!important;line-height:inherit!important;}}"
             f".{uid} img,.{uid} svg,.{uid} video{{max-width:100%;height:auto;}}"
             f"</style>"
             f'<div class="{uid}" style="width:100%;height:100%;overflow:auto;">{lead_html}{grid}</div>'
