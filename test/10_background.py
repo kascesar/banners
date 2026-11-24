@@ -147,7 +147,6 @@ def _(Background, Section, content):
         subtitle="Neutral dark background",
         background=Background.color("#111827"),
         content=content,
-        content_kind="success"
     ).render()
     return
 

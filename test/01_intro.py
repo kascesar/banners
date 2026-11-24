@@ -79,7 +79,6 @@ def _(mo):
         team="Analytics Team",
         date="April 2026",
         palette=BLUE,
-        icon={"src": "img/logo.png"},  # optional
     )
     ```
 
@@ -117,7 +116,6 @@ def _(Cover, Text):
             Text("**Key point 2** — The concrete result achieved."),
             Text("**Key point 3** — The impact for the team."),
         ],
-        content_kind="warn",
     ).render()
     return
 
@@ -132,7 +130,6 @@ def _(mo):
     | `title` | `str` | Large centered title |
     | `subtitle` | `str` | Smaller line below the title |
     | `content` | list of `Text` | Bullet points in a grid below the banner |
-    | `content_kind` | `str` | Box style: `"neutral"`, `"info"`, `"warn"`, `"danger"`, `"success"` |
     | `palette` | `Palette` | Override the global palette |
     | `icon` | `dict` | `{"src": path}` logo on the banner |
     | `footer` | `str` | Quote rendered as a blockquote below content |
@@ -160,7 +157,6 @@ def _(Intro, Text):
             Text("**No traceability** — No record of which version was active."),
             Text("**People dependency** — Manual and undocumented process."),
         ],
-        content_kind="warn",
         footer="The question wasn't whether to migrate — but how to do it sustainably.",
     ).render()
     return
@@ -198,7 +194,6 @@ def _(Section, Text):
             Text("**Decision 2** — Deploy with a single command."),
             Text("**Decision 3** — Automatically generated technical documentation."),
         ],
-        content_kind="neutral",
     ).render()
     return
 
@@ -295,7 +290,7 @@ def _(mo):
     ### Custom palette
 
     ```python
-    teal = Palette(start="#042f2e", mid="#0f766e", end="#2dd4bf")
+    teal = Palette(primary="#2dd4bf", dark="#042f2e", closing_bg="#0f766e")
     configure(palette=teal)
     ```
 
@@ -317,24 +312,22 @@ def _(Cover, GRAY, Text, configure):
             Text("**Section** — border and background derived automatically."),
             Text("**Closing** — same gradient, no extra work."),
         ],
-        content_kind="neutral",
     ).render()
     return
 
 
 @app.cell
 def _(Cover, Palette, Text, configure):
-    teal = Palette(start="#042f2e", mid="#0f766e", end="#2dd4bf")
+    teal = Palette(primary="#2dd4bf", dark="#042f2e", closing_bg="#0f766e")
     configure(palette=teal, team="Analytics Team", date="April 2026")
     Cover(
         title="Custom teal palette",
-        subtitle="Palette(start, mid, end) passed to configure().",
+        subtitle="Palette(primary, dark, closing_bg) passed to configure().",
         content=[
             Text("**start** — darkest stop (left side of gradient)."),
             Text("**mid** — center stop."),
             Text("**end** — brightest stop, used as Section border accent."),
         ],
-        content_kind="neutral",
     ).render()
     return
 

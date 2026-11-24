@@ -4,9 +4,11 @@
 
 Composable slide presentations inside [marimo](https://marimo.io) notebooks.
 
-Each slide is a Python object. Content is declared with dedicated classes and the layout adjusts automatically depending on what you pass.
-
-The default look is sober and editorial: left-aligned headings in a medium weight, one accent color per palette used sparingly for rules and labels, thin lines instead of boxes, and nearly square corners. `Cover` and `Closing` use a solid dark panel; `Intro` and `Section` use a light header with an accent rule.
+Each slide is a Python object drawn on a fixed 16:9 canvas, like a PowerPoint
+slide. Positions and font sizes are relative to the slide width, so a deck keeps
+its proportions and stays legible from a notebook cell to a full-screen projector.
+How the slides look comes from a `Template`, made of layouts, a `Palette`
+(colors) and a `Theme` (fonts, title weight, icon stroke, scale).
 
 > **Personal note:** This project is a personal initiative to explore the capabilities of generative AI for developing complete, production-quality software projects — from architecture decisions to implementation, testing, and documentation — using [Claude Code](https://claude.ai/code) as the primary development partner.
 
@@ -24,7 +26,7 @@ Four slide types (`Cover`, `Intro`, `Section`, `Closing`) with five built-in pal
 
 ![Content types demo](demo-2-content-types.gif)
 
-> The animations on this page were recorded with version 0.2 and still show the previous gradient style.
+> The animations on this page were recorded with version 0.2 and still show the previous style.
 
 `Text` (markdown + LaTeX), `Image`, `Graph` (Mermaid), `AnimatedGraph` (interactive), `Table`, `Plot` (matplotlib / plotly), `FlowAnimation`, and `Manim` — all composable inside any slide.
 
@@ -38,15 +40,21 @@ Four slide types (`Cover`, `Intro`, `Section`, `Closing`) with five built-in pal
 
 ---
 
-# Upgrading from 0.2
+# Upgrading to 0.5
 
-Version 0.3 changes only the visual style. The public API is the same: every class, parameter and default value from 0.2 still works, so existing decks run without code changes. What changes on screen:
+Version 0.5 has a single rendering model: every slide is drawn on the 16:9
+canvas of a `Template`, and the fluid editorial style of 0.3 and 0.4 is gone.
+Decks that only use titles, content and the predefined palettes run unchanged
+and look different. These parameters were removed and now raise an error:
 
-- `Cover` and `Closing` render a solid, left-aligned panel instead of a centered gradient banner.
-- `Intro` and `Section` render a light header with a thin accent rule instead of a colored box.
-- `content_kind` renders light cards with a colored top rule instead of `mo.callout` boxes, and `Closing(stats=...)` renders a typographic row instead of `mo.stat` boxes.
-- `footer` renders a small gray note below a thin rule instead of a blockquote.
-- The five preset palettes (`ORANGE`, `BLUE`, `GREEN`, `PURPLE`, `GRAY`) have new, less saturated colors. Decks that need the old colors can define them with `Palette(start=..., mid=..., end=...)`; the 0.2 values are `#7c2d12`/`#c2410c`/`#ea580c` (orange), `#1e3a5f`/`#1d4ed8`/`#3b82f6` (blue), `#14532d`/`#15803d`/`#22c55e` (green), `#3b0764`/`#7e22ce`/`#a855f7` (purple) and `#111827`/`#374151`/`#6b7280` (gray).
+| Removed | Replacement |
+|---------|-------------|
+| `content_kind=` on slides | None: text renders as body text. |
+| `icon=` on slides and in `configure()` | `Template(mark=...)` for the small corner mark, `logo_on_light`/`logo_on_dark` for logos. |
+| `Palette(start=..., mid=..., end=...)`, `Palette.gradient`, `text_*` | `Palette(primary=..., dark=..., closing_bg=...)`: the old `end`, `start` and `mid`. |
+| `SectionPalette`, `Palette.to_section_palette()` | `Palette`, for every slide type. |
+| `Template(primary=..., font=..., ...)` color and font fields | `Template(palette=Palette(...), theme=Theme(...))`. |
+| `configure(template=None)` for the editorial style | `configure(template=None)` now uses the default `Template()`. |
 
 ---
 
@@ -77,67 +85,52 @@ sudo dnf install gcc-c++ python3-devel pkgconf-pkg-config cairo-devel pango-deve
 # Quick start
 
 ```python
-from banners import configure, Background
-from banners.slides import Cover, Intro, Section, Closing
-from banners.content import Text, Image, Graph
-from banners.palette import BLUE
+from banners import BLUE, TERRA, Closing, Cover, Intro, Section, Text, configure
 
-# Set shared values once — all slides inherit them automatically.
-configure(
-    team="Analytics Team",
-    date="April 2026",
-    palette=BLUE,
-    icon={"src": "img/logo.png"},
-)
+# Set shared values once; every slide picks them up.
+configure(template=TERRA, palette=BLUE, team="Analytics Team", date="April 2026")
 
-Cover(
-    title="Churn Prediction v2",
-    subtitle="Model migration and deployment.",
-    content=[
-        Text("**Accuracy** — 91% AUC on holdout."),
-        Text("**Latency** — p99 under 30 ms."),
-        Text("**Coverage** — All active segments."),
-    ],
-    content_kind="neutral",
-).render()
+Cover(title="Churn Prediction v2", subtitle="Model migration and deployment.")
+Intro(title="Why", content=[Text("**Risk** — No fallback."), Text("**Cost** — Manual steps.")])
+Section(title="Results", content=[Text("**Accuracy** — 91% AUC."), Text("**Latency** — p99 under 30 ms.")])
+Closing(title="One framework for all models.")
 ```
 
 # Global configuration
 
-`configure()` sets values shared across all slides. Call it once at the top of the notebook.
+`configure()` sets values shared across all slides. Call it once at the top of
+the notebook; it only changes the arguments it receives.
 
-| Parameter | Used by | Description |
-|-----------|---------|-------------|
-| `team` | `Cover`, `Intro`, `Closing` | Team line in small caps (top of the `Cover` panel, bottom of `Closing`, kicker fallback in `Intro`) |
-| `date` | `Cover` | Date shown at the top right of the panel |
-| `palette` | All slides | Color palette (`BLUE`, `GREEN`, etc.) |
-| `icon` | All slides | Logo/icon placed next to the heading |
+| Parameter | Description |
+|-----------|-------------|
+| `template` | `Template` that draws every slide. `None` uses the default `Template()`. |
+| `palette` | `Palette` for every slide; replaces the template's palette. |
+| `theme` | `Theme` for every slide; replaces the template's theme. |
+| `background` | `Background` painted on every slide's canvas. |
+| `team` | Team line on `Cover`, `Intro` and `Closing`. |
+| `date` | Date on `Cover`. |
 
 Calling `configure()` also resets the `Section` auto-number counter to zero.
-
-Any slide parameter passed explicitly overrides the global value.
 
 # Slides
 
 | Class | Purpose | Typical position |
 |-------|---------|-----------------|
-| `Cover` | Solid title panel with team and date | First slide |
-| `Intro` | Light header with kicker, for context or problem statement | Slides 2–3 |
-| `Section` | Light header with section number, for content | Middle slides |
-| `Closing` | Solid panel, mirroring `Cover`, with optional metrics row | Last slide |
+| `Cover` | Dark cover with logo, or photo cover (`image=`) | First slide |
+| `Intro` | Large title on the left, content on the right | Slides 2–3 |
+| `Section` | Divider without content; content slide otherwise | Middle slides |
+| `Closing` | Closing message with an optional metrics row (`stats=`) | Last slide |
 
 All slides share these parameters:
 
 | Parameter | Description |
 |-----------|-------------|
 | `title` | Main heading |
-| `subtitle` | Support phrase shown below the title |
-| `content` | Content element(s) displayed below the header |
-| `palette` | Color palette. Defaults to orange |
-| `content_kind` | Card style for `Text` items in a list: `neutral`, `info`, `success`, `warn`, `danger`. Each text goes in a light card whose top rule takes the kind's color |
-| `footer` | Short note (source, closing remark) in small gray text below a thin rule |
-| `icon` | Icon placed next to the heading. Falls back to the global `configure()` value |
-| `background` | Custom slide background (see [Slide backgrounds](#slide-backgrounds)) |
+| `subtitle` | Support phrase shown under the title |
+| `content` | Content element(s) of the slide |
+| `palette` | Colors for this slide only; replaces the configured and the template palette |
+| `footer` | Short note (source, closing remark) at the bottom right |
+| `background` | Background of this slide's canvas (see [Slide backgrounds](#slide-backgrounds)) |
 
 ## Section — auto-numbering
 
@@ -173,8 +166,10 @@ Section(title="No number", number="")
 Content is passed to the `content` parameter of any slide. Layout is resolved automatically:
 
 - **Single item** → full width.
-- **List of `Text` only** → equal columns; pass `content_kind` to add a styled box.
-- **List with any other element** → equal-width CSS grid, one column per item.
+- **Several items** → equal columns, one per item.
+- **A visual first, then text** (`Section(content=[Plot(fig), Text(...)])`) → visual on the left, title and text on the right.
+
+Content elements also work on their own in any marimo cell, without slides or `configure()`.
 
 ## AnimatedGraph
 
@@ -254,25 +249,54 @@ Section(
 
 Renders are cached on disk (`~/.cache/banners/manim/`) keyed by scene source code — no re-rendering across notebook restarts.
 
-# Palettes
+# Palettes and themes
 
-All slides accept a `palette` parameter. The default is orange.
+A `Palette` holds the colors of a deck, named by the role they play:
 
-A palette has two roles. `start` is the solid color of the `Cover` and `Closing` panels, a deep, low-saturation tone. `end` is the accent, used sparingly for the short bar above the title, the rule under headers, kickers and section numbers. `mid` is only used by the `Palette.gradient` property, kept for custom backgrounds.
+| Field | Role |
+|-------|------|
+| `primary` | Titles and main segment of the bottom bar |
+| `secondary` | End segment of the bottom bar |
+| `dark` | Background of the dark cover |
+| `closing_bg` | Background of the closing slide |
+| `light` | Background of dividers and content slides |
+| `text`, `muted` | Body text and labels on light backgrounds |
+| `on_dark` | Text on dark backgrounds |
+| `panel` | Box behind charts and visuals |
+| `icon_color`, `section_colors`, `bar_colors` | Optional: icon color, one color per section, multi-color bar |
 
-| Constant | Panel (`start`) | Accent (`end`) |
-|----------|-----------------|----------------|
-| `ORANGE` | `#2a1810` dark umber | `#c4561b` burnt orange |
-| `BLUE` | `#0f2340` navy | `#2f6fd0` mid blue |
-| `GREEN` | `#0f2a1f` dark forest | `#2e8b57` green |
-| `PURPLE` | `#221a3a` deep aubergine | `#6e56cf` violet |
-| `GRAY` | `#1a1d21` graphite | `#5b6470` slate |
+| Constant | `primary` | `dark` | `closing_bg` |
+|----------|-----------|--------|--------------|
+| `ORANGE` (default) | `#e4572e` | `#404040` | `#363e45` |
+| `BLUE` | `#2f6fd0` | `#0f2340` | `#16325c` |
+| `GREEN` | `#2e8b57` | `#0f2a1f` | `#173d2d` |
+| `PURPLE` | `#6e56cf` | `#221a3a` | `#2e2450` |
+| `GRAY` | `#5b6470` | `#1a1d21` | `#2a2e34` |
 
-Custom palettes: `Palette(start=..., end=...)` for any slide. `Section` also accepts a `SectionPalette(border=...)`, where `border` is the accent; a `Palette` passed to `Section` is converted automatically.
+A `Theme` holds the rest of the style: `font`, `heading_font` (titles; `None`
+uses `font`), `title_weight`, `icon_stroke` (line icons) and `scale` (multiplies
+every font size).
+
+Each template has its own palette and theme (`TERRA.palette`, `TERRA.theme`).
+A palette or theme you declare replaces the template's one as a whole:
+
+```python
+from banners import BLUE, TERRA, Palette, Section, Theme, configure
+
+configure(template=TERRA)                                  # TERRA colors and fonts
+configure(template=TERRA, palette=BLUE)                    # TERRA layouts and fonts, BLUE colors
+configure(theme=Theme(font="Inter, sans-serif", scale=1.1))
+Section(title="Risks", palette=Palette(primary="#b42318"))  # this slide only
+```
+
+Precedence: palette — slide `palette=` > `configure(palette=...)` > template;
+theme — `configure(theme=...)` > template.
 
 # Slide backgrounds
 
-The `background` parameter paints the full slide area (header + content) with a custom background. Use the `Background` factory class:
+The `background` parameter paints the canvas of a slide instead of the layout
+color. When the text color that reads well on the background can be computed,
+the slide text uses it.
 
 ```python
 from banners import Background
@@ -291,32 +315,26 @@ Cover(title="URL",   background=Background.image("https://...", overlay="rgba(0,
 Cover(title="Raw",   background=Background.image(raw_bytes, overlay=None))
 ```
 
-When `background` is set and `content_kind` is not, the content text color is chosen automatically based on the background luminance. Passing `content_kind` explicitly disables this: the text goes in light cards, which stay legible on any background.
-
-On a dark background (one whose automatic text color is white), the titles, subtitles, kickers, section numbers and rules drawn directly on the slide switch to white or translucent white. The accent color stays only on the short rule segments and bars.
-
 # Templates (fixed 16:9 slides)
 
-By default slides use the editorial style, which flows with the notebook width.
-A `Template` renders every slide on a fixed 16:9 canvas instead, like a
-corporate PowerPoint master: positions and font sizes are relative to the slide
-width (`cqw` units), so the deck keeps its proportions and stays legible on any
-screen. Use it to reproduce your organization's template while keeping every
-banners feature (Mermaid, plots, tables, Manim).
+A `Template` draws every slide on the 16:9 canvas, like a corporate PowerPoint
+master: positions and font sizes are relative to the slide width (`cqw` units).
+Without `configure(template=...)` a default `Template()` is used. Define your
+own to reproduce your organization's template while keeping every banners
+feature (Mermaid, plots, tables, Manim).
 
 ```python
-from banners import Template, configure
+from banners import Palette, Template, Theme, configure
 from banners.content import Plot, Text
 from banners.slides import Closing, Cover, Intro, Section
 
 corp = Template(
-    primary="#ff6600",                   # titles + main segment of the bottom bar
-    secondary="#054af6",                 # end segment of the bottom bar
+    palette=Palette(primary="#ff6600", secondary="#054af6"),  # titles + bottom bar
+    theme=Theme(font="'Century Gothic', 'URW Gothic', sans-serif"),
     logo_on_dark="assets/logo_white.png",
     logo_on_light="assets/logo_color.png",
     mark="assets/isotype.png",           # small mark on content slides
     closing_image="assets/mascot.png",   # picture next to the closing title
-    font="'Century Gothic', 'URW Gothic', sans-serif",
 )
 configure(template=corp, team="Analytics", date="November 2026")
 
@@ -348,14 +366,14 @@ BancoEstado template; its logos are linked from Wikimedia Commons and it ships
 no photos:
 
 ```python
-from banners.template import BECH
+from banners import BECH
 configure(template=BECH, team="Advanced Analytics", date="November 2026")
 ```
 
 ## Built-in templates
 
 ```python
-from banners.template import EXECUTIVE, INSTITUTIONAL, COSMOS, VIBRANT, TERRA, PRESETS
+from banners import EXECUTIVE, INSTITUTIONAL, COSMOS, VIBRANT, TERRA, PRESETS
 configure(template=COSMOS)
 ```
 
@@ -377,14 +395,13 @@ Icons come from `banners.icons` (original line icons, inline SVG, no network):
 `dataclasses.replace(COSMOS, cover_image="my_photo.jpg")`. A single slide
 drops the preset photo with `image=False`, for example `Section(title="Agenda", image=False)`.
 
-Other template options: `heading_font`, `cover_image`, `divider_image`,
-`divider_icon`, `icon_color`, `bar_colors`, `section_colors`, `panel`, and
-`auto_contrast` (titles below a 3:1 contrast ratio fall back to a readable
-color; off in `BECH` to keep the brand orange).
+Other template options: `cover_image`, `divider_image`, `divider_icon`, `bar`,
+`bar_split`, and `auto_contrast` (titles below a 3:1 contrast ratio fall back to
+a readable color; off in `BECH` to keep the brand orange).
 
 Keep brand assets (logos, photos) out of public repositories: define your
-`Template` in a private module next to your notebooks. `configure(template=None)`
-goes back to the editorial style. `Template(scale=1.1)` enlarges every font.
+`Template` in a private module next to your notebooks.
+`Template(theme=Theme(scale=1.1))` enlarges every font.
 
 # Documentation
 
@@ -398,7 +415,7 @@ Generated HTML is written to `docs/`.
 
 | Notebook | Content |
 |----------|---------|
-| `example/showcase.py` | Full capabilities walkthrough — all slide types, content elements, and backgrounds |
+| `example/showcase.py` | Walkthrough of slide types, content elements, and backgrounds |
 | `example/ondas_electromagneticas.py` | Complete presentation: Maxwell's equations → animated derivation → wave solution |
 
 Run any example with:

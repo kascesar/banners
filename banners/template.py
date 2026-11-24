@@ -1,20 +1,21 @@
 """Template — render slides on a fixed 16:9 canvas, like a PowerPoint master.
 
-By default banners renders slides in its editorial style, which flows with the
-notebook width. A `Template` replaces that with a fixed 16:9 canvas where every
-element has a position and size relative to the slide, exactly like a
-corporate PowerPoint template. Font sizes are expressed in container-query
-units (`cqw`, percent of the slide width), so a slide keeps its proportions and
-stays legible at any screen size.
+Every slide is drawn by a `Template` on a fixed 16:9 canvas where every element
+has a position and size relative to the slide, like a corporate PowerPoint
+template. Font sizes are expressed in container-query units (`cqw`, percent of
+the slide width), so a slide keeps its proportions and stays legible at any
+screen size. A template combines its layouts with a `Palette` (colors) and a
+`Theme` (fonts, title weight, icon stroke, scale); a palette or theme set with
+`configure()` or on a slide replaces the template's one.
 
-Activate a template for the whole deck with `configure(template=...)`:
+Without `configure(template=...)` a default `Template()` is used. Activate your
+own for the whole deck:
 
 ```python
-from banners import configure, Template
+from banners import Palette, Template, configure
 
 corp = Template(
-    primary="#ff6600",
-    secondary="#054af6",
+    palette=Palette(primary="#ff6600", secondary="#054af6"),
     logo_on_dark="assets/logo_white.png",
     logo_on_light="assets/logo_color.png",
     mark="assets/isotype.png",
@@ -39,9 +40,12 @@ Each slide type maps to a template layout:
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 
 import marimo as mo
+
+from .palette import Palette
+from .theme import Theme
 
 # Slide-relative font sizes, in percent of the slide width (cqw). They come
 # from the point sizes of a 16:9 PowerPoint master (slide width ≈ 1583 pt):
@@ -68,15 +72,6 @@ class Template:
     embedded in the slide. Leave them as `None` to omit them.
 
     Attributes:
-        primary: Title color and main segment of the bottom bar.
-        secondary: End segment of the bottom bar.
-        dark: Background of the dark cover and of the logo closing slide.
-        closing_bg: Background of the closing slide with a title.
-        light: Background of dividers and content slides.
-        text: Body text color on light backgrounds.
-        muted: Labels and subtitles on light backgrounds.
-        on_dark: Text color on dark backgrounds.
-        font: CSS font-family stack.
         logo_on_dark: Full logo for dark backgrounds. When `None`,
             `logo_on_light` is shown in white, with `mark` kept in color over
             its left `logo_mark_width` fraction.
@@ -86,35 +81,19 @@ class Template:
         logo_mark_width: Fraction of the logo width taken by the isotype at
             its left (used only by the white-logo fallback).
         bar: Draw the two-color bar along the bottom edge.
-        bar_split: Fraction of the bar width taken by `primary`.
-        scale: Multiplier applied to every font size.
-        heading_font: CSS font-family for titles; `None` uses `font`.
+        bar_split: Fraction of the bar width taken by `palette.primary`.
         cover_image: Photo used by `Cover` when the slide passes no `image`;
             `Cover(image=False)` turns it off for one slide.
         divider_image: Photo used by dividers when the slide passes no `image`;
             `Section(image=False)` turns it off for one slide.
         divider_icon: Large icon on dividers without a photo: an icon name
             from `banners.icons.ICONS` or any image source.
-        icon_color: Color of named icons (`mark`, `divider_icon`); defaults to
-            the title color.
-        bar_colors: Colors of the bottom bar in equal segments; overrides
-            `primary`/`secondary`/`bar_split`.
-        section_colors: Colors cycled by section number for titles and icons
-            of `Section` slides (colorful decks).
-        panel: Background of the box that holds a chart or visual.
         auto_contrast: Replace title colors that fall below a 3:1 contrast
             ratio with the background. Turn off to keep exact brand colors.
+        palette: Colors of the template (`Palette`).
+        theme: Fonts, title weight, icon stroke and size scale (`Theme`).
     """
 
-    primary: str = "#e4572e"
-    secondary: str = "#2a6fdb"
-    dark: str = "#404040"
-    closing_bg: str = "#363e45"
-    light: str = "#f5f5f5"
-    text: str = "#343e46"
-    muted: str = "#6b7280"
-    on_dark: str = "#f5f5f5"
-    font: str = "'Century Gothic', 'URW Gothic', 'URW Gothic L', 'Questrial', 'Avenir Next', sans-serif"
     logo_on_dark: object = None
     logo_on_light: object = None
     mark: object = None
@@ -122,16 +101,16 @@ class Template:
     logo_mark_width: float = 0.205
     bar: bool = True
     bar_split: float = 2 / 3
-    scale: float = 1.0
-    heading_font: str | None = None
     cover_image: object = None
     divider_image: object = None
     divider_icon: object = None
-    icon_color: str | None = None
-    bar_colors: tuple | None = None
-    section_colors: tuple | None = None
-    panel: str = "#ffffff"
     auto_contrast: bool = True
+    palette: Palette = field(default_factory=Palette)
+    theme: Theme = field(default_factory=Theme)
+
+    # CSS of the `Background` of the slide being rendered; set by `render` on
+    # the copy that draws one slide, never on the template the user declared.
+    _background = None
 
     # ── Entry point ──────────────────────────────────────────────────────────
 
@@ -144,40 +123,57 @@ class Template:
         Returns:
             A `mo.Html` 16:9 canvas.
         """
+        palette, theme = _resolve_style(self, slide)
+        background = getattr(slide, "background", None)
+        if background is not None:
+            from .background import _parse_first_color
+
+            readable = background.text_color()
+            if readable:
+                palette = replace(palette, text=readable, muted=readable, on_dark=readable)
+            rgb = _parse_first_color(background.css)
+            if rgb is not None:
+                # The contrast check compares titles with the layout backgrounds;
+                # point them at the color actually behind the text.
+                ground = "#{:02x}{:02x}{:02x}".format(*rgb)
+                palette = replace(palette, light=ground, dark=ground, closing_bg=ground)
+        active = replace(self, palette=palette, theme=theme)
+        active._background = background.css if background is not None else None
+
         kind = type(slide).__name__
         if kind == "Cover":
-            html = self._cover(slide)
+            html = active._cover(slide)
         elif kind == "Closing":
-            html = self._closing(slide)
+            html = active._closing(slide)
         elif kind == "Intro":
-            html = self._intro(slide)
+            html = active._intro(slide)
         else:
-            html = self._section(slide)
+            html = active._section(slide)
         return mo.Html(html)
 
     # ── Primitives ───────────────────────────────────────────────────────────
 
     def _fs(self, size: str) -> str:
-        return f"{SIZES[size] * self.scale:.3f}cqw"
+        return f"{SIZES[size] * self.theme.scale:.3f}cqw"
 
     def _canvas(self, bg: str, inner: str, color: str, bar_top: float = 95.4) -> str:
         bar = ""
-        if self.bar and self.bar_colors:
-            n = len(self.bar_colors)
+        if self.bar and self.palette.bar_colors:
+            n = len(self.palette.bar_colors)
             bar = "".join(
                 self._box(i * 100 / n, bar_top, 100 / n, 4.6, "", f"background:{c};")
-                for i, c in enumerate(self.bar_colors)
+                for i, c in enumerate(self.palette.bar_colors)
             )
         elif self.bar:
             split = self.bar_split * 100
             bar = (
-                self._box(0, bar_top, split, 4.6, "", f"background:{self.primary};")
-                + self._box(split, bar_top, 100 - split, 4.6, "", f"background:{self.secondary};")
+                self._box(0, bar_top, split, 4.6, "", f"background:{self.palette.primary};")
+                + self._box(split, bar_top, 100 - split, 4.6, "", f"background:{self.palette.secondary};")
             )
         return (
             '<div style="container-type:inline-size;width:100%;">'
             f'<div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;'
-            f'background:{bg};color:{color};font-family:{self.font};">'
+            f'background:{self._background or bg};color:{color};font-family:{self.theme.font};">'
             f"{inner}{bar}</div></div>"
         )
 
@@ -187,9 +183,9 @@ class Template:
         return f'<div style="position:absolute;left:{x}%;top:{y}%;{size}{style}">{html}</div>'
 
     def _text(self, text: str, size: str, color: str, bold: bool = False, extra: str = "") -> str:
-        weight = "700" if bold else "400"
-        if self.heading_font and size in ("display", "title", "closing"):
-            extra = f"font-family:{self.heading_font};" + extra
+        weight = str(self.theme.title_weight) if bold else "400"
+        if self.theme.heading_font and size in ("display", "title", "closing"):
+            extra = f"font-family:{self.theme.heading_font};" + extra
         return (
             f'<div style="font-size:{self._fs(size)};font-weight:{weight};color:{color};'
             f'line-height:1.1;{extra}">{text}</div>'
@@ -221,7 +217,7 @@ class Template:
         ratio = (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
         if ratio >= 3:
             return color
-        return self.on_dark if la < 0.18 else self.text
+        return self.palette.on_dark if la < 0.18 else self.palette.text
 
     def _title_color(self, slide) -> str:
         """Return the title color of a slide.
@@ -235,9 +231,9 @@ class Template:
             `primary` when there are no section colors or no number.
         """
         number = getattr(slide, "number", None)
-        if self.section_colors and number and str(number).isdigit():
-            return self.section_colors[(int(number) - 1) % len(self.section_colors)]
-        return self.primary
+        if self.palette.section_colors and number and str(number).isdigit():
+            return self.palette.section_colors[(int(number) - 1) % len(self.palette.section_colors)]
+        return self.palette.primary
 
     def _resolve(self, image, color: str):
         """Turn an icon name into a colored icon; pass other sources through.
@@ -253,7 +249,7 @@ class Template:
         from .icons import ICONS, icon
 
         if isinstance(image, str) and image in ICONS:
-            return icon(image, color=self.icon_color or color)
+            return icon(image, color=self.palette.icon_color or color, stroke=self.theme.icon_stroke)
         return image
 
     @staticmethod
@@ -308,7 +304,7 @@ class Template:
         return self._box(x, y, w, None, f'<div style="position:relative;">{white}{color_mark}</div>')
 
     def _mark(self, color: str | None = None) -> str:
-        mark = self._resolve(self.mark, self._on(self.light, color or self.primary))
+        mark = self._resolve(self.mark, self._on(self.palette.light, color or self.palette.primary))
         return self._box(91.9, 5.7, 2.9, None, self._img(mark, "width:100%;height:auto;"))
 
     def _content(self, slide, items: list, color: str, columns: bool = True, lead: str = "") -> str:
@@ -335,7 +331,7 @@ class Template:
             f'<div class="{uid}-lead" style="margin-bottom:1.5cqw;font-weight:700;">{lead}</div>'
             if lead else ""
         )
-        accent = self.primary
+        accent = self.palette.primary
         return (
             f"<style>"
             f".{uid}{{font-size:{self._fs('body')};line-height:1.4;color:{color};}}"
@@ -389,30 +385,30 @@ class Template:
         if image is None:
             inner = (
                 self._dark_logo(5.1, 6.1, 21.3)
-                + (self._box(50, 7, 44.9, None, self._text(s.team, "label", self.on_dark, extra="text-align:right;")) if s.team else "")
-                + self._box(11.7, 37, 80, None, self._text(s.title, "display", self._on(self.dark, self._title_color(s)), bold=True))
-                + (self._box(12.2, 52, 75, None, self._text(s.subtitle, "subtitle", self.on_dark, extra="line-height:1.25;")) if s.subtitle else "")
-                + (self._box(5.8, 87.5, 50, None, self._text(s.date, "small", self.on_dark)) if s.date else "")
+                + (self._box(50, 7, 44.9, None, self._text(s.team, "label", self.palette.on_dark, extra="text-align:right;")) if s.team else "")
+                + self._box(11.7, 37, 80, None, self._text(s.title, "display", self._on(self.palette.dark, self._title_color(s)), bold=True))
+                + (self._box(12.2, 52, 75, None, self._text(s.subtitle, "subtitle", self.palette.on_dark, extra="line-height:1.25;")) if s.subtitle else "")
+                + (self._box(5.8, 87.5, 50, None, self._text(s.date, "small", self.palette.on_dark)) if s.date else "")
             )
-            return self._canvas(self.dark, inner, self.on_dark)
+            return self._canvas(self.palette.dark, inner, self.palette.on_dark)
         shade = "linear-gradient(90deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.15) 55%,rgba(0,0,0,0) 100%)"
         inner = (
             self._photo(image, 0, 0, 100, 76.1, overlay=shade)
             + self._box(5.2, 29, 60, None, self._text(s.title, "display", "#ffffff", bold=True))
             + (self._box(5.6, 44.5, 55, None, self._text(s.subtitle, "subtitle", "#ffffff", extra="line-height:1.25;")) if s.subtitle else "")
             + (self._box(5.6, 68.4, 60, None, self._text(s.team, "label", "#ffffff")) if s.team else "")
-            + (self._box(7.3, 87.5, 50, None, self._text(s.date, "small", self.text)) if s.date else "")
+            + (self._box(7.3, 87.5, 50, None, self._text(s.date, "small", self.palette.text)) if s.date else "")
             + self._logo(self.logo_on_light, 77.9, 86, 18.4)
         )
-        return self._canvas(self.light, inner, self.text, bar_top=76.1)
+        return self._canvas(self.palette.light, inner, self.palette.text, bar_top=76.1)
 
     def _divider(self, s) -> str:
         image = self._slide_image(s, self.divider_image)
         accent = self._title_color(s)
-        title_color = self.text if image is not None else self._on(self.light, accent)
+        title_color = self.palette.text if image is not None else self._on(self.palette.light, accent)
         icon_html = ""
         if image is None and self.divider_icon is not None:
-            src = self._resolve(self.divider_icon, self._on(self.light, accent))
+            src = self._resolve(self.divider_icon, self._on(self.palette.light, accent))
             icon_html = self._box(66, 24, 22, None, self._img(src, "width:100%;height:auto;opacity:0.9;"))
         width = 38 if image is not None or icon_html else 85
         inner = (
@@ -420,20 +416,20 @@ class Template:
             + self._photo(image, 46.5, 0, 53.5, 95.4)
             + self._logo(self.logo_on_light, 5.2, 7, 21.3)
             + self._box(5.2, 36, width, None, self._text(s.title, "display", title_color, bold=True))
-            + (self._box(5.2, 72.9, width, None, self._text(s.subtitle, "label", self.muted, extra="line-height:1.25;")) if s.subtitle else "")
+            + (self._box(5.2, 72.9, width, None, self._text(s.subtitle, "label", self.palette.muted, extra="line-height:1.25;")) if s.subtitle else "")
         )
-        return self._canvas(self.light, inner, self.text)
+        return self._canvas(self.palette.light, inner, self.palette.text)
 
     def _stack(self, s, x: float, y: float, w: float, h: float, body: str) -> str:
         """Title, subtitle and body in one vertical flow, so a long title pushes
         the body down instead of overlapping it."""
         subtitle = (
-            self._text(s.subtitle, "body", self.muted, extra="margin-top:0.6cqw;line-height:1.3;")
+            self._text(s.subtitle, "body", self.palette.muted, extra="margin-top:0.6cqw;line-height:1.3;")
             if s.subtitle else ""
         )
         return self._box(
             x, y, w, h,
-            self._text(s.title, "title", self._on(self.light, self._title_color(s)), bold=True)
+            self._text(s.title, "title", self._on(self.palette.light, self._title_color(s)), bold=True)
             + subtitle
             + f'<div style="flex:1;min-height:0;margin-top:2.2cqw;">{body}</div>',
             "display:flex;flex-direction:column;",
@@ -451,29 +447,29 @@ class Template:
             # Photo on the left half, title and content on the right.
             inner = (
                 self._photo(image, 0, 0, 54, 95.4)
-                + self._stack(s, 57.8, 14, 34, 74, self._content(s, items, self.text, columns=False))
+                + self._stack(s, 57.8, 14, 34, 74, self._content(s, items, self.palette.text, columns=False))
                 + self._mark(self._title_color(s))
             )
-            return self._canvas(self.light, inner, self.text)
+            return self._canvas(self.palette.light, inner, self.palette.text)
 
         if len(items) >= 2 and not isinstance(items[0], (Text, str)):
             # Visual on the left, title and text on the right.
-            visual = self._content(s, items[:1], self.text)
+            visual = self._content(s, items[:1], self.palette.text)
             inner = (
-                self._box(5.1, 22, 44.9, 62, visual, f"background:{self.panel};padding:1.2cqw;box-sizing:border-box;")
-                + self._stack(s, 54.4, 22, 40.4, 66, self._content(s, items[1:], self.text, columns=False))
+                self._box(5.1, 22, 44.9, 62, visual, f"background:{self.palette.panel};padding:1.2cqw;box-sizing:border-box;")
+                + self._stack(s, 54.4, 22, 40.4, 66, self._content(s, items[1:], self.palette.text, columns=False))
                 + self._mark(self._title_color(s))
-                + self._footer(s, self.muted)
+                + self._footer(s, self.palette.muted)
             )
-            return self._canvas(self.light, inner, self.text)
+            return self._canvas(self.palette.light, inner, self.palette.text)
 
         # Title on top, content in columns below.
         inner = (
-            self._stack(s, 5.2, 10, 84, 76, self._content(s, items, self.text))
+            self._stack(s, 5.2, 10, 84, 76, self._content(s, items, self.palette.text))
             + self._mark(self._title_color(s))
-            + self._footer(s, self.muted)
+            + self._footer(s, self.palette.muted)
         )
-        return self._canvas(self.light, inner, self.text)
+        return self._canvas(self.palette.light, inner, self.palette.text)
 
     def _intro(self, s) -> str:
         label_text = s.subtitle or s.tag or ""
@@ -483,22 +479,22 @@ class Template:
         items = self._items(s)
         inner = (
             self._logo(self.logo_on_light, 5.2, 7, 21.3)
-            + self._box(5.2, 28.8, 27.1, 42, self._text(s.title, "display", self._on(self.light, self._title_color(s)), bold=True))
-            + (self._box(5.2, 72.9, 27.1, None, self._text(label_text, "label", self.muted, extra="line-height:1.25;")) if label_text else "")
-            + self._box(35.8, 28.8, 57.2, 56, self._content(s, items, self.text, lead=lead))
-            + self._footer(s, self.muted)
+            + self._box(5.2, 28.8, 27.1, 42, self._text(s.title, "display", self._on(self.palette.light, self._title_color(s)), bold=True))
+            + (self._box(5.2, 72.9, 27.1, None, self._text(label_text, "label", self.palette.muted, extra="line-height:1.25;")) if label_text else "")
+            + self._box(35.8, 28.8, 57.2, 56, self._content(s, items, self.palette.text, lead=lead))
+            + self._footer(s, self.palette.muted)
         )
-        return self._canvas(self.light, inner, self.text)
+        return self._canvas(self.palette.light, inner, self.palette.text)
 
     def _closing(self, s) -> str:
         if not s.title:
             inner = (
                 self._dark_logo(38, 45.7, 24)
-                + (self._box(5.1, 86.5, 50, None, self._text(s.team, "label", self.on_dark)) if s.team else "")
+                + (self._box(5.1, 86.5, 50, None, self._text(s.team, "label", self.palette.on_dark)) if s.team else "")
             )
-            return self._canvas(self.dark, inner, self.on_dark)
+            return self._canvas(self.palette.dark, inner, self.palette.on_dark)
 
-        accent = self._on(self.closing_bg, self.primary)
+        accent = self._on(self.palette.closing_bg, self.palette.primary)
         closing_image = self._resolve(self.closing_image, accent)
         has_image = self._src(closing_image) is not None
         dy = 6 if s.stats else 0  # push the title down to make room for the stats row
@@ -516,7 +512,7 @@ class Template:
                              "display:flex;align-items:center;justify-content:center;")
         sub = (
             self._box(10, 62 + dy, 80, None,
-                      self._text(s.subtitle, "body", self.on_dark, extra="text-align:center;line-height:1.3;"))
+                      self._text(s.subtitle, "body", self.palette.on_dark, extra="text-align:center;line-height:1.3;"))
             if s.subtitle else ""
         )
         stats = ""
@@ -524,14 +520,36 @@ class Template:
             cells = "".join(
                 f'<div style="text-align:center;padding:0 1cqw;">'
                 f'<div style="font-size:{self._fs("title")};font-weight:700;color:{accent};">{v}</div>'
-                f'<div style="font-size:{self._fs("body")};color:{self.on_dark};margin-top:0.4cqw;">{label}</div>'
-                f'<div style="font-size:{self._fs("small")};color:{self.on_dark};opacity:0.7;">{cap}</div></div>'
+                f'<div style="font-size:{self._fs("body")};color:{self.palette.on_dark};margin-top:0.4cqw;">{label}</div>'
+                f'<div style="font-size:{self._fs("small")};color:{self.palette.on_dark};opacity:0.7;">{cap}</div></div>'
                 for v, label, cap in s.stats
             )
             stats = self._box(10, 14, 80, None,
                               f'<div style="display:grid;grid-template-columns:repeat({len(s.stats)},1fr);">{cells}</div>')
-        team = self._box(5.1, 86.5, 50, None, self._text(s.team, "label", self.on_dark)) if s.team else ""
-        return self._canvas(self.closing_bg, head + sub + stats + team, self.on_dark)
+        team = self._box(5.1, 86.5, 50, None, self._text(s.team, "label", self.palette.on_dark)) if s.team else ""
+        return self._canvas(self.palette.closing_bg, head + sub + stats + team, self.palette.on_dark)
+
+
+def _resolve_style(template: Template, slide) -> tuple[Palette, Theme]:
+    """Choose the palette and the theme a slide is drawn with.
+
+    A palette or theme declared by the user replaces the template's one as a
+    whole; fields are never merged.
+
+    Args:
+        template: The template that draws the slide.
+        slide: The slide being rendered; its `palette` may be `None`.
+
+    Returns:
+        `(palette, theme)`: the slide palette, else `configure(palette=...)`,
+        else `template.palette`; and `configure(theme=...)`, else
+        `template.theme`.
+    """
+    from . import config as _cfg
+
+    palette = getattr(slide, "palette", None) or _cfg.get("palette") or template.palette
+    theme = _cfg.get("theme") or template.theme
+    return palette, theme
 
 
 # ── Presets ───────────────────────────────────────────────────────────────────
@@ -539,17 +557,21 @@ class Template:
 _COMMONS = "https://commons.wikimedia.org/wiki/Special:FilePath/"
 
 BECH = Template(
-    primary="#ff6600",
-    secondary="#054af6",
-    dark="#404040",
-    closing_bg="#363e45",
-    light="#f5f5f5",
-    text="#343e46",
-    muted="#6b7280",
-    font="'Century Gothic', 'URW Gothic', 'URW Gothic L', 'Questrial', sans-serif",
+    palette=Palette(
+        primary="#ff6600",
+        secondary="#054af6",
+        dark="#404040",
+        closing_bg="#363e45",
+        light="#f5f5f5",
+        text="#343e46",
+        muted="#6b7280",
+    ),
     logo_on_light=_COMMONS + "Logo_BancoEstado.svg",
     mark=_COMMONS + "Logo_BancoEstado_(cropped).svg",
     auto_contrast=False,  # keep the brand orange exactly as in the deck
+    theme=Theme(
+        font="'Century Gothic', 'URW Gothic', 'URW Gothic L', 'Questrial', sans-serif",
+    ),
 )
 """Template inspired by BancoEstado's 16:9 decks (colors, font and layout).
 
@@ -583,88 +605,108 @@ def _commons(name: str, width: int = 1920) -> str:
 
 
 EXECUTIVE = Template(
-    primary="#1f2933",
-    secondary="#9aa5b1",
-    dark="#1f2933",
-    closing_bg="#1f2933",
-    light="#ffffff",
-    text="#323f4b",
-    muted="#7b8794",
-    on_dark="#f5f7fa",
-    font="'Helvetica Neue', Arial, sans-serif",
-    heading_font="Georgia, Cambria, 'Times New Roman', serif",
+    palette=Palette(
+        primary="#1f2933",
+        secondary="#9aa5b1",
+        dark="#1f2933",
+        closing_bg="#1f2933",
+        light="#ffffff",
+        text="#323f4b",
+        muted="#7b8794",
+        on_dark="#f5f7fa",
+    ),
     mark="chart",
     divider_icon="layers",
     bar=False,
+    theme=Theme(
+        font="'Helvetica Neue', Arial, sans-serif",
+        heading_font="Georgia, Cambria, 'Times New Roman', serif",
+    ),
 )
 """Sober, monochrome: graphite on white, serif titles, thin line icons, no bar."""
 
 INSTITUTIONAL = Template(
-    primary="#0b2545",
-    secondary="#8da9c4",
-    dark="#0b2545",
-    closing_bg="#0b2545",
-    light="#f7f9fb",
-    text="#13315c",
-    muted="#6b7c93",
-    font="'Helvetica Neue', Arial, sans-serif",
-    heading_font="Cambria, Georgia, serif",
+    palette=Palette(
+        primary="#0b2545",
+        secondary="#8da9c4",
+        dark="#0b2545",
+        closing_bg="#0b2545",
+        light="#f7f9fb",
+        text="#13315c",
+        muted="#6b7c93",
+    ),
     mark="building",
     divider_icon="shield",
+    theme=Theme(
+        font="'Helvetica Neue', Arial, sans-serif",
+        heading_font="Cambria, Georgia, serif",
+    ),
 )
 """Formal navy with steel blue, serif titles and monochrome navy icons."""
 
 COSMOS = Template(
-    primary="#22d3ee",
-    secondary="#a78bfa",
-    dark="#070912",
-    closing_bg="#070912",
-    light="#0d1024",
-    text="#e5e7eb",
-    muted="#9ca3af",
-    on_dark="#e5e7eb",
-    panel="#151936",
-    font="'Helvetica Neue', Arial, sans-serif",
+    palette=Palette(
+        primary="#22d3ee",
+        secondary="#a78bfa",
+        dark="#070912",
+        closing_bg="#070912",
+        light="#0d1024",
+        text="#e5e7eb",
+        muted="#9ca3af",
+        on_dark="#e5e7eb",
+        panel="#151936",
+        bar_colors=("#22d3ee", "#a78bfa", "#f472b6"),
+        section_colors=("#22d3ee", "#a78bfa", "#f472b6", "#facc15"),
+    ),
     cover_image=_commons("Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg"),
     divider_image=_commons("The_Earth_seen_from_Apollo_17.jpg"),
     mark="orbit",
-    bar_colors=("#22d3ee", "#a78bfa", "#f472b6"),
-    section_colors=("#22d3ee", "#a78bfa", "#f472b6", "#facc15"),
+    theme=Theme(
+        font="'Helvetica Neue', Arial, sans-serif",
+    ),
 )
 """Dark, colorful space theme with NASA public-domain photos (Hubble's Pillars
 of Creation on the cover, Apollo 17's Earth on dividers)."""
 
 VIBRANT = Template(
-    primary="#ef476f",
-    secondary="#118ab2",
-    dark="#073b4c",
-    closing_bg="#073b4c",
-    light="#ffffff",
-    text="#1f2937",
-    muted="#6b7280",
-    font="'Trebuchet MS', 'Segoe UI', Arial, sans-serif",
+    palette=Palette(
+        primary="#ef476f",
+        secondary="#118ab2",
+        dark="#073b4c",
+        closing_bg="#073b4c",
+        light="#ffffff",
+        text="#1f2937",
+        muted="#6b7280",
+        bar_colors=("#ef476f", "#ffd166", "#06d6a0", "#118ab2"),
+        section_colors=("#ef476f", "#118ab2", "#0a9396", "#e76f51"),
+    ),
     mark="spark",
     divider_icon="target",
-    bar_colors=("#ef476f", "#ffd166", "#06d6a0", "#118ab2"),
-    section_colors=("#ef476f", "#118ab2", "#0a9396", "#e76f51"),
+    theme=Theme(
+        font="'Trebuchet MS', 'Segoe UI', Arial, sans-serif",
+    ),
 )
 """Bright and playful: four-color bar, each section in its own color."""
 
 TERRA = Template(
-    primary="#2d6a4f",
-    secondary="#c8553d",
-    dark="#1b4332",
-    closing_bg="#1b4332",
-    light="#f4f1ea",
-    text="#283618",
-    muted="#6b705c",
-    font="Verdana, 'DejaVu Sans', sans-serif",
-    heading_font="Georgia, Cambria, serif",
+    palette=Palette(
+        primary="#2d6a4f",
+        secondary="#c8553d",
+        dark="#1b4332",
+        closing_bg="#1b4332",
+        light="#f4f1ea",
+        text="#283618",
+        muted="#6b705c",
+        bar_colors=("#2d6a4f", "#dda15e", "#c8553d"),
+        section_colors=("#2d6a4f", "#bc6c25", "#c8553d"),
+    ),
     cover_image=_commons("Grand_Canyon_National_Park_GRCA9857.jpg"),
     mark="mountain",
     divider_icon="leaf",
-    bar_colors=("#2d6a4f", "#dda15e", "#c8553d"),
-    section_colors=("#2d6a4f", "#bc6c25", "#c8553d"),
+    theme=Theme(
+        font="Verdana, 'DejaVu Sans', sans-serif",
+        heading_font="Georgia, Cambria, serif",
+    ),
 )
 """Earthy greens and terracotta with a public-domain Grand Canyon photo
 (U.S. National Park Service) on the cover; good for climate and nature topics."""

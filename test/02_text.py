@@ -1,5 +1,5 @@
 """
-02_text.py — Text content element: markdown, layouts and content_kind styles.
+02_text.py — Text content element: markdown and layouts.
 Run with: uv run marimo edit test/02_text.py
 """
 
@@ -36,8 +36,6 @@ def _(mo):
     ```
 
     `Text` objects are passed in `content=` lists alongside other elements.
-    When a slide receives a list of only `Text` items, it applies `content_kind`
-    to all of them as styled boxes.
     """)
     return
 
@@ -84,80 +82,6 @@ def _(Section, Text):
             Text("**Transform** — Spark job normalizes schema and fills missing values."),
             Text("**Load** — Final dataset written to Athena and Redshift for queries."),
         ],
-    ).render()
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("## `content_kind` — styled boxes")
-    return
-
-
-@app.cell
-def _(Section, Text):
-    Section(
-        title="content_kind = neutral",
-        content=[
-            Text("**Point A** — Neutral box, default style."),
-            Text("**Point B** — Same style as A."),
-            Text("**Point C** — All items share the same kind."),
-        ],
-        content_kind="neutral",
-    ).render()
-    return
-
-
-@app.cell
-def _(Section, Text):
-    Section(
-        title="content_kind = warn",
-        content=[
-            Text("**Risk 1** — Models stop producing predictions."),
-            Text("**Risk 2** — No record of which version is active."),
-            Text("**Risk 3** — Manual and undocumented process."),
-        ],
-        content_kind="warn",
-    ).render()
-    return
-
-
-@app.cell
-def _(Section, Text):
-    Section(
-        title="content_kind = success",
-        content=[
-            Text("**Result 1** — Deployment time reduced from days to minutes."),
-            Text("**Result 2** — Full end-to-end traceability."),
-            Text("**Result 3** — Single parameterized framework."),
-        ],
-        content_kind="success",
-    ).render()
-    return
-
-
-@app.cell
-def _(Section, Text):
-    Section(
-        title="content_kind = info",
-        content=[
-            Text("**Note 1** — Any model can be deployed with one command."),
-            Text("**Note 2** — Documentation is generated automatically."),
-        ],
-        content_kind="info",
-    ).render()
-    return
-
-
-@app.cell
-def _(Section, Text):
-    Section(
-        title="content_kind = danger",
-        content=[
-            Text("**Critical 1** — Servers shut down on March 15."),
-            Text("**Critical 2** — Zero fallback strategy in place."),
-        ],
-        content_kind="danger",
     ).render()
     return
 

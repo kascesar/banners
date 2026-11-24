@@ -131,7 +131,7 @@ def _build_svg(nodes, edges, pos, node_w, node_h, uid):
     parts = [
         (
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {svg_w} {svg_h}" '
-            f'width="100%" style="font-family:sans-serif;font-size:13px;'
+            f'width="100%" font-size="13" style="font-family:sans-serif;'
             f'max-width:{svg_w}px;display:block;margin:0 auto;">'
         ),
         '<defs>',

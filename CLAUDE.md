@@ -93,20 +93,22 @@ git push origin v0.2.3
 ## Architecture
 
 `banners` is a **marimo presentation library** published on PyPI as `marimo-banners`.
-Every slide calls `.render()` which returns a `mo.vstack` of marimo components,
-displayed directly in a notebook cell (slides also implement `_display_()`).
+Every slide calls `.render()`, which returns a `mo.Html` 16:9 canvas drawn by the
+active `Template`, displayed directly in a notebook cell (slides also implement
+`_display_()`). Content elements (`banners/content/`) render on their own too.
 
 ### Layers
 
 ```
 banners/
-  config.py          # Global mutable state: team, date, icon, palette, background, section counter
-  palette.py         # Palette / SectionPalette dataclasses + 5 presets
+  config.py          # Global mutable state: team, date, template, palette, theme, background, section counter
+  palette.py         # Palette: colors by role + 5 presets (ORANGE, BLUE, GREEN, PURPLE, GRAY)
+  theme.py           # Theme: fonts, title weight, icon stroke, scale
   background.py      # Background: color / gradient / image + automatic text contrast
-  slide.py           # Slide base class — layout engine lives here
-  template.py        # Template: fixed 16:9 canvas renderer + presets (BECH, EXECUTIVE, …)
+  slide.py           # Slide base class: stores the slide data, render() delegates to the template
+  template.py        # Template: 16:9 canvas renderer (layouts) + presets (BECH, EXECUTIVE, …)
   icons.py           # Original line icons as SVG data URIs (used by templates)
-  slides/            # Cover, Intro, Section, Closing — each overrides _render_banner()
+  slides/            # Cover, Intro, Section, Closing — only their own fields, no rendering
   content/           # Leaf content elements — each has a .render() method
   scenes/            # Reusable Manim Scene factories (e.g. PipelineScene)
   static/            # Vendored mermaid.min.js
@@ -117,23 +119,27 @@ example/layouts/     # marimo slide-layout files (*.slides.json)
 
 ### `Slide` base class (`slide.py`)
 
-`_render_content()` drives all layout logic:
-- **1 item** → rendered at full width.
-- **N items** → `_css_grid()` wraps them in an equal `1fr`-per-column grid via inline HTML.
-- `content_kind` wraps `Text` items in `mo.callout(kind=...)` when the list is text-only.
-
-`_render_item()` dispatches by type: `Text`/`str` → `mo.md()`; anything with `.render()` → call it; otherwise pass through as-is.
-
-All four slide types inherit `Slide` and only implement `_render_banner()` to return a `mo.Html` banner block.
+A slide only stores data (`title`, `subtitle`, `content`, `palette`, `footer`,
+`background` plus each subclass's fields). `Slide.render()` returns
+`(configure template or Template()).render(self)`; there is no other rendering
+path. `Slide._icon_src()` converts paths, URLs and bytes to data URIs for the
+template and for `Background.image`.
 
 ### Templates (`template.py`)
 
-When `configure(template=Template(...))` is set, every slide's `render()` returns
-`template.render(self)` instead of the editorial layout. The template draws a
-16:9 canvas (`container-type:inline-size` + `aspect-ratio:16/9`) with absolutely
+`Template` = layouts + logos/photos/icons/bar options + one `Palette` + one
+`Theme`. `Template.render(slide)` calls `_resolve_style()` to pick the palette
+(slide `palette=` > `configure(palette=)` > `template.palette`) and the theme
+(`configure(theme=)` > `template.theme`); a user palette or theme replaces the
+template's one as a whole, fields are never merged. It then draws the layout on
+`replace(self, palette=..., theme=...)`, so layouts read only `self.palette.*`
+and `self.theme.*`. A slide `background` paints the canvas and, when
+`Background.text_color()` returns a color, sets `text`/`muted`/`on_dark` to it.
+
+The canvas is `container-type:inline-size` + `aspect-ratio:16/9`, with absolutely
 positioned boxes in % of the slide and font sizes in `cqw` (`SIZES`, taken from
-PowerPoint point sizes). Layout is chosen by slide type and content (see the
-module docstring). `Cover.image` and `Section.image` are only used by templates.
+PowerPoint point sizes, times `Theme.scale`). Layout is chosen by slide type and
+content (see the module docstring). Never size slide text in `rem` or `px`.
 Never commit organization brand assets (logos, photos) to this public repo.
 Preset photos must be public domain, contain no people, and be linked
 (Wikimedia Commons `Special:FilePath` URLs), never stored in the repo.
@@ -148,14 +154,19 @@ so **cell order matters** — sections number themselves at construction time.
 Because `_state` is module-global, tests must reset it between cases
 (call `configure()` with explicit values or restore a snapshot of `_state` in a fixture).
 
-### Palette system (`palette.py`)
+### Palette and Theme (`palette.py`, `theme.py`)
 
-`Palette` is for full-banner slides (Cover/Intro/Closing). It has `start/mid/end` colors and a `gradient` property. `Palette.to_section_palette()` derives a `SectionPalette` (border + dark bg) by darkening `start`. Predefined constants: `ORANGE`, `BLUE`, `GREEN`, `PURPLE`, `GRAY`.
+`Palette` holds only colors, by role (`primary`, `secondary`, `dark`,
+`closing_bg`, `light`, `text`, `muted`, `on_dark`, `panel`, optional
+`icon_color`, `section_colors`, `bar_colors`). `ORANGE = Palette()` is the
+default. `Theme` holds `font`, `heading_font`, `title_weight`, `icon_stroke` and
+`scale`. Both are plain dataclasses with no dependency on templates or slides.
 
 ### Backgrounds (`background.py`)
 
 `Background.color()`, `Background.gradient()`, `Background.image(src, overlay=...)`
-produce a `Background(css=...)`. Set globally via `configure(background=...)` or per slide.
+produce a `Background(css=...)`. Set globally via `configure(background=...)` or per slide;
+the template paints it on the slide canvas.
 `text_color()` parses the first color in the CSS (`_parse_first_color`: named colors,
 `#rrggbbaa`, `#rrggbb`, `#rgba`, …), computes WCAG relative luminance and returns
 `"#ffffff"` (dark bg, luminance < 0.2) or `"#1f2937"` (light bg), or `None` if unparseable.

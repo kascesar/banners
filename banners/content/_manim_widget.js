@@ -61,13 +61,13 @@ function render({ model, el }) {
         const b = document.createElement("button");
         b.textContent = text;
         b.style.cssText = "background:#1f2937;color:#9ca3af;border:1px solid #374151;"
-            + "border-radius:0.375rem;padding:0.2rem 0.7rem;cursor:pointer;font-size:0.85rem;";
+            + "border-radius:0.375rem;padding:0.2rem 0.7rem;cursor:pointer;font-size:0.85em;";
         return b;
     }
 
     const btnPrev = makeBtn("←");
     const label = document.createElement("span");
-    label.style.cssText = "font-size:0.8rem;color:#9ca3af;min-width:4rem;display:inline-block;";
+    label.style.cssText = "font-size:0.8em;color:#9ca3af;min-width:4rem;display:inline-block;";
     label.textContent = "1 / " + srcs.length;
     const btnNext = makeBtn("→");
     const btnAuto = makeBtn("▶");

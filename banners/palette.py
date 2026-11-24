@@ -1,124 +1,73 @@
-"""Color palettes for slide banners."""
+"""Palette — the colors of a deck, named by the role they play on a slide.
+
+A `Palette` holds only colors. A `Template` holds one palette (its own
+default); a palette set with `configure(palette=...)` or on a slide replaces
+the template's palette as a whole. The same palette works with any template.
+
+```python
+from banners import BLUE, Palette, configure
+
+configure(palette=BLUE)                                  # every slide
+custom = Palette(primary="#0f766e", dark="#042f2e", closing_bg="#134e4a")
+```
+"""
+
+from __future__ import annotations
 
 from dataclasses import dataclass
 
 
 @dataclass
 class Palette:
-    """Color palette for slides.
-
-    `start` is the solid panel color used by `Cover` and `Closing`; `end` is
-    the accent used sparingly for rules, section numbers and kickers. `mid`
-    is only used by the `gradient` property, kept for custom backgrounds.
+    """Colors of a deck, by role.
 
     Attributes:
-        start: Panel color (hex), a deep, low-saturation tone.
-        mid: Secondary panel tone (hex), used by `gradient`.
-        end: Accent color (hex).
-        text_main: Primary text color on the banner.
-        text_sub: Subtitle text color.
-        text_muted: Muted text color (dates, captions).
-        text_tag: Small-caps tag/team line color.
-
-    Example:
-        ```python
-        from banners.palette import Palette, BLUE
-
-        # Use a predefined palette
-        Cover(title="My Project", palette=BLUE).render()
-
-        # Build a custom palette
-        custom = Palette(start="#0f172a", mid="#1e40af", end="#3b82f6")
-        Cover(title="My Project", palette=custom).render()
-        ```
+        primary: Title color and main segment of the bottom bar.
+        secondary: End segment of the bottom bar.
+        dark: Background of the dark cover and of the logo closing slide.
+        closing_bg: Background of the closing slide with a title.
+        light: Background of dividers and content slides.
+        text: Body text color on light backgrounds.
+        muted: Labels and subtitles on light backgrounds.
+        on_dark: Text color on dark backgrounds.
+        panel: Background of the box that holds a chart or visual.
+        icon_color: Color of named icons (`mark`, `divider_icon`); `None` uses
+            the title color.
+        section_colors: Colors cycled by section number for titles and icons
+            of `Section` slides; `None` uses `primary` on every section.
+        bar_colors: Colors of the bottom bar in equal segments; `None` draws
+            `primary` and `secondary` split by `Template.bar_split`.
     """
 
-    start: str = "#2a1810"
-    mid: str = "#3d2216"
-    end: str = "#c4561b"
-
-    text_main: str = "#ffffff"
-    text_sub: str = "#d6d3d1"
-    text_muted: str = "#a8a29e"
-    text_tag: str = "#a8a29e"
-
-    @property
-    def gradient(self) -> str:
-        """CSS linear-gradient string built from start, mid and end stops."""
-        return f"linear-gradient(135deg, {self.start} 0%, {self.mid} 50%, {self.end} 100%)"
-
-    def to_section_palette(self) -> "SectionPalette":
-        """Derive a SectionPalette from this palette.
-
-        Uses `end` as the border accent and a darkened `start` for the background.
-        """
-        def _darken(hex_color: str, factor: float) -> str:
-            h = hex_color.lstrip("#")
-            r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
-            return f"#{int(r * factor):02x}{int(g * factor):02x}{int(b * factor):02x}"
-
-        return SectionPalette(
-            border=self.end,
-            bg_start=_darken(self.start, 0.30),
-            bg_end=_darken(self.start, 0.42),
-        )
-
-
-@dataclass
-class SectionPalette:
-    """Palette for Section slides: left border accent over a dark background.
-
-    Attributes:
-        border: Left-border accent color (hex).
-        bg_start: Dark background gradient start color (hex).
-        bg_end: Dark background gradient end color (hex).
-        text_main: Primary text color.
-        text_sub: Subtitle text color.
-
-    Example:
-        ```python
-        from banners.palette import SectionPalette
-
-        blue_section = SectionPalette(
-            border="#3b82f6",
-            bg_start="#0f172a",
-            bg_end="#1e293b",
-        )
-        Section(title="Results", palette=blue_section).render()
-        ```
-    """
-
-    border: str = "#c4561b"
-    bg_start: str = "#1c0a00"
-    bg_end: str = "#1f1210"
-
-    text_main: str = "#ffffff"
-    text_sub: str = "#d1d5db"
-
-    @property
-    def gradient(self) -> str:
-        """CSS linear-gradient string for the dark background."""
-        return f"linear-gradient(90deg, {self.bg_start} 0%, {self.bg_end} 100%)"
+    primary: str = "#e4572e"
+    secondary: str = "#2a6fdb"
+    dark: str = "#404040"
+    closing_bg: str = "#363e45"
+    light: str = "#f5f5f5"
+    text: str = "#343e46"
+    muted: str = "#6b7280"
+    on_dark: str = "#f5f5f5"
+    panel: str = "#ffffff"
+    icon_color: str | None = None
+    section_colors: tuple | None = None
+    bar_colors: tuple | None = None
 
 
 # ── Predefined palettes ───────────────────────────────────────────────────────
-# Deep, desaturated panel tones with one restrained accent each.
+# Each one keeps the tones of the 0.4 palette with the same name: its accent
+# becomes `primary`, its deepest tone `dark` and its middle tone `closing_bg`.
 
 ORANGE = Palette()
-"""Default palette — dark umber panel, burnt-orange accent."""
+"""Default palette: orange titles, blue accent, graphite dark slides."""
 
-BLUE = Palette(start="#0f2340", mid="#16325c", end="#2f6fd0",
-               text_sub="#cbd5e1", text_muted="#94a3b8", text_tag="#94a3b8")
-"""Navy panel, mid-blue accent."""
+BLUE = Palette(primary="#2f6fd0", dark="#0f2340", closing_bg="#16325c")
+"""Mid-blue titles on navy dark slides."""
 
-GREEN = Palette(start="#0f2a1f", mid="#173d2d", end="#2e8b57",
-                text_sub="#cfd8d3", text_muted="#94a89c", text_tag="#94a89c")
-"""Dark forest panel, green accent."""
+GREEN = Palette(primary="#2e8b57", dark="#0f2a1f", closing_bg="#173d2d")
+"""Green titles on dark forest slides."""
 
-PURPLE = Palette(start="#221a3a", mid="#2e2450", end="#6e56cf",
-                 text_sub="#d4d0e0", text_muted="#a09ab8", text_tag="#a09ab8")
-"""Deep aubergine panel, violet accent."""
+PURPLE = Palette(primary="#6e56cf", dark="#221a3a", closing_bg="#2e2450")
+"""Violet titles on deep aubergine slides."""
 
-GRAY = Palette(start="#1a1d21", mid="#2a2e34", end="#5b6470",
-               text_sub="#d1d5db", text_muted="#9ca3af", text_tag="#9ca3af")
-"""Graphite panel, slate accent."""
+GRAY = Palette(primary="#5b6470", dark="#1a1d21", closing_bg="#2a2e34")
+"""Slate titles on graphite slides."""

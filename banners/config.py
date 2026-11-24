@@ -3,8 +3,8 @@
 _state: dict = {
     "team": "",
     "date": "",
-    "icon": None,
     "palette": None,
+    "theme": None,
     "background": None,
     "template": None,
     "_section_counter": 0,
@@ -16,8 +16,8 @@ _UNSET = object()
 def configure(
     team: str = _UNSET,
     date: str = _UNSET,
-    icon=_UNSET,
     palette=_UNSET,
+    theme=_UNSET,
     background=_UNSET,
     template=_UNSET,
 ) -> None:
@@ -30,18 +30,18 @@ def configure(
     Args:
         team: Team line shown in `Cover`, `Intro`, and `Closing` banners.
         date: Date string shown in `Cover` (e.g. `"April 2026"`).
-        icon: Icon applied to all slides. Pass a dict with keys `"src"`
-            (path, URL, or bytes) and optionally `"size"` (CSS height).
-        palette: Color palette applied to `Cover`, `Intro`, and `Closing`.
-            Pass any `Palette` instance or predefined constant
-            (`BLUE`, `GREEN`, `PURPLE`, `GRAY`).
+        palette: `Palette` for every slide (e.g. `BLUE`). It replaces the
+            template's palette as a whole; a slide's own `palette=` replaces
+            it in turn. `None` uses the template's palette.
+        theme: `Theme` for every slide (fonts, title weight, icon stroke,
+            scale). It replaces the template's theme as a whole. `None` uses
+            the template's theme.
         background: Background applied to all slides. Pass a `Background`
             instance (`Background.color()`, `Background.gradient()`, or
             `Background.image()`). Individual slides can override this with
             their own `background` argument.
-        template: A `Template` that renders every slide on a fixed 16:9
-            canvas (corporate PowerPoint style). Pass `None` to go back to
-            the default editorial style.
+        template: The `Template` that draws every slide on the 16:9 canvas.
+            `None` uses a default `Template()`.
 
     Example:
         ```python
@@ -52,7 +52,6 @@ def configure(
             team="Analytics Team",
             date="April 2026",
             palette=BLUE,
-            icon={"src": "img/logo.png"},
             background=Background.gradient("#0f172a", "#1e3a5f"),
         )
         ```
@@ -61,10 +60,10 @@ def configure(
         _state["team"] = team
     if date is not _UNSET:
         _state["date"] = date
-    if icon is not _UNSET:
-        _state["icon"] = icon
     if palette is not _UNSET:
         _state["palette"] = palette
+    if theme is not _UNSET:
+        _state["theme"] = theme
     if background is not _UNSET:
         _state["background"] = background
     if template is not _UNSET:

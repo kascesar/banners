@@ -91,12 +91,10 @@ Make sure every notebook in `test/` and `example/` at least executes without err
 - `uv run pytest tests/test_notebooks.py` → green for all non-manim notebooks.
 - `uv run pytest -m manim` → green locally on César's Fedora (with system libs installed).
 
-Pending verification by César: `uv run pytest -m manim` on César's Fedora machine with the system libraries
-(`example/ondas_electromagneticas.py` fails with `ValueError: latex error converting to dvi`
-because the LaTeX class `standalone.cls`, used by the default `MathTex` template, is missing;
-`kpsewhich standalone.cls` finds nothing and `dvisvgm` is not on the PATH either.
-`test/08_manim.py` and `test/09_flow_animation.py` pass; `example/showcase.py` stays xfail
-because of the error recorded in the Backlog).
+Verified on 2026-11-24: `uv run pytest -m manim` on César's Fedora machine → 3 passed, 1 xfailed
+(`example/showcase.py`, the error recorded in the Backlog). The LaTeX error in
+`example/ondas_electromagneticas.py` was missing system packages, fixed with
+`sudo dnf install texlive-standalone texlive-dvisvgm`.
 
 `tests/test_notebooks.py` joins the M3 CI without workflow changes: the CI runs
 `uv run pytest` and `addopts = "-m 'not manim'"` leaves the manim notebooks out.
@@ -117,6 +115,156 @@ because of the error recorded in the Backlog).
   (can be tested first against TestPyPI).
 
 Verified on 2026-11-23: the Trusted Publisher is registered on PyPI and the `v0.4.0` tag published 0.4.0. TestPyPI (`rc` tags) has not been tried yet.
+
+---
+
+## [x] M6 — One rendering model: Template = Palette + Theme + layouts
+
+banners exists to present. Today it has two rendering modes that look and size
+text differently: the fluid editorial style (sizes in `rem`, so text stays at
+16–19 px even on a full-screen projector, which has drawn criticism) and
+`Template` (a fixed 16:9 canvas sized in `cqw`). `Template` also ignores any
+`palette`, so palettes and templates cannot be combined. This milestone keeps a
+single model: every slide is drawn on the 16:9 canvas, and a template is
+composed of a palette and a theme that can each be declared on their own.
+It is a breaking release: **0.5.0**.
+
+**Concepts**
+
+- `Palette`: colors only, named by role. Fields: `primary`, `secondary`, `dark`,
+  `closing_bg`, `light`, `text`, `muted`, `on_dark`, `panel`, `icon_color`
+  (optional) and the optional sequences `section_colors` and `bar_colors`.
+  These are exactly the color fields `Template` has today, moved out of it.
+- `Theme`: the visual style that is not color. Fields: `font`, `heading_font`,
+  `title_weight`, `icon_stroke` (stroke width of the line icons) and `scale`.
+- `Template`: layouts, logos, photos, icons, bar on/off and split, and
+  `auto_contrast`, plus one `palette` and one `theme` (its own defaults).
+  Switching the template of an existing deck changes layouts, palette and theme
+  together without touching the slides.
+
+**Precedence** (resolved in one function, not per layout):
+palette: slide `palette=` > `configure(palette=...)` > `template.palette`;
+theme: `configure(theme=...)` > `template.theme`. A palette or theme declared by
+the user replaces the template's one as a whole (no field-by-field merge).
+
+**Changes**
+
+- Every slide renders through the active template. Without
+  `configure(template=...)`, a default `Template()` is used, whose palette is
+  `ORANGE`. `ORANGE` takes the current `Template` default colors; `BLUE`,
+  `GREEN`, `PURPLE` and `GRAY` are redefined by role from their current colors.
+- `background=` (per slide or in `configure`) paints the canvas background of
+  that slide instead of the layout color; when `Background.text_color()` returns
+  a color, the text of that slide uses it.
+- Removed, with no deprecation period (code that uses them fails with
+  `TypeError`/`ImportError`): the editorial rendering in `banners/slides/` and
+  `Slide` (`_render_banner`, `_render_content`, `_css_grid`, the `rem` sizes),
+  `content_kind`, `icon=` on slides and in `configure`, `Palette.start/mid/end`,
+  `Palette.text_*`, `Palette.gradient`, `SectionPalette` and `to_section_palette`.
+- The six presets (`BECH`, `EXECUTIVE`, `INSTITUTIONAL`, `COSMOS`, `VIBRANT`,
+  `TERRA`) are rewritten as `Template(palette=Palette(...), theme=Theme(...), ...)`
+  with the same look as today. Their palettes and themes are reachable as
+  `TERRA.palette` / `TERRA.theme`; no extra named constants.
+- Content elements (`Text`, `Image`, `Graph`, `AnimatedGraph`, `Table`, `Plot`,
+  `Manim`, `FlowAnimation`) stay independent of slides and configuration and
+  keep working in a plain marimo cell.
+- `Palette`, `Theme` and the presets are exported in `banners.__all__`; README
+  and docstrings describe the new model (the full README rewrite is a later
+  milestone). Notebooks in `test/` and `example/` are updated to the new API.
+
+**Non-goals**: per-slide `theme=`; new icon sets (filled icons); new layouts or a
+new visual identity; manim animations and the README rewrite (later milestones).
+
+**Anti-goals**: a field-by-field merge between user and template palettes; any
+slide text sized in `rem`/`px`; content elements importing `banners.config`.
+
+**Acceptance criteria**
+- `make check` → green.
+- Tests in `tests/` cover: the precedence rules above (slide > configure >
+  template for palette, configure > template for theme); `Palette` and `Theme`
+  are usable without a `Template`; every preset renders `Cover`, `Intro`,
+  `Section` (divider and with content) and `Closing` with its own palette and
+  with `palette=BLUE`; `background=` changes the canvas background; every removed
+  parameter raises `TypeError`; each content element renders without `configure()`.
+- `grep -rnE "font-size:[0-9.]+(rem|px)" banners/` → no matches.
+- `uv run pytest tests/test_notebooks.py` → the same notebooks pass as before
+  (known xfails stay xfail).
+- `pyproject.toml` version is `0.5.0`; `uv build` and `uvx twine check dist/*` pass.
+- César reviews a private artifact gallery that renders every preset × layout,
+  with and without a user palette, and presents one existing deck full screen in
+  marimo slide mode to confirm text size.
+
+Verified on 2026-11-24: César reviewed the gallery (electromagnetic-waves demo,
+eight layouts per template) and presented `example/ondas_electromagneticas.py`
+full screen; the text reads well. The Python release itself (tag `v0.5.0`) is
+left to César.
+
+---
+
+## [ ] M7 — Professional manim animations, player, and palette-aware plots
+
+**Needs a brainstorming pass before planning**: César wants the manim
+transitions "completely renewed to a much more professional style"; what
+"professional" means concretely (pace, easing, motion style, references he
+likes) is still open, and the acceptance criteria below are provisional.
+
+What exists today and is in scope:
+- The player (`banners/content/_manim_widget.js`): a black stage that hard-cuts
+  between section videos (double buffer, z-index swap, no cross-fade), and gray
+  `#1f2937` buttons plus an "Auto" toggle under the video.
+- The scenes: `FlowAnimation` (`banners/content/flow_animation.py`) and
+  `PipelineScene` (`banners/scenes/pipeline.py`) build every step with
+  `FadeIn(scale=0.85)` + `Write` at `run_time=0.5`, with their own fixed colors
+  (`_COLORS`, `#9ca3af` details) and background.
+- Colors come from the active M6 palette when one is configured; with no
+  configuration, `Manim` and `FlowAnimation` keep working in a plain cell with
+  their own defaults (content elements must not require `banners.config`).
+- Plots follow the palette (decided with César): today a matplotlib `Plot` does
+  not know which panel it lands on, so each user picks readable colors by hand.
+  The template restyles the figure when it places it on a slide, because only
+  the template knows `palette.panel`: axes, ticks, labels and legend take a color
+  readable on the panel, and only lines and patches that use matplotlib's
+  automatic cycle colors (`C0`, `C1`, …) are recolored with the palette
+  (`primary`, `secondary`, then `section_colors` if any). Colors the user set by
+  hand are kept, and a `Plot` in a plain cell renders exactly as today. `Plot`
+  itself still does not read `banners.config`.
+
+**Acceptance criteria (provisional)**
+- `make check` → green; `uv run pytest -m manim` → green on César's machine.
+- The player and the scenes follow the style agreed in the brainstorming.
+- `FlowAnimation` and `PipelineScene` take their colors from the active palette,
+  and render with defaults when no palette is configured (unit test without manim
+  for the color resolution).
+- A matplotlib figure placed on a slide gets panel-readable axes and text, its
+  automatic-color lines take the palette colors, a hand-set line color is
+  unchanged, and the same `Plot` rendered without a slide is unchanged (unit
+  tests with matplotlib, no manim).
+- César reviews `test/08_manim.py`, `test/09_flow_animation.py` and
+  `example/showcase.py` in marimo slide mode.
+
+---
+
+## [ ] M8 — Short, striking README
+
+**Needs a brainstorming pass before planning**: César finds the current README
+(408 lines) confusing and disordered, and says it does not show off what
+banners really does. He wants it much shorter and much more striking. Which
+features lead, and what "striking" looks like, are still open.
+
+In scope:
+- Rewrite `README.md` around the 0.5 model from M6 (Template = Palette + Theme
+  + layouts) and the M7 animations; detailed API reference moves to the pdoc
+  docs instead of the README.
+- Regenerate the demo GIFs (`demo-1-slide-types.gif`, `demo-2-content-types.gif`,
+  `demo-3-backgrounds.gif`), which still show the 0.2 style.
+- Update the texts of the `test/` notebooks, which describe the old design.
+- No organization brand assets in the README or the GIFs (public repository).
+
+**Acceptance criteria (provisional)**
+- Every code example in the README runs against the current API (checked by a
+  test that extracts and executes the README code blocks).
+- The GIFs show the 0.5 look.
+- César approves the README rendered on GitHub.
 
 ---
 
@@ -148,15 +296,14 @@ Unplanned items found while working. Promote to a milestone when relevant.
 - `Slide._icon_src` disables TLS verification (`check_hostname = False`,
   `verify_mode = ssl.CERT_NONE`) when downloading icons and images by URL, so it accepts
   invalid or spoofed certificates. It affects `icon=` and `Background.image(url)`.
-- Regenerate the README GIFs (`demo-1-slide-types.gif`, `demo-2-content-types.gif`,
-  `demo-3-backgrounds.gif`) with the 0.3 editorial design; today they show the 0.2 style
-  (the README warns about it in a note).
-- The texts of the `test/` notebooks describe the previous design (for example,
-  `test/01_intro.py` says "Compact gradient banner" and "Dark panel with left border").
+- `Cover` and `Closing` accept `content=` and `footer=`, but the template layouts do not draw
+  them, so the values are silently ignored. Either draw them or remove the parameters.
+- `Closing` stats values use a fixed `font-weight:700` instead of `Theme.title_weight`.
+- `test/01_intro.py` and `example/showcase.py` prose still describes the removed `icon`
+  parameter and the `start`/`mid`/`end` palette (M8 rewrites the notebook texts).
 - A local `make publish` would put `.claude/settings.local.json` in the sdist: hatch only
   reads the project `.gitignore`, not the user's global git ignore file. The CI release
   builds from a clean checkout and is not affected. Fix: an `exclude` rule in `pyproject.toml`.
-- (Optional) `configure(font=...)` to set a corporate typeface on every slide.
 
 ---
 
@@ -170,3 +317,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | 2026-11-23 | M4 | `milestone/m4-notebook-smoke` | Smoke test `tests/test_notebooks.py` that runs the 12 notebooks (4 with the `manim` marker, 4 xfail for errors recorded in the Backlog). |
 | 2026-11-23 | M5 | `milestone/m5-release` | Workflow `release.yml` that publishes to PyPI with Trusted Publishing when a `v*` tag is pushed (TestPyPI if the tag contains `rc`) and fails if the tag does not match the version; release steps in `CLAUDE.md`. |
 | 2026-11-23 | — | `design/editorial` | Editorial redesign of the slides (César's patch) plus visual fixes: icons without overlap, contrast on dark backgrounds, `Intro` summary size; docstrings, README with "Upgrading from 0.2" and version 0.3.0. |
+| 2026-11-24 | M6 | `milestone/m6-palette-theme-template` | One rendering model on the 16:9 canvas: `Template` = `Palette` (colors by role) + `Theme` (fonts, title weight, icon stroke, scale) + layouts; palette precedence slide > configure > template; editorial style, `content_kind`, `icon=` and `SectionPalette` removed; version 0.5.0. |
