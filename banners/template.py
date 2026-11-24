@@ -39,9 +39,11 @@ Each slide type maps to a template layout:
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import marimo as mo
+
+from .theme import Theme
 
 # Slide-relative font sizes, in percent of the slide width (cqw). They come
 # from the point sizes of a 16:9 PowerPoint master (slide width ≈ 1583 pt):
@@ -76,7 +78,6 @@ class Template:
         text: Body text color on light backgrounds.
         muted: Labels and subtitles on light backgrounds.
         on_dark: Text color on dark backgrounds.
-        font: CSS font-family stack.
         logo_on_dark: Full logo for dark backgrounds. When `None`,
             `logo_on_light` is shown in white, with `mark` kept in color over
             its left `logo_mark_width` fraction.
@@ -87,8 +88,6 @@ class Template:
             its left (used only by the white-logo fallback).
         bar: Draw the two-color bar along the bottom edge.
         bar_split: Fraction of the bar width taken by `primary`.
-        scale: Multiplier applied to every font size.
-        heading_font: CSS font-family for titles; `None` uses `font`.
         cover_image: Photo used by `Cover` when the slide passes no `image`;
             `Cover(image=False)` turns it off for one slide.
         divider_image: Photo used by dividers when the slide passes no `image`;
@@ -104,6 +103,7 @@ class Template:
         panel: Background of the box that holds a chart or visual.
         auto_contrast: Replace title colors that fall below a 3:1 contrast
             ratio with the background. Turn off to keep exact brand colors.
+        theme: Fonts, title weight, icon stroke and size scale (`Theme`).
     """
 
     primary: str = "#e4572e"
@@ -114,7 +114,6 @@ class Template:
     text: str = "#343e46"
     muted: str = "#6b7280"
     on_dark: str = "#f5f5f5"
-    font: str = "'Century Gothic', 'URW Gothic', 'URW Gothic L', 'Questrial', 'Avenir Next', sans-serif"
     logo_on_dark: object = None
     logo_on_light: object = None
     mark: object = None
@@ -122,8 +121,6 @@ class Template:
     logo_mark_width: float = 0.205
     bar: bool = True
     bar_split: float = 2 / 3
-    scale: float = 1.0
-    heading_font: str | None = None
     cover_image: object = None
     divider_image: object = None
     divider_icon: object = None
@@ -132,6 +129,7 @@ class Template:
     section_colors: tuple | None = None
     panel: str = "#ffffff"
     auto_contrast: bool = True
+    theme: Theme = field(default_factory=Theme)
 
     # ── Entry point ──────────────────────────────────────────────────────────
 
@@ -158,7 +156,7 @@ class Template:
     # ── Primitives ───────────────────────────────────────────────────────────
 
     def _fs(self, size: str) -> str:
-        return f"{SIZES[size] * self.scale:.3f}cqw"
+        return f"{SIZES[size] * self.theme.scale:.3f}cqw"
 
     def _canvas(self, bg: str, inner: str, color: str, bar_top: float = 95.4) -> str:
         bar = ""
@@ -177,7 +175,7 @@ class Template:
         return (
             '<div style="container-type:inline-size;width:100%;">'
             f'<div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;'
-            f'background:{bg};color:{color};font-family:{self.font};">'
+            f'background:{bg};color:{color};font-family:{self.theme.font};">'
             f"{inner}{bar}</div></div>"
         )
 
@@ -187,9 +185,9 @@ class Template:
         return f'<div style="position:absolute;left:{x}%;top:{y}%;{size}{style}">{html}</div>'
 
     def _text(self, text: str, size: str, color: str, bold: bool = False, extra: str = "") -> str:
-        weight = "700" if bold else "400"
-        if self.heading_font and size in ("display", "title", "closing"):
-            extra = f"font-family:{self.heading_font};" + extra
+        weight = str(self.theme.title_weight) if bold else "400"
+        if self.theme.heading_font and size in ("display", "title", "closing"):
+            extra = f"font-family:{self.theme.heading_font};" + extra
         return (
             f'<div style="font-size:{self._fs(size)};font-weight:{weight};color:{color};'
             f'line-height:1.1;{extra}">{text}</div>'
@@ -253,7 +251,7 @@ class Template:
         from .icons import ICONS, icon
 
         if isinstance(image, str) and image in ICONS:
-            return icon(image, color=self.icon_color or color)
+            return icon(image, color=self.icon_color or color, stroke=self.theme.icon_stroke)
         return image
 
     @staticmethod
@@ -546,10 +544,12 @@ BECH = Template(
     light="#f5f5f5",
     text="#343e46",
     muted="#6b7280",
-    font="'Century Gothic', 'URW Gothic', 'URW Gothic L', 'Questrial', sans-serif",
     logo_on_light=_COMMONS + "Logo_BancoEstado.svg",
     mark=_COMMONS + "Logo_BancoEstado_(cropped).svg",
     auto_contrast=False,  # keep the brand orange exactly as in the deck
+    theme=Theme(
+        font="'Century Gothic', 'URW Gothic', 'URW Gothic L', 'Questrial', sans-serif",
+    ),
 )
 """Template inspired by BancoEstado's 16:9 decks (colors, font and layout).
 
@@ -591,11 +591,13 @@ EXECUTIVE = Template(
     text="#323f4b",
     muted="#7b8794",
     on_dark="#f5f7fa",
-    font="'Helvetica Neue', Arial, sans-serif",
-    heading_font="Georgia, Cambria, 'Times New Roman', serif",
     mark="chart",
     divider_icon="layers",
     bar=False,
+    theme=Theme(
+        font="'Helvetica Neue', Arial, sans-serif",
+        heading_font="Georgia, Cambria, 'Times New Roman', serif",
+    ),
 )
 """Sober, monochrome: graphite on white, serif titles, thin line icons, no bar."""
 
@@ -607,10 +609,12 @@ INSTITUTIONAL = Template(
     light="#f7f9fb",
     text="#13315c",
     muted="#6b7c93",
-    font="'Helvetica Neue', Arial, sans-serif",
-    heading_font="Cambria, Georgia, serif",
     mark="building",
     divider_icon="shield",
+    theme=Theme(
+        font="'Helvetica Neue', Arial, sans-serif",
+        heading_font="Cambria, Georgia, serif",
+    ),
 )
 """Formal navy with steel blue, serif titles and monochrome navy icons."""
 
@@ -624,12 +628,14 @@ COSMOS = Template(
     muted="#9ca3af",
     on_dark="#e5e7eb",
     panel="#151936",
-    font="'Helvetica Neue', Arial, sans-serif",
     cover_image=_commons("Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg"),
     divider_image=_commons("The_Earth_seen_from_Apollo_17.jpg"),
     mark="orbit",
     bar_colors=("#22d3ee", "#a78bfa", "#f472b6"),
     section_colors=("#22d3ee", "#a78bfa", "#f472b6", "#facc15"),
+    theme=Theme(
+        font="'Helvetica Neue', Arial, sans-serif",
+    ),
 )
 """Dark, colorful space theme with NASA public-domain photos (Hubble's Pillars
 of Creation on the cover, Apollo 17's Earth on dividers)."""
@@ -642,11 +648,13 @@ VIBRANT = Template(
     light="#ffffff",
     text="#1f2937",
     muted="#6b7280",
-    font="'Trebuchet MS', 'Segoe UI', Arial, sans-serif",
     mark="spark",
     divider_icon="target",
     bar_colors=("#ef476f", "#ffd166", "#06d6a0", "#118ab2"),
     section_colors=("#ef476f", "#118ab2", "#0a9396", "#e76f51"),
+    theme=Theme(
+        font="'Trebuchet MS', 'Segoe UI', Arial, sans-serif",
+    ),
 )
 """Bright and playful: four-color bar, each section in its own color."""
 
@@ -658,13 +666,15 @@ TERRA = Template(
     light="#f4f1ea",
     text="#283618",
     muted="#6b705c",
-    font="Verdana, 'DejaVu Sans', sans-serif",
-    heading_font="Georgia, Cambria, serif",
     cover_image=_commons("Grand_Canyon_National_Park_GRCA9857.jpg"),
     mark="mountain",
     divider_icon="leaf",
     bar_colors=("#2d6a4f", "#dda15e", "#c8553d"),
     section_colors=("#2d6a4f", "#bc6c25", "#c8553d"),
+    theme=Theme(
+        font="Verdana, 'DejaVu Sans', sans-serif",
+        heading_font="Georgia, Cambria, serif",
+    ),
 )
 """Earthy greens and terracotta with a public-domain Grand Canyon photo
 (U.S. National Park Service) on the cover; good for climate and nature topics."""

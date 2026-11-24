@@ -10,6 +10,7 @@ from banners.content import Text
 from banners.icons import ICONS, icon
 from banners.slides import Closing, Cover, Section
 from banners.template import PRESETS
+from banners.theme import Theme
 
 
 def html(slide) -> str:
@@ -75,7 +76,7 @@ def test_auto_contrast_swaps_unreadable_title_color():
 
 
 def test_heading_font_applies_to_titles_only():
-    configure(template=Template(heading_font="Georgia, serif"))
+    configure(template=Template(theme=Theme(heading_font="Georgia, serif")))
     out = html(Section(title="T", content=Text("body")))
     # The slide has a single title: the font appears once and does not leak into the body.
     assert out.count("font-family:Georgia, serif") == 1

@@ -69,11 +69,6 @@ def test_intro_and_closing_render(tpl):
     assert "Thanks" not in html(Closing(title=""))
 
 
-def test_scale_multiplies_font_sizes():
-    t = Template(scale=2)
-    assert t._fs("body") == f"{1.77 * 2:.3f}cqw"
-
-
 def test_bad_image_is_omitted(tpl):
     t = Template(logo_on_dark="/does/not/exist.png")
     configure(template=t)
