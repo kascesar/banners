@@ -126,9 +126,17 @@ class Template:
         palette, theme = _resolve_style(self, slide)
         background = getattr(slide, "background", None)
         if background is not None:
+            from .background import _parse_first_color
+
             readable = background.text_color()
             if readable:
                 palette = replace(palette, text=readable, muted=readable, on_dark=readable)
+            rgb = _parse_first_color(background.css)
+            if rgb is not None:
+                # The contrast check compares titles with the layout backgrounds;
+                # point them at the color actually behind the text.
+                ground = "#{:02x}{:02x}{:02x}".format(*rgb)
+                palette = replace(palette, light=ground, dark=ground, closing_bg=ground)
         active = replace(self, palette=palette, theme=theme)
         active._background = background.css if background is not None else None
 

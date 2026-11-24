@@ -104,3 +104,10 @@ def test_background_image_makes_text_white():
     configure(template=None)
     out = html(Section(title="A", content=Text("x"), background=Background.image(PNG)))
     assert "url(data:image/png" in out and "#ffffff" in out
+
+
+def test_title_contrast_follows_background():
+    """On a `background`, the title contrast check uses that background, not the layout color."""
+    configure(template=Template(palette=Palette(primary="#222222")))
+    out = html(Section(title="Divider", background=Background.color("#000000")))
+    assert "color:#222222" not in out
