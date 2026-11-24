@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev   = ["hatch", "pdoc", "pandas", "plotly", "manim>=0.21", "ruff", "pytest", "pytest-cov"]
+dev   = ["hatch", "pdoc", "pandas", "plotly", "manim>=0.21", "ruff", "pytest", "pytest-cov", "playwright"]
 manim = ["manim>=0.21"]
 [project.urls]
 Homepage = "https://github.com/kascesar/banners"

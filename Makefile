@@ -8,13 +8,20 @@ docs:
 # Checks required by the milestone workflow before any work is reported as done.
 .PHONY: lint test check
 lint:
-	$(UV) run ruff check banners tests
+	$(UV) run ruff check banners tests scripts
 
 # Tests marked manim are skipped by default (see pyproject.toml).
 test:
 	$(UV) run pytest
 
 check: lint test
+
+# README images (template gallery PNGs and showcase GIFs) in media/.
+# Needs the dev extra; downloads Chromium the first time.
+.PHONY: readme-images
+readme-images:
+	$(UV) run playwright install chromium
+	$(UV) run python scripts/readme_images.py
 
 # Development environment exactly as pinned in uv.lock.
 uv-dev:
