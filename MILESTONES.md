@@ -237,7 +237,7 @@ mixed-format gradients, `Closing` stats weight).
 
 ---
 
-## [ ] M8 — Professional manim animations, player, and palette-aware plots
+## [x] M8 — Professional manim animations, player, and palette-aware plots
 
 Today the manim animations look like a foreign piece on the slide: a fixed navy
 background (`#0f172a`), fixed node colors, a black video stage and gray buttons,
@@ -387,3 +387,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | 2026-11-23 | — | `design/editorial` | Editorial redesign of the slides (César's patch) plus visual fixes: icons without overlap, contrast on dark backgrounds, `Intro` summary size; docstrings, README with "Upgrading from 0.2" and version 0.3.0. |
 | 2026-11-24 | M6 | `milestone/m6-palette-theme-template` | One rendering model on the 16:9 canvas: `Template` = `Palette` (colors by role) + `Theme` (fonts, title weight, icon stroke, scale) + layouts; palette precedence slide > configure > template; editorial style, `content_kind`, `icon=` and `SectionPalette` removed; version 0.5.0. |
 | 2026-11-24 | M7 | `milestone/m7-security-notebooks` | TLS verification restored in `Slide._icon_src`; `test/04`, `05`, `07` and `example/showcase.py` run (no known notebook failures left); plotly added to the dev extra and CI for `test/07_plot.py`. |
+| 2026-11-24 | M8 | `milestone/m8-manim-palette` | Python ≥ 3.11 and manim ≥ 0.21; plots and animations follow the slide palette (`_with_palette`); manim renders on `palette.panel` at 30 fps with 0.25 s ease-out steps (4-node flow cold render 2.0 s → 1.62 s); player controls above the video; `PipelineScene` fixed; version 0.6.0. |
