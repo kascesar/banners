@@ -40,9 +40,6 @@ MANIM_NOTEBOOKS = {
 
 # Notebooks with a known error, recorded in the Backlog of MILESTONES.md.
 KNOWN_FAILURES = {
-    "test/04_graph.py": "SyntaxError: triple quote nested inside mo.md(r\"\"\"...\"\"\")",
-    "test/05_animated_graph.py": "SyntaxError: triple quote nested inside mo.md(r\"\"\"...\"\"\")",
-    "test/07_plot.py": "MultipleDefinitionError: several cells define `plt`",
     "example/showcase.py": "NameError: the BasicScene cell uses MathTex, FadeOut and MW without defining them",
 }
 
