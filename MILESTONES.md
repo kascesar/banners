@@ -363,16 +363,33 @@ Out of scope: the texts of the `test/` notebooks and the detailed usage guide
 
 ---
 
-## [ ] M10 — Templates for open-source projects
+## [!] M10 — Templates for open-source projects
 
 Presets themed after open-source projects (Debian first; candidates: Fedora,
 Ubuntu, marimo, NumPy, pandas, matplotlib, Hydra), with the project name and
-its logo linked from an official or Wikimedia Commons URL, never stored in the
-repo. **Needs research before planning**: each project's trademark or logo
-policy decides whether a preset may use its name, colors and logo. Debian's
-"Open Use Logo" has a free license; Fedora (Red Hat), Ubuntu (Canonical) and
-Hydra (Meta) are trademarks with restrictive policies; the others are
-unverified. Only projects whose policy allows it get a preset.
+its logo linked from an official URL, never stored in the repo.
+
+**Blocked (2026-11-24): the trademark policies do not allow it.** No project
+lets an unaffiliated library ship a preset named after it with its logo
+without permission:
+
+| Project | Policy | Finding |
+|---|---|---|
+| Debian | https://www.debian.org/trademark | The Open Use logo is free (LGPL-3+ or CC BY-SA 3.0), but "You cannot use Debian trademarks … as the name of a product or service". |
+| Fedora | https://docs.fedoraproject.org/en-US/legal/trademarks/ | Needs Council permission; the logo is "not licensed for reuse". |
+| Ubuntu | https://canonical.com/legal/intellectual-property-policy | "You cannot use the Trademarks in software titles"; written permission from Canonical. |
+| marimo | https://marimo.io/pages/legal/terms | "You must request permission to use the Company's logo". |
+| NumPy, pandas | https://numfocus.org/trademark-guidelines | Marks may not be part of a product name; logos only with permission (the pandas logo file is BSD). |
+| matplotlib | https://matplotlib.org/stable/project/license.html | The license grants no trademark use; no other policy published. |
+| scikit-learn | brand guidelines, Feb 2025 (PROBABL) | Prior written permission for any branding use. |
+| Arch Linux | https://terms.archlinux.org/docs/trademark-policy/ | A license is needed to combine the logo with other marks. |
+| Hydra | none published | Unknown. |
+| Python, Jupyter | https://www.python.org/psf/trademarks-faq/, https://jupyter.org/governance/trademarks/ | Allowed only as nominative or compatibility use, unaltered logo, no implied endorsement. |
+
+Decision (César): banners ships no branded presets. Instead, the usage guide
+(M11) explains how an organization builds its own template from its logo URL
+and colors; whoever presents on behalf of a project uses its marks under that
+project's own rules.
 
 ---
 
@@ -381,8 +398,9 @@ unverified. Only projects whose policy allows it get a preset.
 A GitHub Pages site with the detailed guide that leaves the README in M9:
 installation, slides, content elements, palettes, themes, templates,
 backgrounds, animations, and the API reference (pdoc). Includes rewriting the
-texts of the `test/` notebooks, which describe the old design. Needs a
-brainstorming pass before planning.
+texts of the `test/` notebooks, which describe the old design, and a recipe
+for building an organization's own template from its logo URL and colors
+(from M10). Needs a brainstorming pass before planning.
 
 ---
 
