@@ -288,14 +288,20 @@ research below.
 - **Player (`_manim_widget.js`):** no black stage; controls take colors from the
   palette passed by Python (`muted` for idle controls, `primary` for the active
   autoplay toggle), on a transparent bar, sized relative to the surrounding text.
+- **Python and manim (approved by César):** the minimum Python becomes 3.11 so
+  the `manim` extra can require `manim>=0.21`, which reports a 2.2× faster Cairo
+  renderer and faster scene hashing
+  ([v0.21 notes](https://gle-graphics.org/blog/manim-v021-typst-cairo-speedup/),
+  secondary source; verified by measuring). Users on Python 3.10 stay on 0.5.1,
+  so the next release is 0.6.0. `requires-python`, ruff `target-version`, the CI
+  matrix (3.11 and 3.12) and `CLAUDE.md` change accordingly.
 - **Plots** (decided with César earlier): the template restyles a matplotlib
   figure placed on a slide: axes, ticks, labels and legend take a color readable
   on `panel`; only lines and patches with matplotlib's automatic cycle colors
   (`C0`, `C1`, …) take the palette colors (`primary`, `secondary`, then
   `section_colors`). Colors set by hand are kept.
 
-**Non-goals**: transparent video; plotly restyling; new scene types; manim
-upgrade (manim ≥ 0.21 needs Python ≥ 3.11, and banners supports 3.10).
+**Non-goals**: transparent video; plotly restyling; new scene types; Typst math.
 
 **Acceptance criteria**
 - `make check` → green, with unit tests (no manim) for: `_with_palette` on
@@ -309,8 +315,11 @@ upgrade (manim ≥ 0.21 needs Python ≥ 3.11, and banners supports 3.10).
   rendering one video per section, and a 4-node `FlowAnimation` whose sections
   each last at most 0.3 s.
 - A cold render of `FlowAnimation(["Ingest", "Validate", "Transform", "Load"], quality="low")`
-  is measured before and after on César's machine (baseline 2.0 s) and the result
-  is written in the closing commit; it must not be slower than the baseline.
+  is measured before and after on César's machine (baseline 2.0 s with manim
+  0.19.1 on Python 3.10) and the result is written in the closing commit; it
+  must not be slower than the baseline.
+- `requires-python = ">=3.11"`, the `manim` extra requires `manim>=0.21`, CI runs
+  on 3.11 and 3.12, and `pyproject.toml` version is `0.6.0`.
 - César reviews `test/08_manim.py`, `test/09_flow_animation.py` and
   `example/showcase.py` in marimo slide mode, with at least two different palettes.
 
