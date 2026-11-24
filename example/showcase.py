@@ -238,19 +238,19 @@ def _(BLUE, GRAY, GREEN, PURPLE, Section, Text, mo):
 
 @app.cell
 def _(Cover, Palette, Text, mo):
-    _custom = Palette(start="#1a0533", mid="#6d28d9", end="#a78bfa")
+    _custom = Palette(primary="#a78bfa", dark="#1a0533", closing_bg="#6d28d9")
     mo.vstack([
         mo.md("""
     ```python
     from banners.palette import Palette
 
-    custom = Palette(start="#1a0533", mid="#6d28d9", end="#a78bfa")
+    custom = Palette(primary="#a78bfa", dark="#1a0533", closing_bg="#6d28d9")
     Cover(title="...", palette=custom, ...).render()
     ```
     """),
         Cover(
             title="Custom palette",
-            subtitle="Palette(start, mid, end) — any CSS colors.",
+            subtitle="Palette(primary, dark, closing_bg) — any CSS colors.",
             content=[Text("The gradient flows `start` → `mid` → `end`.")],
             palette=_custom,
         ).render(),

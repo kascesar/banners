@@ -290,7 +290,7 @@ def _(mo):
     ### Custom palette
 
     ```python
-    teal = Palette(start="#042f2e", mid="#0f766e", end="#2dd4bf")
+    teal = Palette(primary="#2dd4bf", dark="#042f2e", closing_bg="#0f766e")
     configure(palette=teal)
     ```
 
@@ -318,11 +318,11 @@ def _(Cover, GRAY, Text, configure):
 
 @app.cell
 def _(Cover, Palette, Text, configure):
-    teal = Palette(start="#042f2e", mid="#0f766e", end="#2dd4bf")
+    teal = Palette(primary="#2dd4bf", dark="#042f2e", closing_bg="#0f766e")
     configure(palette=teal, team="Analytics Team", date="April 2026")
     Cover(
         title="Custom teal palette",
-        subtitle="Palette(start, mid, end) passed to configure().",
+        subtitle="Palette(primary, dark, closing_bg) passed to configure().",
         content=[
             Text("**start** — darkest stop (left side of gradient)."),
             Text("**mid** — center stop."),

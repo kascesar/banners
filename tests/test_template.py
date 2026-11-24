@@ -2,7 +2,7 @@
 
 import pytest
 
-from banners import Template, configure
+from banners import ORANGE, Palette, Template, configure
 from banners.content import Graph, Text
 from banners.slides import Closing, Cover, Intro, Section
 
@@ -14,7 +14,7 @@ PNG = (
 
 @pytest.fixture
 def tpl():
-    t = Template(primary="#ff6600", secondary="#054af6", logo_on_dark=PNG, logo_on_light=PNG, mark=PNG)
+    t = Template(palette=Palette(primary="#ff6600", secondary="#054af6"), logo_on_dark=PNG, logo_on_light=PNG, mark=PNG)
     configure(template=t, team="Team", date="Nov 2026")
     return t
 
@@ -36,14 +36,14 @@ def test_bar_uses_primary_and_secondary(tpl):
 
 
 def test_no_bar_when_disabled():
-    configure(template=Template(primary="#ff6600", secondary="#054af6", bar=False))
+    configure(template=Template(palette=Palette(primary="#ff6600", secondary="#054af6"), bar=False))
     assert "background:#054af6" not in html(Cover(title="Deck"))
 
 
 def test_cover_dark_vs_photo(tpl):
     dark = html(Cover(title="Deck"))
     photo = html(Cover(title="Deck", image=PNG))
-    assert f"background:{tpl.dark}" in dark
+    assert f"background:{tpl.palette.dark}" in dark
     assert "center/cover" in photo and "center/cover" not in dark
 
 
@@ -96,7 +96,12 @@ def test_dark_slides_fall_back_to_white_light_logo():
 def test_bech_preset_links_logos_and_has_no_photos():
     from banners.template import BECH
 
-    assert BECH.primary == "#ff6600" and BECH.secondary == "#054af6"
+    assert BECH.palette.primary == "#ff6600" and BECH.palette.secondary == "#054af6"
     assert BECH.logo_on_light.startswith("https://commons.wikimedia.org/")
     assert BECH.mark.startswith("https://commons.wikimedia.org/")
     assert BECH.logo_on_dark is None and BECH.closing_image is None
+
+
+def test_template_default_palette_is_orange():
+    """A default `Template` uses the `ORANGE` palette."""
+    assert Template().palette == ORANGE

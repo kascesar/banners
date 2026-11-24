@@ -5,7 +5,7 @@ from urllib.parse import quote
 
 import pytest
 
-from banners import Template, configure
+from banners import Palette, Template, configure
 from banners.content import Text
 from banners.icons import ICONS, icon
 from banners.slides import Closing, Cover, Section
@@ -52,13 +52,13 @@ def test_presets_link_only_public_urls_or_inline_icons():
 
 
 def test_bar_colors_draw_equal_segments():
-    configure(template=Template(bar_colors=("#111111", "#222222", "#333333")))
+    configure(template=Template(palette=Palette(bar_colors=("#111111", "#222222", "#333333"))))
     out = html(Cover(title="A"))
     assert all(f"background:{c}" in out for c in ("#111111", "#222222", "#333333"))
 
 
 def test_section_colors_cycle_by_number():
-    configure(template=Template(section_colors=("#aa0000", "#0000aa"), light="#ffffff", auto_contrast=False))
+    configure(template=Template(palette=Palette(section_colors=("#aa0000", "#0000aa"), light="#ffffff"), auto_contrast=False))
     first, second = Section(title="One"), Section(title="Two")
     assert "color:#aa0000" in html(first) and "color:#0000aa" in html(second)
 
@@ -70,9 +70,9 @@ def test_default_cover_image_and_divider_icon():
 
 
 def test_auto_contrast_swaps_unreadable_title_color():
-    t = Template(primary="#222222", dark="#222222", on_dark="#fafafa")
-    assert t._on(t.dark, t.primary) == "#fafafa"
-    assert Template(primary="#222222", dark="#222222", auto_contrast=False)._on("#222222", "#222222") == "#222222"
+    t = Template(palette=Palette(primary="#222222", dark="#222222", on_dark="#fafafa"))
+    assert t._on(t.palette.dark, t.palette.primary) == "#fafafa"
+    assert Template(palette=Palette(primary="#222222", dark="#222222"), auto_contrast=False)._on("#222222", "#222222") == "#222222"
 
 
 def test_heading_font_applies_to_titles_only():
@@ -87,8 +87,8 @@ def test_closing_stats_and_icon_contrast_with_closing_bg(name):
     t = PRESETS[name]
     configure(template=replace(t, closing_image="chart"))
     out = html(Closing(title="Gracias", stats=[("42%", "Ahorro", "2026")]))
-    assert f"color:{t.primary};\">42%" not in out
-    assert quote(f'stroke="{t.primary}"') not in out
+    assert f"color:{t.palette.primary};\">42%" not in out
+    assert quote(f'stroke="{t.palette.primary}"') not in out
 
 
 def test_icon_mark_does_not_clip_white_logo():
@@ -105,7 +105,7 @@ def test_image_false_disables_preset_photo():
 
 
 def test_divider_icon_follows_title_contrast():
-    configure(template=Template(primary="#f5f5f5", light="#ffffff", divider_icon="layers"))
+    configure(template=Template(palette=Palette(primary="#f5f5f5", light="#ffffff"), divider_icon="layers"))
     out = html(Section(title="B"))
     assert quote('stroke="#f5f5f5"') not in out
 
@@ -121,3 +121,15 @@ def test_presets_and_icons_are_exported():
 
     for name in ("BECH", "EXECUTIVE", "INSTITUTIONAL", "COSMOS", "VIBRANT", "TERRA", "PRESETS", "icon", "ICONS"):
         assert name in banners.__all__ and hasattr(banners, name)
+
+
+def test_every_preset_has_palette_and_theme():
+    """Every preset is composed of a `Palette` and a `Theme`."""
+    for t in PRESETS.values():
+        assert isinstance(t.palette, Palette) and isinstance(t.theme, Theme)
+
+
+def test_unparseable_palette_color_is_used_as_is():
+    """A color that cannot be parsed does not break rendering and is used as given."""
+    configure(template=Template(palette=Palette(primary="var(--brand)")))
+    assert "var(--brand)" in html(Cover(title="A"))
