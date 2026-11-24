@@ -26,6 +26,7 @@ Action renders and publishes the site to the `gh-pages` branch.
 - Every page opens with one sentence saying what it covers, shows code next to its result (image or GIF), and ends with a "Next" link following the reading order above.
 - Every ```` ```python ```` block is self-contained (its own imports) and runs; a block whose first line is `# fragment` is not run. Blocks that import manim run only under the `manim` marker.
 - Links between pages are relative; no link starts with `/`.
+- Language switch: one button at the top right of the navbar (EN on Spanish pages, ES on English pages). Only the selected language's sidebar is visible; the navbar lists no pages of either language.
 - Images live in `site/images/`; README media stays in `media/`.
 - Writing rules from the maintainer: full sentences, explicit subject and object, explain the why by its practical effect, no slogans, no bold for drama. Spanish pages pass `hunspell -d es_CL -l` (proper nouns and code excepted) and are checked by eye for missing accents.
 - No branded presets or brand assets (M10); the organization-template page uses a placeholder logo URL from Wikimedia Commons in the public domain.
