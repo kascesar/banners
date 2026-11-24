@@ -132,6 +132,7 @@ class FlowAnimation:
             data = {"nodes": list(self._node_specs.values()), "edges": self._edges}
         else:
             data = {"rows": self._rows}
+        data["direction"] = self._direction
         raw = json.dumps(data, sort_keys=True)
         return hashlib.sha256(raw.encode()).hexdigest()[:24]
 

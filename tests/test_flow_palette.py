@@ -67,3 +67,11 @@ def test_flow_steps_are_short(monkeypatch):
     durations = section_durations(built[0])
     assert len(durations) == 4
     assert all(d <= 0.3 for d in durations), durations
+
+
+def test_direction_changes_the_cache_key():
+    """The same nodes drawn LR and TD must not share a cached render."""
+    nodes = ["S3", "Glue", "Athena"]
+    lr = FlowAnimation(nodes, direction="LR")._data_key()
+    td = FlowAnimation(nodes, direction="TD")._data_key()
+    assert lr != td
