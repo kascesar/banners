@@ -1,26 +1,26 @@
-"""Pruebas de la configuración global (`banners.config`) y de la numeración de `Section`."""
+"""Tests for the global configuration (`banners.config`) and `Section` numbering."""
 
 from banners import BLUE, Background, Section, config, configure
 
 
 def test_configure_sets_passed_values():
-    """`configure()` guarda los valores que recibe."""
-    configure(team="Equipo", date="Abril 2026", palette=BLUE)
-    assert config.get("team") == "Equipo"
-    assert config.get("date") == "Abril 2026"
+    """`configure()` stores the values it receives."""
+    configure(team="Team", date="April 2026", palette=BLUE)
+    assert config.get("team") == "Team"
+    assert config.get("date") == "April 2026"
     assert config.get("palette") is BLUE
 
 
 def test_configure_keeps_values_not_passed():
-    """Un argumento omitido no sobrescribe el valor configurado antes."""
-    configure(team="Equipo", date="Abril 2026")
-    configure(date="Mayo 2026")
-    assert config.get("team") == "Equipo"
-    assert config.get("date") == "Mayo 2026"
+    """An omitted argument does not overwrite a previously configured value."""
+    configure(team="Team", date="April 2026")
+    configure(date="May 2026")
+    assert config.get("team") == "Team"
+    assert config.get("date") == "May 2026"
 
 
 def test_configure_accepts_explicit_none():
-    """`None` explícito sí borra el valor, a diferencia de omitir el argumento."""
+    """An explicit `None` clears the value, unlike omitting the argument."""
     bg = Background.color("#000000")
     configure(background=bg)
     assert config.get("background") is bg
@@ -29,25 +29,25 @@ def test_configure_accepts_explicit_none():
 
 
 def test_get_returns_default_for_unknown_key():
-    """`get()` devuelve el valor por defecto si la clave no existe."""
-    assert config.get("no_existe", "x") == "x"
+    """`get()` returns the default when the key does not exist."""
+    assert config.get("missing", "x") == "x"
 
 
 def test_next_section_number_is_zero_padded_sequence():
-    """`_next_section_number()` entrega "01", "02", ... a partir del contador."""
+    """`_next_section_number()` yields "01", "02", ... from the counter."""
     configure()
     assert [config._next_section_number() for _ in range(3)] == ["01", "02", "03"]
 
 
 def test_next_section_number_two_digits_past_nine():
-    """El número sigue creciendo después de "09"."""
+    """The number keeps growing past "09"."""
     configure()
     numbers = [config._next_section_number() for _ in range(11)]
     assert numbers[8:] == ["09", "10", "11"]
 
 
 def test_configure_resets_section_counter():
-    """Cada llamada a `configure()` reinicia el contador, aunque no reciba argumentos."""
+    """Every call to `configure()` resets the counter, even with no arguments."""
     configure()
     config._next_section_number()
     config._next_section_number()
@@ -56,13 +56,13 @@ def test_configure_resets_section_counter():
 
 
 def test_section_auto_numbers_consecutively():
-    """Las secciones creadas una tras otra se numeran en orden."""
+    """Sections created one after another are numbered in order."""
     configure()
     assert [Section(title=f"S{i}").number for i in range(3)] == ["01", "02", "03"]
 
 
 def test_section_numbering_restarts_after_configure():
-    """Después de `configure()` la siguiente sección vuelve a ser "01"."""
+    """After `configure()` the next section is "01" again."""
     configure()
     Section(title="A")
     Section(title="B")
@@ -71,7 +71,7 @@ def test_section_numbering_restarts_after_configure():
 
 
 def test_section_explicit_number_does_not_advance_counter():
-    """Un número explícito no consume un número del contador."""
+    """An explicit number does not consume a counter number."""
     configure()
     assert Section(title="A", number="99").number == "99"
     assert Section(title="B").number == "01"

@@ -421,5 +421,5 @@ class Slide:
             size = icon.get("size", default_size)
             src = self._icon_src(icon["src"])
             return f'<img src="{src}" style="height:{size};{style}border-radius:4px;">'
-        except Exception:  # noqa: BLE001 — el ícono es decorativo; si falla, se omite
+        except Exception:  # noqa: BLE001 — the icon is decorative; if it fails, it is omitted
             return ""

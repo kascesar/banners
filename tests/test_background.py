@@ -1,4 +1,4 @@
-"""Pruebas de los fondos (`banners.background`): lectura de colores y contraste del texto."""
+"""Tests for backgrounds (`banners.background`): color parsing and text contrast."""
 
 import pytest
 
@@ -20,51 +20,51 @@ from banners.background import Background, _parse_first_color
     ],
 )
 def test_parse_first_color_formats(css, expected):
-    """`_parse_first_color` reconoce nombres, hex de 3/4/6/8 dígitos y rgb()/rgba()."""
+    """`_parse_first_color` recognizes names, 3/4/6/8-digit hex and rgb()/rgba()."""
     assert _parse_first_color(css) == expected
 
 
 def test_parse_first_color_gradient_first_wins():
-    """En un gradiente con colores del mismo formato se toma el primero."""
+    """In a gradient whose colors share a format, the first one is taken."""
     css = "linear-gradient(135deg,#0f172a 0%,#ffffff 100%)"
     assert _parse_first_color(css) == (0x0F, 0x17, 0x2A)
 
 
 @pytest.mark.xfail(
-    reason="Busca cada formato en todo el string en orden fijo (#rrggbb antes que #rgb "
-    "y rgb()), así que con formatos mezclados no gana el primer color. Ver Backlog.",
+    reason="Each format is searched over the whole string in a fixed order (#rrggbb before "
+    "#rgb and rgb()), so with mixed formats the first color does not win. See Backlog.",
     strict=True,
 )
 def test_parse_first_color_gradient_mixed_formats_first_wins():
-    """Con formatos mezclados también debería ganar el primer color del gradiente."""
+    """With mixed formats the first color of the gradient should win as well."""
     assert _parse_first_color("linear-gradient(#fff 0%, #000000 100%)") == (255, 255, 255)
 
 
 @pytest.mark.parametrize("css", ["", "url(foo.png)", "var(--bg)", "not-a-color"])
 def test_parse_first_color_unparseable_returns_none(css):
-    """Un valor sin color reconocible devuelve `None`."""
+    """A value with no recognizable color returns `None`."""
     assert _parse_first_color(css) is None
 
 
 @pytest.mark.parametrize("css", ["#000000", "black", "#0f172a", "navy"])
 def test_text_color_white_on_dark(css):
-    """Sobre un fondo oscuro el texto es blanco."""
+    """On a dark background the text is white."""
     assert Background.color(css).text_color() == "#ffffff"
 
 
 @pytest.mark.parametrize("css", ["#ffffff", "white", "#f3f4f6", "yellow"])
 def test_text_color_dark_on_light(css):
-    """Sobre un fondo claro el texto es gris oscuro."""
+    """On a light background the text is dark gray."""
     assert Background.color(css).text_color() == "#1f2937"
 
 
 def test_text_color_none_when_unparseable():
-    """Si el color no se puede leer, no se propone color de texto."""
+    """When the color cannot be read, no text color is proposed."""
     assert Background.color("var(--bg)").text_color() is None
 
 
 def test_gradient_css_with_and_without_mid():
-    """`Background.gradient` agrega el color intermedio solo si se entrega."""
+    """`Background.gradient` adds the middle color only when it is given."""
     assert Background.gradient("#000", "#fff").css == "linear-gradient(135deg,#000 0%,#fff 100%)"
     assert (
         Background.gradient("#000", "#fff", mid="#888", angle=45).css

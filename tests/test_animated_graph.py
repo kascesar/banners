@@ -1,4 +1,4 @@
-"""Pruebas del parser, el layout y el SVG de `AnimatedGraph` (funciones puras, sin widget)."""
+"""Tests for the parser, layout and SVG of `AnimatedGraph` (pure functions, no widget)."""
 
 import re
 
@@ -8,7 +8,7 @@ from banners.content.animated_graph import _build_svg, _layout, _parse
 
 
 def test_parse_graph_lr():
-    """Un `graph LR` simple produce nodos, aristas y dirección."""
+    """A simple `graph LR` yields nodes, edges and direction."""
     nodes, edges, direction = _parse("graph LR\n  A --> B\n  B --> C")
     assert direction == "LR"
     assert nodes == {"A": "A", "B": "B", "C": "C"}
@@ -16,49 +16,49 @@ def test_parse_graph_lr():
 
 
 def test_parse_graph_td():
-    """La dirección se lee de la primera línea y se normaliza a mayúsculas."""
+    """The direction is read from the first line and upper-cased."""
     _, _, direction = _parse("graph td\n  A --> B")
     assert direction == "TD"
 
 
 def test_parse_source_and_solo_labels():
-    """Las etiquetas entre corchetes del origen y de un nodo suelto reemplazan al id."""
-    nodes, _, _ = _parse("graph LR\n  B[Validar]\n  A[Datos crudos] --> B\n  B --> C")
-    assert nodes == {"B": "Validar", "A": "Datos crudos", "C": "C"}
+    """Bracketed labels of a source node and of a standalone node replace the id."""
+    nodes, _, _ = _parse("graph LR\n  B[Validate]\n  A[Raw data] --> B\n  B --> C")
+    assert nodes == {"B": "Validate", "A": "Raw data", "C": "C"}
 
 
 @pytest.mark.xfail(
-    reason="_edge_re no está anclado al final de la línea y el grupo perezoso de la "
-    "etiqueta acepta vacío, así que la etiqueta del nodo destino se pierde. Ver Backlog.",
+    reason="_edge_re is not anchored to the end of the line and the lazy label group "
+    "accepts an empty match, so the destination node label is lost. See Backlog.",
     strict=True,
 )
 def test_parse_destination_label():
-    """La etiqueta del nodo destino de una arista también debería leerse."""
-    nodes, _, _ = _parse("graph LR\n  A --> B[Validar]")
-    assert nodes["B"] == "Validar"
+    """The label of an edge destination node should be read as well."""
+    nodes, _, _ = _parse("graph LR\n  A --> B[Validate]")
+    assert nodes["B"] == "Validate"
 
 
 def test_parse_first_label_wins():
-    """Si un nodo aparece de nuevo con otra etiqueta, se conserva la primera."""
-    nodes, _, _ = _parse("graph LR\n  A[Uno] --> B\n  A[Otro] --> C")
-    assert nodes["A"] == "Uno"
+    """When a node appears again with another label, the first label is kept."""
+    nodes, _, _ = _parse("graph LR\n  A[One] --> B\n  A[Other] --> C")
+    assert nodes["A"] == "One"
 
 
 def test_parse_edge_labels():
-    """El texto entre barras `|...|` queda como etiqueta de la arista."""
-    _, edges, _ = _parse("graph LR\n  A -->| sí | B\n  A -.-> C")
-    assert edges == [("A", "B", "sí"), ("A", "C", "")]
+    """Text between bars `|...|` becomes the edge label."""
+    _, edges, _ = _parse("graph LR\n  A -->| yes | B\n  A -.-> C")
+    assert edges == [("A", "B", "yes"), ("A", "C", "")]
 
 
 def test_parse_ignores_comments_and_solo_nodes():
-    """Los comentarios `%%` se ignoran y un nodo suelto se agrega sin aristas."""
-    nodes, edges, _ = _parse("graph LR\n  %% comentario\n  X[Solo]")
-    assert nodes == {"X": "Solo"}
+    """`%%` comments are ignored and a standalone node is added without edges."""
+    nodes, edges, _ = _parse("graph LR\n  %% comment\n  X[Alone]")
+    assert nodes == {"X": "Alone"}
     assert edges == []
 
 
 def test_layout_chain_lr():
-    """En una cadena LR cada nodo avanza un nivel en el eje x."""
+    """In an LR chain each node moves one level along the x axis."""
     nodes, edges, d = _parse("graph LR\n A --> B\n B --> C")
     pos, w, h = _layout(nodes, edges, d)
     assert (w, h) == (130, 40)
@@ -68,7 +68,7 @@ def test_layout_chain_lr():
 
 
 def test_layout_chain_td_uses_y_axis():
-    """En TD los niveles avanzan en el eje y."""
+    """In TD the levels advance along the y axis."""
     nodes, edges, d = _parse("graph TD\n A --> B")
     pos, _, _ = _layout(nodes, edges, d)
     assert pos["A"][0] == pos["B"][0]
@@ -76,7 +76,7 @@ def test_layout_chain_td_uses_y_axis():
 
 
 def test_layout_fork_shares_level():
-    """Los hijos de una bifurcación quedan en el mismo nivel y en filas distintas."""
+    """The children of a fork share a level and sit on different rows."""
     nodes, edges, d = _parse("graph LR\n A --> B\n A --> C")
     pos, _, _ = _layout(nodes, edges, d)
     assert pos["B"][0] == pos["C"][0] > pos["A"][0]
@@ -84,23 +84,23 @@ def test_layout_fork_shares_level():
 
 
 def test_layout_cycle_terminates():
-    """Un ciclo no deja el BFS en un bucle infinito y todos los nodos reciben posición."""
+    """A cycle does not trap the BFS in an infinite loop and every node gets a position."""
     nodes, edges, d = _parse("graph LR\n A --> B\n B --> C\n C --> A")
     pos, _, _ = _layout(nodes, edges, d)
     assert set(pos) == {"A", "B", "C"}
 
 
 def test_layout_empty():
-    """Sin nodos, el layout es vacío."""
+    """With no nodes, the layout is empty."""
     assert _layout({}, [], "LR") == ({}, 130, 40)
 
 
 def test_build_svg_one_ag_node_per_node():
-    """El SVG tiene un grupo `.ag-node` por nodo y una línea por arista."""
-    nodes, edges, d = _parse("graph LR\n A[Uno] --> B\n B -->|x| C\n A --> C")
+    """The SVG has one `.ag-node` group per node and one line per edge."""
+    nodes, edges, d = _parse("graph LR\n A[One] --> B\n B -->|x| C\n A --> C")
     pos, w, h = _layout(nodes, edges, d)
     svg = _build_svg(nodes, edges, pos, w, h, "u1")
     assert svg.startswith("<svg") and svg.rstrip().endswith("</svg>")
     assert len(re.findall(r'class="ag-node"', svg)) == len(nodes)
-    assert "Uno" in svg and ">x<" in svg
+    assert "One" in svg and ">x<" in svg
     assert 'id="arr-u1"' in svg

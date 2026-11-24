@@ -1,21 +1,21 @@
-"""Prueba de humo de los notebooks de marimo en `test/` y `example/`.
+"""Smoke test for the marimo notebooks in `test/` and `example/`.
 
-Requisito previo: instalar el extra `dev` (`uv sync --extra dev`).
-Este módulo ejecuta cada notebook como script (`python <archivo>`, que llama a
-`app.run()`) en un subproceso con límite de tiempo y exige código de salida 0.
-No modifica los notebooks; los archivos que un notebook escriba quedan donde el
-notebook los deje.
-Los notebooks que usan manim llevan la marca `manim` y se omiten por defecto,
-porque necesitan las librerías del sistema (cairo, pango, ffmpeg y LaTeX). Los
-notebooks con un error conocido se marcan `xfail(strict=True)`: si alguien corrige
-el error, la prueba pasa a fallar como XPASS y avisa que hay que quitar la marca.
-Uso: `uv run pytest tests/test_notebooks.py` (sin manim) o `uv run pytest -m manim`.
+Prerequisite: install the `dev` extra (`uv sync --extra dev`).
+This module runs each notebook as a script (`python <file>`, which calls
+`app.run()`) in a subprocess with a time limit and requires exit code 0.
+It does not modify the notebooks; files a notebook writes stay where the
+notebook leaves them.
+Notebooks that use manim carry the `manim` marker and are skipped by default,
+because they need the system libraries (cairo, pango, ffmpeg and LaTeX).
+Notebooks with a known error are marked `xfail(strict=True)`: if someone fixes
+the error, the test fails as XPASS and signals that the marker must be removed.
+Usage: `uv run pytest tests/test_notebooks.py` (no manim) or `uv run pytest -m manim`.
 
-Detección de errores: en marimo 0.23 `app.run()` relanza la excepción de la primera
-celda que falla, así que el proceso termina con código distinto de 0. Se verificó
-con copias de un notebook con una celda que lanza `RuntimeError` y con una celda
-dependiente de otra que divide por cero; ambas terminan con código 1. Por eso basta
-revisar el código de salida, sin buscar "Traceback" en stderr.
+Error detection: in marimo 0.23 `app.run()` re-raises the exception of the first
+failing cell, so the process exits with a non-zero code. This was checked with
+copies of a notebook with a cell that raises `RuntimeError` and with a cell that
+depends on another one dividing by zero; both exit with code 1. Checking the exit
+code is therefore enough, without searching stderr for "Traceback".
 """
 
 import subprocess
@@ -26,11 +26,11 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# Límite de tiempo por notebook, en segundos. `example/showcase.py` renderiza
-# varias escenas de manim y tarda cerca de dos minutos.
+# Time limit per notebook, in seconds. `example/showcase.py` renders several
+# manim scenes and takes about two minutes.
 TIMEOUT = 600
 
-# Notebooks que necesitan manim, con ruta relativa a la raíz del repositorio.
+# Notebooks that need manim, with paths relative to the repository root.
 MANIM_NOTEBOOKS = {
     "test/08_manim.py",
     "test/09_flow_animation.py",
@@ -38,21 +38,21 @@ MANIM_NOTEBOOKS = {
     "example/ondas_electromagneticas.py",
 }
 
-# Notebooks con un error conocido, anotado en el Backlog de MILESTONES.md.
+# Notebooks with a known error, recorded in the Backlog of MILESTONES.md.
 KNOWN_FAILURES = {
-    "test/04_graph.py": "SyntaxError: triple comilla anidada dentro de mo.md(r\"\"\"...\"\"\")",
-    "test/05_animated_graph.py": "SyntaxError: triple comilla anidada dentro de mo.md(r\"\"\"...\"\"\")",
-    "test/07_plot.py": "MultipleDefinitionError: varias celdas definen `plt`",
-    "example/showcase.py": "NameError: la celda de BasicScene usa MathTex, FadeOut y MW sin definirlos",
+    "test/04_graph.py": "SyntaxError: triple quote nested inside mo.md(r\"\"\"...\"\"\")",
+    "test/05_animated_graph.py": "SyntaxError: triple quote nested inside mo.md(r\"\"\"...\"\"\")",
+    "test/07_plot.py": "MultipleDefinitionError: several cells define `plt`",
+    "example/showcase.py": "NameError: the BasicScene cell uses MathTex, FadeOut and MW without defining them",
 }
 
 
 def notebook_params() -> list:
-    """Construye los parámetros de la prueba, uno por notebook.
+    """Build the test parameters, one per notebook.
 
     Returns:
-        Lista de `pytest.param` con la ruta relativa a la raíz como valor e id,
-        y las marcas `manim` y `xfail` según corresponda.
+        A list of `pytest.param` with the root-relative path as value and id,
+        and the `manim` and `xfail` markers where they apply.
     """
     paths = sorted(ROOT.glob("test/*.py")) + sorted(ROOT.glob("example/*.py"))
     params = []
@@ -69,15 +69,15 @@ def notebook_params() -> list:
 
 @pytest.mark.parametrize("notebook", notebook_params())
 def test_notebook_runs(notebook: str) -> None:
-    """Ejecuta un notebook como script y exige que termine sin error.
+    """Run a notebook as a script and require it to finish without errors.
 
-    El directorio de trabajo es la raíz del repositorio, porque los notebooks leen
-    archivos con rutas relativas a ella (por ejemplo `img/test.jpeg` en
-    `test/10_background.py`). Los `layout_file` no dependen del directorio de
-    trabajo: `app.run()` ejecutado como script no lee el archivo de layout.
+    The working directory is the repository root, because the notebooks read
+    files with paths relative to it (for example `img/test.jpeg` in
+    `test/10_background.py`). `layout_file` does not depend on the working
+    directory: `app.run()` run as a script does not read the layout file.
 
     Args:
-        notebook: Ruta del notebook relativa a la raíz del repositorio.
+        notebook: Path of the notebook relative to the repository root.
     """
     result = subprocess.run(
         [sys.executable, notebook],
@@ -88,5 +88,5 @@ def test_notebook_runs(notebook: str) -> None:
         check=False,
     )
     assert result.returncode == 0, (
-        f"{notebook} terminó con código {result.returncode}\n--- stderr ---\n{result.stderr}"
+        f"{notebook} exited with code {result.returncode}\n--- stderr ---\n{result.stderr}"
     )

@@ -349,7 +349,7 @@ no photos:
 
 ```python
 from banners.template import BECH
-configure(template=BECH, team="Analítica Avanzada", date="Noviembre 2026")
+configure(template=BECH, team="Advanced Analytics", date="November 2026")
 ```
 
 ## Built-in templates

@@ -77,7 +77,7 @@ def test_auto_contrast_swaps_unreadable_title_color():
 def test_heading_font_applies_to_titles_only():
     configure(template=Template(heading_font="Georgia, serif"))
     out = html(Section(title="T", content=Text("body")))
-    # Un solo título en la slide: la fuente aparece una vez y no se filtra al cuerpo.
+    # The slide has a single title: the font appears once and does not leak into the body.
     assert out.count("font-family:Georgia, serif") == 1
 
 
