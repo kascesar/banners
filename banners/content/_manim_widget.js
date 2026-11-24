@@ -10,10 +10,16 @@ function render({ model, el }) {
 
     const wrap = document.createElement("div");
     const maxW = model.get("width") || "100%";
-    wrap.style.cssText = "display:block;width:100%;max-width:" + maxW + ";margin:0 auto;";
+    // fill: the player fills a fixed-size box (the iframe): controls on top,
+    // the video takes the remaining height, letterboxed on the panel color.
+    const fill = model.get("fill");
+    wrap.style.cssText = fill
+        ? "display:flex;flex-direction:column;width:100%;height:100%;"
+        : "display:block;width:100%;max-width:" + maxW + ";margin:0 auto;";
 
     const stage = document.createElement("div");
-    stage.style.cssText = "position:relative;width:100%;overflow:hidden;background:" + colors.panel + ";cursor:pointer;";
+    stage.style.cssText = "position:relative;width:100%;overflow:hidden;background:" + colors.panel + ";cursor:pointer;"
+        + (fill ? "flex:1;min-height:0;" : "");
     wrap.appendChild(stage);
 
     function makeVideo() {
@@ -35,7 +41,7 @@ function render({ model, el }) {
 
     buf[0].addEventListener("loadedmetadata", function onMeta() {
         buf[0].removeEventListener("loadedmetadata", onMeta);
-        stage.style.aspectRatio = buf[0].videoWidth + " / " + buf[0].videoHeight;
+        if (!fill) stage.style.aspectRatio = buf[0].videoWidth + " / " + buf[0].videoHeight;
     });
 
     function whenReady(video, cb) {
@@ -56,22 +62,22 @@ function render({ model, el }) {
     }
     preloadNext();
 
-    // Controls bar: [←]  "2 / 5"  [→]  [▶]
+    // Controls bar above the stage, so it is visible without scrolling: [←]  "2 / 5"  [→]  [▶]
     const controls = document.createElement("div");
-    controls.style.cssText = "display:flex;align-items:center;justify-content:center;gap:1em;margin-top:0.4em;"
+    controls.style.cssText = "display:flex;align-items:center;justify-content:center;gap:1.2em;margin-bottom:0.4em;"
         + "background:transparent;color:" + colors.muted + ";";
 
     function makeBtn(text) {
         const b = document.createElement("button");
         b.textContent = text;
         b.style.cssText = "background:transparent;color:" + colors.muted + ";border:none;"
-            + "padding:0.1em 0.4em;cursor:pointer;font-size:0.9em;line-height:1;";
+            + "padding:0.15em 0.5em;cursor:pointer;font-size:1.5em;line-height:1;";
         return b;
     }
 
     const btnPrev = makeBtn("←");
     const label = document.createElement("span");
-    label.style.cssText = "font-size:0.8em;color:" + colors.muted + ";min-width:3.5em;display:inline-block;"
+    label.style.cssText = "font-size:1.1em;color:" + colors.muted + ";min-width:3.5em;display:inline-block;"
         + "font-variant-numeric:tabular-nums;";
     label.textContent = "1 / " + srcs.length;
     const btnNext = makeBtn("→");
@@ -128,7 +134,7 @@ function render({ model, el }) {
         }
     });
 
-    wrap.appendChild(controls);
+    wrap.insertBefore(controls, stage);
     el.appendChild(wrap);
 
     // Apply initial autoplay state

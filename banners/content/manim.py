@@ -260,7 +260,7 @@ class Manim:
         colors_json = json.dumps(colors)
         html = f"""<!DOCTYPE html><html><head>
 <meta charset="utf-8">
-<style>*{{margin:0;padding:0;box-sizing:border-box;}}body{{background:{colors["panel"]};}}</style>
+<style>*{{margin:0;padding:0;box-sizing:border-box;}}html,body,#root{{height:100%;}}body{{background:{colors["panel"]};font-family:system-ui,sans-serif;}}</style>
 </head><body>
 <div id="root"></div>
 <script type="module">
@@ -273,6 +273,7 @@ const model = {{
         if (k === "width") return "100%";
         if (k === "autoplay") return autoplay;
         if (k === "colors") return colors;
+        if (k === "fill") return true;
     }}
 }};
 {js.replace("export default { render };", "")}
