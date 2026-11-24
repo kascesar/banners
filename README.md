@@ -195,7 +195,12 @@ graph LR
 
 ## FlowAnimation
 
-Step-by-step pipeline animation. Each node appears on click. Requires the `manim` dependency.
+Step-by-step pipeline animation. Each node appears on click with a short
+0.25 s fade-in, and the diagram stays on screen between clicks. On a slide the
+animation takes the slide palette: the background is `palette.panel`, nodes use
+`section_colors` (or `primary` and `secondary`), and names and arrows use `text`
+and `muted`. Standalone, it uses the default `Palette()`, or pass `palette=`.
+Requires the `manim` dependency.
 
 ```python
 from banners.content import FlowAnimation
@@ -240,7 +245,6 @@ from banners.content import Manim
 
 class MyScene(Scene):
     def construct(self):
-        self.camera.background_color = "#0f172a"
         self.next_section("eq1")
         self.play(Write(MathTex(r"E = mc^2", font_size=72)))
         self.wait(1)
@@ -254,7 +258,16 @@ Section(
 ).render()
 ```
 
-Renders are cached on disk (`~/.cache/banners/manim/`) keyed by scene source code — no re-rendering across notebook restarts.
+On a slide, banners paints the scene background with `palette.panel` and the
+player controls with the palette, so the animation blends into the slide; a
+scene that sets `self.camera.background_color` keeps its own color. Every
+render runs at 30 frames per second.
+
+`banners.scenes.PipelineScene` is a ready-made data-pipeline scene that follows
+the palette: `Manim(PipelineScene, interactive=True)`.
+
+Renders are cached on disk (`~/.cache/banners/manim/`) keyed by scene source code
+and palette — no re-rendering across notebook restarts.
 
 # Palettes and themes
 
