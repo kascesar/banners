@@ -40,7 +40,6 @@ MANIM_NOTEBOOKS = {
 
 # Notebooks with a known error, recorded in the Backlog of MILESTONES.md.
 KNOWN_FAILURES = {
-    "example/showcase.py": "NameError: the BasicScene cell uses MathTex, FadeOut and MW without defining them",
 }
 
 
