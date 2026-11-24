@@ -77,7 +77,7 @@ def _(Create, FadeIn, LEFT, Line, MT, Manim, ORANGE, RIGHT, Scene, UP):
             self.play(Create(line))
             self.wait(1.5)
 
-    Manim(_Part0Title, quality="high", autoplay=True).render()
+    Manim(_Part0Title, format="mp4", quality="high", autoplay=True).render()
     return
 
 
@@ -93,7 +93,7 @@ def _(Create, FadeIn, LEFT, Line, MT, Manim, ORANGE, RIGHT, Scene, UP, Write):
             self.play(Create(line))
             self.wait(1.5)
 
-    Manim(_Part1Title, quality="high", autoplay=True).render()
+    Manim(_Part1Title, format="mp4", quality="high", autoplay=True).render()
     return
 
 
@@ -271,7 +271,7 @@ def _(Create, FadeIn, LEFT, Line, MT, Manim, ORANGE, RIGHT, Scene, UP, Write):
             self.play(Create(line))
             self.wait(1.5)
 
-    Manim(_Part2Title, quality="high", autoplay=True).render()
+    Manim(_Part2Title, format="mp4", quality="high", autoplay=True).render()
     return
 
 
@@ -519,7 +519,7 @@ def _(Create, FadeIn, LEFT, Line, MT, Manim, ORANGE, RIGHT, Scene, UP, Write):
             self.play(Create(line))
             self.wait(1.5)
 
-    Manim(_Part3Title, quality="high", autoplay=True).render()
+    Manim(_Part3Title, format="mp4", quality="high", autoplay=True).render()
     return
 
 
