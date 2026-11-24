@@ -2,6 +2,7 @@
 
 import base64
 import contextlib
+import copy
 import hashlib
 import inspect
 import io
@@ -11,6 +12,10 @@ from pathlib import Path
 from typing import ClassVar
 
 _HERE = Path(__file__).parent
+
+FRAME_RATE = 30
+"""Frames per second of every render. Manim's "low" preset is 15 fps, which
+leaves a 0.25 s step with about 4 frames."""
 
 import marimo as mo
 
@@ -34,6 +39,10 @@ class Manim:
         interactive: When ``True``, the scene is rendered section by section
             and a click-to-advance widget is returned. The scene must define
             steps with ``self.next_section("name")``.
+        palette: Colors for the render. The background is ``palette.panel``
+            (a scene may still set its own) and the player controls use
+            ``muted`` and ``primary``. ``None`` uses the default ``Palette()``;
+            on a slide the template passes the slide palette.
     """
 
     _QUALITY_MAP: ClassVar[dict[str, str]] = {
@@ -51,6 +60,7 @@ class Manim:
         width: str = "100%",
         autoplay: bool = False,
         _extra_key: str = "",
+        palette=None,
     ) -> None:
         self.scene = scene
         self.format = format
@@ -59,14 +69,73 @@ class Manim:
         self.width = width
         self.autoplay = autoplay
         self._extra_key = _extra_key
+        self.palette = palette
         self._cached = None
+
+    @property
+    def _palette(self):
+        """The palette used for the render: the given one or the default `Palette()`."""
+        from banners.palette import Palette
+
+        return self.palette or Palette()
+
+    def _with_palette(self, palette) -> "Manim":
+        """Return a copy that renders with a slide palette.
+
+        Args:
+            palette: The `banners.Palette` of the slide.
+
+        Returns:
+            A new `Manim` with `palette` set and no cached render.
+        """
+        styled = copy.copy(self)
+        styled.palette = palette
+        styled._cached = None
+        return styled
+
+    def _scene_class(self):
+        """Return the scene class to render.
+
+        `scene` may be a `Scene` subclass or a factory function that returns
+        one (such as `banners.scenes.PipelineScene`); a factory that accepts a
+        `palette` argument receives the render palette.
+
+        Returns:
+            The `Scene` subclass.
+        """
+        if inspect.isclass(self.scene):
+            return self.scene
+        if "palette" in inspect.signature(self.scene).parameters:
+            return self.scene(palette=self._palette)
+        return self.scene()
+
+    def _render_config(self) -> dict:
+        """Manim settings shared by static and interactive renders.
+
+        Returns:
+            Settings for `manim.tempconfig`: the palette panel as background
+            and 30 frames per second for every quality.
+        """
+        return {"background_color": self._palette.panel, "frame_rate": FRAME_RATE}
+
+    def _player_colors(self) -> dict:
+        """Colors of the click-to-advance player.
+
+        Returns:
+            `{"panel": ..., "muted": ..., "primary": ...}` from the palette.
+        """
+        p = self._palette
+        return {"panel": p.panel, "muted": p.muted, "primary": p.primary}
 
     def _cache_key(self) -> str:
         try:
             src = inspect.getsource(self.scene)
         except OSError:
             src = self.scene.__qualname__
-        raw = f"{src}|{self.quality}|{self.format}|{self.interactive}|{self._extra_key}"
+        raw = (
+            f"{src}|{self.quality}|{self.format}|{self.interactive}|{self._extra_key}"
+            f"|{self._palette!r}|fps={FRAME_RATE}"
+        )
         return hashlib.sha256(raw.encode()).hexdigest()[:24]
 
     @staticmethod
@@ -122,8 +191,9 @@ class Manim:
                 "quality": quality,
                 "verbosity": "CRITICAL",
                 "disable_caching": True,
+                **self._render_config(),
             }):
-                scene_cls = self.scene
+                scene_cls = self._scene_class()
                 with self._quiet():
                     instance = scene_cls()
                     instance.render()
@@ -154,8 +224,9 @@ class Manim:
                     "quality": quality,
                     "verbosity": "CRITICAL",
                     "disable_caching": True,
+                    **self._render_config(),
                 }):
-                    scene_cls = self.scene
+                    scene_cls = self._scene_class()
                     with self._quiet():
                         instance = scene_cls()
                         instance.render()
@@ -179,26 +250,29 @@ class Manim:
             f"data:video/mp4;base64,{base64.b64encode(f).decode()}"
             for f in frames
         ]
-        return self._build_iframe_player(srcs, self.width, self.autoplay)
+        return self._build_iframe_player(srcs, self.width, self.autoplay, self._player_colors())
 
     @staticmethod
-    def _build_iframe_player(srcs: list, width: str, autoplay: bool) -> mo.Html:
+    def _build_iframe_player(srcs: list, width: str, autoplay: bool, colors: dict) -> mo.Html:
         js = (_HERE / "_manim_widget.js").read_text()
         srcs_json = json.dumps(srcs)
         autoplay_json = json.dumps(autoplay)
+        colors_json = json.dumps(colors)
         html = f"""<!DOCTYPE html><html><head>
 <meta charset="utf-8">
-<style>*{{margin:0;padding:0;box-sizing:border-box;}}body{{background:#000;}}</style>
+<style>*{{margin:0;padding:0;box-sizing:border-box;}}body{{background:{colors["panel"]};}}</style>
 </head><body>
 <div id="root"></div>
 <script type="module">
 const srcs = {srcs_json};
 const autoplay = {autoplay_json};
+const colors = {colors_json};
 const model = {{
     get(k) {{
         if (k === "srcs") return srcs;
         if (k === "width") return "100%";
         if (k === "autoplay") return autoplay;
+        if (k === "colors") return colors;
     }}
 }};
 {js.replace("export default { render };", "")}

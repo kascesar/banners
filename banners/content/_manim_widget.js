@@ -1,5 +1,8 @@
 function render({ model, el }) {
     const srcs = model.get("srcs");
+    // Palette colors from Python: panel behind the video, muted idle controls,
+    // primary for the active autoplay toggle.
+    const colors = model.get("colors") || { panel: "transparent", muted: "#6b7280", primary: "#e4572e" };
     let idx = 0;
     let busy = false;
 
@@ -10,7 +13,7 @@ function render({ model, el }) {
     wrap.style.cssText = "display:block;width:100%;max-width:" + maxW + ";margin:0 auto;";
 
     const stage = document.createElement("div");
-    stage.style.cssText = "position:relative;width:100%;overflow:hidden;border-radius:0.5rem;background:#000;cursor:pointer;";
+    stage.style.cssText = "position:relative;width:100%;overflow:hidden;background:" + colors.panel + ";cursor:pointer;";
     wrap.appendChild(stage);
 
     function makeVideo() {
@@ -55,19 +58,21 @@ function render({ model, el }) {
 
     // Controls bar: [←]  "2 / 5"  [→]  [▶]
     const controls = document.createElement("div");
-    controls.style.cssText = "display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:0.5rem;";
+    controls.style.cssText = "display:flex;align-items:center;justify-content:center;gap:1em;margin-top:0.4em;"
+        + "background:transparent;color:" + colors.muted + ";";
 
     function makeBtn(text) {
         const b = document.createElement("button");
         b.textContent = text;
-        b.style.cssText = "background:#1f2937;color:#9ca3af;border:1px solid #374151;"
-            + "border-radius:0.375rem;padding:0.2rem 0.7rem;cursor:pointer;font-size:0.85em;";
+        b.style.cssText = "background:transparent;color:" + colors.muted + ";border:none;"
+            + "padding:0.1em 0.4em;cursor:pointer;font-size:0.9em;line-height:1;";
         return b;
     }
 
     const btnPrev = makeBtn("←");
     const label = document.createElement("span");
-    label.style.cssText = "font-size:0.8em;color:#9ca3af;min-width:4rem;display:inline-block;";
+    label.style.cssText = "font-size:0.8em;color:" + colors.muted + ";min-width:3.5em;display:inline-block;"
+        + "font-variant-numeric:tabular-nums;";
     label.textContent = "1 / " + srcs.length;
     const btnNext = makeBtn("→");
     const btnAuto = makeBtn("▶");
@@ -116,12 +121,10 @@ function render({ model, el }) {
     btnAuto.addEventListener("click", function () {
         autoplay = !autoplay;
         if (autoplay) {
-            btnAuto.style.color = "#60a5fa";
-            btnAuto.style.borderColor = "#3b82f6";
+            btnAuto.style.color = colors.primary;
             if (buf[0].ended) { goForward(); } else { attachAutoEnded(); }
         } else {
-            btnAuto.style.color = "#9ca3af";
-            btnAuto.style.borderColor = "#374151";
+            btnAuto.style.color = colors.muted;
         }
     });
 
@@ -130,8 +133,7 @@ function render({ model, el }) {
 
     // Apply initial autoplay state
     if (autoplay) {
-        btnAuto.style.color = "#60a5fa";
-        btnAuto.style.borderColor = "#3b82f6";
+        btnAuto.style.color = colors.primary;
         attachAutoEnded();
     }
 }
