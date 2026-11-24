@@ -49,3 +49,14 @@ def test_make_gif_one_frame_per_slide(tmp_path):
         assert gif.convert("RGB").getpixel((799, 449)) == (0, 128, 0)
         assert gif.info["duration"] == 1500
         assert gif.info["loop"] == 0
+
+
+def test_gif_command():
+    """The ffmpeg command crops the slide, keeps 12 fps, scales to 800 px and builds a palette."""
+    cmd = load_script().gif_command(Path("v.webm"), Path("o.gif"), (10, 20, 300, 200))
+    joined = " ".join(cmd)
+    assert "crop=300:200:10:20" in joined
+    assert "fps=12" in joined
+    assert "scale=800:-1" in joined
+    assert "palettegen" in joined
+    assert cmd[-1] == "o.gif"
