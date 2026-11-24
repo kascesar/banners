@@ -17,7 +17,7 @@ def _():
     from banners.content import Manim, Text
     from banners.palette import BLUE
     configure(team="Analytics Team", date="April 2026", palette=BLUE)
-    return Manim, Section, Text, mo
+    return BLUE, Manim, Section, Text, mo
 
 
 @app.cell
@@ -62,16 +62,15 @@ def _(mo):
 
 
 @app.cell
-def _(Manim, Section):
+def _(BLUE, Manim, Section):
     from manim import (
         Scene, Circle, Square, Create, Transform, FadeOut,
-        WHITE as MW,
     )
 
+    # No background color: the scene is drawn on the panel color of the palette.
     class ShapeScene(Scene):
         def construct(self):
-            self.camera.background_color = "#0f172a"
-            c = Circle(color=MW, fill_opacity=0.3)
+            c = Circle(color=BLUE.text, fill_opacity=0.3)
             s = Square(color="#3b82f6", fill_opacity=0.3)
             self.play(Create(c))
             self.play(Transform(c, s))
@@ -113,12 +112,12 @@ def _(mo):
 
 
 @app.cell
-def _(Manim, Scene, Section):
+def _(BLUE, Manim, Scene, Section):
     from manim import (
         RoundedRectangle, Arrow, Dot,
         Write, FadeIn, FadeOut as MFO, GrowArrow, Flash,
         UP as MUP, DOWN as MDN, LEFT as ML, RIGHT as MR,
-        WHITE as MW2, YELLOW as MY, GRAY as MG2,
+        YELLOW as MY, GRAY as MG2,
         Text as MText2,
     )
 
@@ -130,12 +129,9 @@ def _(Manim, Scene, Section):
             ("SageMaker\nTrain", "#10b981"),
             ("Redshift\nLoad",   "#ef4444"),
         ]
-        BG = "#0f172a"
 
         def construct(self):
-            self.camera.background_color = self.BG
-
-            title = MText2("Data & ML Pipeline", font_size=32, color=MW2, weight="BOLD")
+            title = MText2("Data & ML Pipeline", font_size=32, color=BLUE.text, weight="BOLD")
             title.to_edge(MUP, buff=0.35)
             self.play(Write(title), run_time=0.5)
 
@@ -185,19 +181,18 @@ def _(mo):
 
 
 @app.cell
-def _(Manim, Section, Text):
+def _(BLUE, Manim, Section, Text):
     from manim import (
         Scene as MScene2,
         Circle as MCircle, Square as MSq, Triangle as MTri,
         Create as MCreate, Transform as MTrans, FadeOut as MFO2,
-        WHITE as MW3, BLUE as MB3, GREEN as MGRN,
+        BLUE as MB3, GREEN as MGRN,
     )
 
     class ColorScene(MScene2):
         def construct(self):
-            self.camera.background_color = "#0f172a"
             shapes = [
-                MCircle(color=MW3, fill_opacity=0.4),
+                MCircle(color=BLUE.text, fill_opacity=0.4),
                 MSq(color="#3b82f6", fill_opacity=0.4),
                 MTri(color="#22c55e", fill_opacity=0.4),
             ]

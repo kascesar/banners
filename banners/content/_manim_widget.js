@@ -1,5 +1,8 @@
 function render({ model, el }) {
     const srcs = model.get("srcs");
+    // Palette colors from Python: panel behind the video, muted idle controls,
+    // primary for the active autoplay toggle.
+    const colors = model.get("colors") || { panel: "transparent", muted: "#6b7280", primary: "#e4572e" };
     let idx = 0;
     let busy = false;
 
@@ -7,10 +10,16 @@ function render({ model, el }) {
 
     const wrap = document.createElement("div");
     const maxW = model.get("width") || "100%";
-    wrap.style.cssText = "display:block;width:100%;max-width:" + maxW + ";margin:0 auto;";
+    // fill: the player fills a fixed-size box (the iframe): controls on top,
+    // the video takes the remaining height, letterboxed on the panel color.
+    const fill = model.get("fill");
+    wrap.style.cssText = fill
+        ? "display:flex;flex-direction:column;width:100%;height:100%;"
+        : "display:block;width:100%;max-width:" + maxW + ";margin:0 auto;";
 
     const stage = document.createElement("div");
-    stage.style.cssText = "position:relative;width:100%;overflow:hidden;border-radius:0.5rem;background:#000;cursor:pointer;";
+    stage.style.cssText = "position:relative;width:100%;overflow:hidden;background:" + colors.panel + ";cursor:pointer;"
+        + (fill ? "flex:1;min-height:0;" : "");
     wrap.appendChild(stage);
 
     function makeVideo() {
@@ -32,7 +41,7 @@ function render({ model, el }) {
 
     buf[0].addEventListener("loadedmetadata", function onMeta() {
         buf[0].removeEventListener("loadedmetadata", onMeta);
-        stage.style.aspectRatio = buf[0].videoWidth + " / " + buf[0].videoHeight;
+        if (!fill) stage.style.aspectRatio = buf[0].videoWidth + " / " + buf[0].videoHeight;
     });
 
     function whenReady(video, cb) {
@@ -53,21 +62,23 @@ function render({ model, el }) {
     }
     preloadNext();
 
-    // Controls bar: [←]  "2 / 5"  [→]  [▶]
+    // Controls bar above the stage, so it is visible without scrolling: [←]  "2 / 5"  [→]  [▶]
     const controls = document.createElement("div");
-    controls.style.cssText = "display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:0.5rem;";
+    controls.style.cssText = "display:flex;align-items:center;justify-content:center;gap:1.2em;margin-bottom:0.4em;"
+        + "background:transparent;color:" + colors.muted + ";";
 
     function makeBtn(text) {
         const b = document.createElement("button");
         b.textContent = text;
-        b.style.cssText = "background:#1f2937;color:#9ca3af;border:1px solid #374151;"
-            + "border-radius:0.375rem;padding:0.2rem 0.7rem;cursor:pointer;font-size:0.85em;";
+        b.style.cssText = "background:transparent;color:" + colors.muted + ";border:none;"
+            + "padding:0.15em 0.5em;cursor:pointer;font-size:1.5em;line-height:1;";
         return b;
     }
 
     const btnPrev = makeBtn("←");
     const label = document.createElement("span");
-    label.style.cssText = "font-size:0.8em;color:#9ca3af;min-width:4rem;display:inline-block;";
+    label.style.cssText = "font-size:1.1em;color:" + colors.muted + ";min-width:3.5em;display:inline-block;"
+        + "font-variant-numeric:tabular-nums;";
     label.textContent = "1 / " + srcs.length;
     const btnNext = makeBtn("→");
     const btnAuto = makeBtn("▶");
@@ -116,22 +127,19 @@ function render({ model, el }) {
     btnAuto.addEventListener("click", function () {
         autoplay = !autoplay;
         if (autoplay) {
-            btnAuto.style.color = "#60a5fa";
-            btnAuto.style.borderColor = "#3b82f6";
+            btnAuto.style.color = colors.primary;
             if (buf[0].ended) { goForward(); } else { attachAutoEnded(); }
         } else {
-            btnAuto.style.color = "#9ca3af";
-            btnAuto.style.borderColor = "#374151";
+            btnAuto.style.color = colors.muted;
         }
     });
 
-    wrap.appendChild(controls);
+    wrap.insertBefore(controls, stage);
     el.appendChild(wrap);
 
     // Apply initial autoplay state
     if (autoplay) {
-        btnAuto.style.color = "#60a5fa";
-        btnAuto.style.borderColor = "#3b82f6";
+        btnAuto.style.color = colors.primary;
         attachAutoEnded();
     }
 }

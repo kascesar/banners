@@ -314,6 +314,10 @@ class Template:
         uid = f"tp{uuid.uuid4().hex[:8]}"
         parts = []
         for item in items:
+            # Content that can follow the palette (plots, animations) gets a
+            # styled copy; the element itself never reads the configuration.
+            if hasattr(item, "_with_palette"):
+                item = item._with_palette(self.palette)
             if isinstance(item, (Text, str)):
                 body = item.body if isinstance(item, Text) else item
                 html = mo.as_html(Text(body).render()).text
@@ -341,6 +345,12 @@ class Template:
             f".{uid} ul,.{uid} ol{{margin:0!important;padding-left:1.1em!important;}}"
             f".{uid} li{{margin:0 0 0.6em!important;}}"
             f".{uid} li::marker{{color:{accent};}}"
+            # Code is excluded from the inherit rule above (it keeps its monospace
+            # font), so its color and size are set here: inline code takes the
+            # slide text color, code blocks scale with the slide text.
+            f".{uid} :not(pre)>code{{color:inherit!important;font-size:0.9em!important;}}"
+            f".{uid} pre{{font-size:0.8em!important;line-height:1.45!important;}}"
+            f".{uid} pre code{{font-size:inherit!important;line-height:inherit!important;}}"
             f".{uid} img,.{uid} svg,.{uid} video{{max-width:100%;height:auto;}}"
             f"</style>"
             f'<div class="{uid}" style="width:100%;height:100%;overflow:auto;">{lead_html}{grid}</div>'
@@ -386,16 +396,21 @@ class Template:
             inner = (
                 self._dark_logo(5.1, 6.1, 21.3)
                 + (self._box(50, 7, 44.9, None, self._text(s.team, "label", self.palette.on_dark, extra="text-align:right;")) if s.team else "")
-                + self._box(11.7, 37, 80, None, self._text(s.title, "display", self._on(self.palette.dark, self._title_color(s)), bold=True))
-                + (self._box(12.2, 52, 75, None, self._text(s.subtitle, "subtitle", self.palette.on_dark, extra="line-height:1.25;")) if s.subtitle else "")
+                # One box for title and subtitle: a wrapped title pushes the subtitle down.
+                + self._box(11.7, 37, 80, None,
+                            self._text(s.title, "display", self._on(self.palette.dark, self._title_color(s)), bold=True)
+                            + (self._text(s.subtitle, "subtitle", self.palette.on_dark,
+                                          extra="line-height:1.25;margin-top:1.5cqw;max-width:94%;") if s.subtitle else ""))
                 + (self._box(5.8, 87.5, 50, None, self._text(s.date, "small", self.palette.on_dark)) if s.date else "")
             )
             return self._canvas(self.palette.dark, inner, self.palette.on_dark)
         shade = "linear-gradient(90deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.15) 55%,rgba(0,0,0,0) 100%)"
         inner = (
             self._photo(image, 0, 0, 100, 76.1, overlay=shade)
-            + self._box(5.2, 29, 60, None, self._text(s.title, "display", "#ffffff", bold=True))
-            + (self._box(5.6, 44.5, 55, None, self._text(s.subtitle, "subtitle", "#ffffff", extra="line-height:1.25;")) if s.subtitle else "")
+            + self._box(5.2, 29, 60, None,
+                        self._text(s.title, "display", "#ffffff", bold=True)
+                        + (self._text(s.subtitle, "subtitle", "#ffffff",
+                                      extra="line-height:1.25;margin-top:1.5cqw;max-width:92%;") if s.subtitle else ""))
             + (self._box(5.6, 68.4, 60, None, self._text(s.team, "label", "#ffffff")) if s.team else "")
             + (self._box(7.3, 87.5, 50, None, self._text(s.date, "small", self.palette.text)) if s.date else "")
             + self._logo(self.logo_on_light, 77.9, 86, 18.4)

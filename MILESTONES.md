@@ -237,70 +237,152 @@ mixed-format gradients, `Closing` stats weight).
 
 ---
 
-## [ ] M8 — Professional manim animations, player, and palette-aware plots
+## [x] M8 — Professional manim animations, player, and palette-aware plots
 
-**Needs a brainstorming pass before planning**: César wants the manim
-transitions "completely renewed to a much more professional style"; what
-"professional" means concretely (pace, easing, motion style, references he
-likes) is still open, and the acceptance criteria below are provisional.
+Today the manim animations look like a foreign piece on the slide: a fixed navy
+background (`#0f172a`), fixed node colors, a black video stage and gray buttons,
+while M6 made most slides light and palette-driven. Each step also takes 0.5 s
+plus a 0.2 s wait, which feels slow. César wants the animations to belong to the
+deck's palette, be faster and more direct, and render faster, without losing
+their visual appeal. He gave freedom on the motion details, grounded in the
+research below.
 
-What exists today and is in scope:
-- The player (`banners/content/_manim_widget.js`): a black stage that hard-cuts
-  between section videos (double buffer, z-index swap, no cross-fade), and gray
-  `#1f2937` buttons plus an "Auto" toggle under the video.
-- The scenes: `FlowAnimation` (`banners/content/flow_animation.py`) and
-  `PipelineScene` (`banners/scenes/pipeline.py`) build every step with
-  `FadeIn(scale=0.85)` + `Write` at `run_time=0.5`, with their own fixed colors
-  (`_COLORS`, `#9ca3af` details) and background.
-- Colors come from the active M6 palette when one is configured; with no
-  configuration, `Manim` and `FlowAnimation` keep working in a plain cell with
-  their own defaults (content elements must not require `banners.config`).
-- Plots follow the palette (decided with César): today a matplotlib `Plot` does
-  not know which panel it lands on, so each user picks readable colors by hand.
-  The template restyles the figure when it places it on a slide, because only
-  the template knows `palette.panel`: axes, ticks, labels and legend take a color
-  readable on the panel, and only lines and patches that use matplotlib's
-  automatic cycle colors (`C0`, `C1`, …) are recolored with the palette
-  (`primary`, `secondary`, then `section_colors` if any). Colors the user set by
-  hand are kept, and a `Plot` in a plain cell renders exactly as today. `Plot`
-  itself still does not read `banners.config`.
+**Research (2026-11-24)** that sets the motion rules:
+- Duration: most UI animations should last 100–400 ms; at 500 ms they start to
+  feel slow; 200–300 ms for elements entering
+  ([NN/g](https://www.nngroup.com/articles/animation-duration/),
+  [Material Design 3](https://m3.material.io/styles/motion/easing-and-duration/applying-easing-and-duration)).
+- Easing: ease-out for entrances, smooth for moves; no bounce or overshoot
+  ([NN/g](https://www.nngroup.com/articles/animation-duration/),
+  [Apple HIG](https://developer.apple.com/design/human-interface-guidelines/motion)).
+- One focal change per click; no decorative motion; no trailing waits, because
+  the click is the pause; hard cut from the last frame between steps
+  ([manim-slides example](https://raw.githubusercontent.com/jeertmans/manim-slides/main/example.py),
+  [Manim output docs](https://docs.manim.community/en/stable/tutorials/output_and_config.html)).
+- Match the slide by painting the scene background with the slide color; use
+  transparency only when something other than a flat color must show through.
 
-**Acceptance criteria (provisional)**
-- `make check` → green; `uv run pytest -m manim` → green on César's machine.
-- The player and the scenes follow the style agreed in the brainstorming.
-- `FlowAnimation` and `PipelineScene` take their colors from the active palette,
-  and render with defaults when no palette is configured (unit test without manim
-  for the color resolution).
-- A matplotlib figure placed on a slide gets panel-readable axes and text, its
-  automatic-color lines take the palette colors, a hand-set line color is
-  unchanged, and the same `Plot` rendered without a slide is unchanged (unit
-  tests with matplotlib, no manim).
+**Decisions**
+- **Palette hand-off (approach A, chosen by César).** Content elements that can
+  follow the palette implement `_with_palette(palette) -> same type`, which
+  returns a styled copy. `Template._content` calls it before rendering the item.
+  A content element still never reads `banners.config`; a standalone element
+  renders with `Palette()` (the `ORANGE` defaults) for animations, and exactly as
+  today for `Plot`. The palette is part of the manim cache key.
+- **Background (chosen by César):** opaque MP4 painted with `palette.panel`, the
+  color of the box that holds visuals. No transparent video.
+- **FlowAnimation colors:** background `panel`; node colors cycle through
+  `section_colors`, else `(primary, secondary)`; node names in `text`, details
+  and arrows in `muted`.
+- **Motion:** each step plays one `self.play` of **0.25 s**: the node fades in
+  with a short shift and its incoming arrows draw, with `rate_func=ease_out_cubic`.
+  No `Write`, no scale-in, no `self.wait()` at the end of a step.
+- **Frame rate:** 30 fps for every quality (manim's "low" preset is 15 fps,
+  which leaves a 0.25 s step with about 4 frames). Resolutions stay 480p/720p/1080p.
+- **`Manim(scene)` with a custom scene:** banners sets `background_color` to
+  `palette.panel` as a default; the scene keeps any color it sets itself.
+- **`PipelineScene`:** becomes `PipelineScene(palette=None)` with the same motion
+  rules and palette colors. `Manim` accepts a scene factory and calls it with the
+  palette, which also fixes the documented `Manim(PipelineScene, interactive=True)`,
+  broken today with `TypeError: Scene.render() missing 1 required positional argument`.
+- **Player (`_manim_widget.js`):** no black stage; controls take colors from the
+  palette passed by Python (`muted` for idle controls, `primary` for the active
+  autoplay toggle), on a transparent bar, sized relative to the surrounding text.
+- **Python and manim (approved by César):** the minimum Python becomes 3.11 so
+  the `manim` extra can require `manim>=0.21`, which reports a 2.2× faster Cairo
+  renderer and faster scene hashing
+  ([v0.21 notes](https://gle-graphics.org/blog/manim-v021-typst-cairo-speedup/),
+  secondary source; verified by measuring). Users on Python 3.10 stay on 0.5.1,
+  so the next release is 0.6.0. `requires-python`, ruff `target-version`, the CI
+  matrix (3.11 and 3.12) and `CLAUDE.md` change accordingly.
+- **Plots** (decided with César earlier): the template restyles a matplotlib
+  figure placed on a slide: axes, ticks, labels and legend take a color readable
+  on `panel`; only lines and patches with matplotlib's automatic cycle colors
+  (`C0`, `C1`, …) take the palette colors (`primary`, `secondary`, then
+  `section_colors`). Colors set by hand are kept.
+
+**Non-goals**: transparent video; plotly restyling; new scene types; Typst math.
+
+**Acceptance criteria**
+- `make check` → green, with unit tests (no manim) for: `_with_palette` on
+  `FlowAnimation`, `Manim` and `Plot` returns a copy with the palette colors and
+  leaves the original unchanged; the palette changes the manim cache key; the
+  template calls `_with_palette` for items that have it; a figure on a slide gets
+  panel-readable axes and palette colors on automatic lines, a hand-set line
+  color is unchanged, and the same `Plot` outside a slide is unchanged; content
+  modules still do not import `banners.config`.
+- `uv run pytest -m manim` → green, including `Manim(PipelineScene, interactive=True)`
+  rendering one video per section, and a 4-node `FlowAnimation` whose sections
+  each last at most 0.3 s.
+- A cold render of `FlowAnimation(["Ingest", "Validate", "Transform", "Load"], quality="low")`
+  is measured before and after on César's machine (baseline 2.0 s with manim
+  0.19.1 on Python 3.10) and the result is written in the closing commit; it
+  must not be slower than the baseline.
+- `requires-python = ">=3.11"`, the `manim` extra requires `manim>=0.21`, CI runs
+  on 3.11 and 3.12, and `pyproject.toml` version is `0.6.0`.
 - César reviews `test/08_manim.py`, `test/09_flow_animation.py` and
-  `example/showcase.py` in marimo slide mode.
+  `example/showcase.py` in marimo slide mode, with at least two different palettes.
 
 ---
 
-## [ ] M9 — Short, striking README
+## [x] M9 — Short, striking README
 
-**Needs a brainstorming pass before planning**: César finds the current README
-(408 lines) confusing and disordered, and says it does not show off what
-banners really does. He wants it much shorter and much more striking. Which
-features lead, and what "striking" looks like, are still open.
+The README is the first thing people see on GitHub and PyPI. Its job is to make
+them want to try banners, not to document it: the how-to guide moves to a
+GitHub Pages site (M11). The current README (445 lines, three GIFs in the 0.2
+style) reads as a reference manual.
 
-In scope:
-- Rewrite `README.md` around the 0.5 model from M6 (Template = Palette + Theme
-  + layouts) and the M8 animations; detailed API reference moves to the pdoc
-  docs instead of the README.
-- Regenerate the demo GIFs (`demo-1-slide-types.gif`, `demo-2-content-types.gif`,
-  `demo-3-backgrounds.gif`), which still show the 0.2 style.
-- Update the texts of the `test/` notebooks, which describe the old design.
-- No organization brand assets in the README or the GIFs (public repository).
+Design (approved by César, 2026-11-24):
+- **Short.** A one-line pitch, install, a quick start of a few lines, the two
+  galleries below, and links to the docs. No API reference, no upgrade notes
+  beyond one line pointing to the changelog section of the docs.
+- **Template gallery, 2×3.** The same slide (a `Section` with a title, three
+  bullets and a small matplotlib chart) rendered with the six public templates:
+  default `Template()`, `EXECUTIVE`, `INSTITUTIONAL`, `COSMOS`, `VIBRANT`,
+  `TERRA`. `BECH` is never shown (it imitates a real bank).
+- **Showcase GIFs, one per row (1×3).** One GIF per part of
+  `example/showcase.py` (01 slide types, 02 content types, 03 backgrounds).
+  Hard cuts between slides, no transitions, about 1.5 s per slide, looping.
+- **Generated, not hand-made.** A script renders the slides in headless
+  Chromium (Playwright) and writes PNGs and GIFs to `media/`; `make
+  readme-images` runs it. The old root GIFs are deleted.
+- **Absolute image URLs** (`raw.githubusercontent.com/.../main/media/...`),
+  because PyPI does not resolve relative paths.
+- No organization brand assets in the README or the images.
 
-**Acceptance criteria (provisional)**
-- Every code example in the README runs against the current API (checked by a
-  test that extracts and executes the README code blocks).
-- The GIFs show the 0.5 look.
+Out of scope: the texts of the `test/` notebooks and the detailed usage guide
+(both go to M11).
+
+**Acceptance criteria**
+- `README.md` is at most 120 lines.
+- Every Python code block in the README runs against the current API, checked
+  by a test that extracts and executes them.
+- `make readme-images` regenerates the 6 template PNGs and the 3 GIFs; every
+  GIF has hard cuts (no frame blends two slides).
 - César approves the README rendered on GitHub.
+
+---
+
+## [ ] M10 — Templates for open-source projects
+
+Presets themed after open-source projects (Debian first; candidates: Fedora,
+Ubuntu, marimo, NumPy, pandas, matplotlib, Hydra), with the project name and
+its logo linked from an official or Wikimedia Commons URL, never stored in the
+repo. **Needs research before planning**: each project's trademark or logo
+policy decides whether a preset may use its name, colors and logo. Debian's
+"Open Use Logo" has a free license; Fedora (Red Hat), Ubuntu (Canonical) and
+Hydra (Meta) are trademarks with restrictive policies; the others are
+unverified. Only projects whose policy allows it get a preset.
+
+---
+
+## [ ] M11 — Usage guide on GitHub Pages
+
+A GitHub Pages site with the detailed guide that leaves the README in M9:
+installation, slides, content elements, palettes, themes, templates,
+backgrounds, animations, and the API reference (pdoc). Includes rewriting the
+texts of the `test/` notebooks, which describe the old design. Needs a
+brainstorming pass before planning.
 
 ---
 
@@ -323,7 +405,7 @@ Unplanned items found while working. Promote to a milestone when relevant.
   them, so the values are silently ignored. Either draw them or remove the parameters.
 - `Closing` stats values use a fixed `font-weight:700` instead of `Theme.title_weight`.
 - `test/01_intro.py` and `example/showcase.py` prose still describes the removed `icon`
-  parameter and the `start`/`mid`/`end` palette (M9 rewrites the notebook texts).
+  parameter and the `start`/`mid`/`end` palette (M11 rewrites the notebook texts).
 - A local `make publish` would put `.claude/settings.local.json` in the sdist: hatch only
   reads the project `.gitignore`, not the user's global git ignore file. The CI release
   builds from a clean checkout and is not affected. Fix: an `exclude` rule in `pyproject.toml`.
@@ -342,3 +424,5 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | 2026-11-23 | — | `design/editorial` | Editorial redesign of the slides (César's patch) plus visual fixes: icons without overlap, contrast on dark backgrounds, `Intro` summary size; docstrings, README with "Upgrading from 0.2" and version 0.3.0. |
 | 2026-11-24 | M6 | `milestone/m6-palette-theme-template` | One rendering model on the 16:9 canvas: `Template` = `Palette` (colors by role) + `Theme` (fonts, title weight, icon stroke, scale) + layouts; palette precedence slide > configure > template; editorial style, `content_kind`, `icon=` and `SectionPalette` removed; version 0.5.0. |
 | 2026-11-24 | M7 | `milestone/m7-security-notebooks` | TLS verification restored in `Slide._icon_src`; `test/04`, `05`, `07` and `example/showcase.py` run (no known notebook failures left); plotly added to the dev extra and CI for `test/07_plot.py`. |
+| 2026-11-24 | M8 | `milestone/m8-manim-palette` | Python ≥ 3.11 and manim ≥ 0.21; plots and animations follow the slide palette (`_with_palette`); manim renders on `palette.panel` at 30 fps with 0.25 s ease-out steps (4-node flow cold render 2.0 s → 1.62 s); player controls above the video; `PipelineScene` fixed; version 0.6.0. |
+| 2026-11-24 | M9 | `milestone/m9-readme` | README of 95 lines with a 2×3 template gallery and three showcase GIFs, generated by `make readme-images` (Playwright) into `media/`; README code tested; Cover subtitle no longer overlaps a wrapped title; marimo-defined manim scenes invalidate the cache; showcase titles as MP4. |

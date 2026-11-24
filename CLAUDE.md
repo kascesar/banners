@@ -53,9 +53,11 @@ maintainer for a review of finished work, `requesting-code-review` may be used.
 
 ```bash
 # Install (always use uv, never pip)
-uv pip install -e "."            # core only
-uv pip install -e ".[manim]"     # + manim (needs system libs, see README)
-uv pip install -e ".[dev]"       # dev tools: hatch, pdoc, pandas, manim
+uv sync                          # core only, exactly as pinned in uv.lock
+uv sync --extra manim            # + manim (needs system libs, see README)
+uv sync --extra dev              # dev tools: hatch, pdoc, pandas, plotly, manim, ruff, pytest
+# Do not mix in `uv pip install`: `uv run` re-syncs to uv.lock and can leave
+# packages from another resolution next to it (incompatible versions).
 
 # Visual reference notebooks (one per feature)
 uv run marimo edit test/01_intro.py        # ... through test/10_background.py
@@ -238,7 +240,7 @@ Add a factory function to `banners/scenes/` that lazily imports manim and return
 
 ## Conventions
 
-- Python ≥ 3.10. Use `uv` for everything (`uv run`, `uv pip`, `uv build`).
+- Python ≥ 3.11. Use `uv` for everything (`uv run`, `uv pip`, `uv build`).
 - Everything in the repository is written in English: code, docstrings, comments,
   tests, notebooks, README, `MILESTONES.md`, plans in `plans/`, workflow and config
   comments, commit messages and PR comments. This overrides any personal rule that
