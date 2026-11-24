@@ -201,7 +201,43 @@ left to César.
 
 ---
 
-## [ ] M7 — Professional manim animations, player, and palette-aware plots
+## [ ] M7 — Security and broken notebooks
+
+Short fix milestone before the manim work: one security issue and the four
+visual notebooks that do not run. M9 regenerates the README GIFs from these
+notebooks, so they have to run first.
+
+- **TLS verification.** `Slide._icon_src` downloads images by URL with
+  `check_hostname = False` and `verify_mode = ssl.CERT_NONE`, so it accepts
+  invalid or spoofed certificates. It is used by templates (logos, marks,
+  photos given as paths or bytes) and by `Background.image(url)`. Remove both
+  lines so the default context verifies the certificate and the host name. An
+  image whose certificate fails is then omitted by templates (as any failing
+  image already is) and raises when `Background.image(url)` is created.
+- **`test/04_graph.py` and `test/05_animated_graph.py`** do not compile: the
+  documentation cell uses `mo.md(r"""...""")` and the code example inside it
+  contains another triple quote. Use `r'''...'''` for the outer string.
+- **`test/07_plot.py`** raises `MultipleDefinitionError` because several cells
+  import `matplotlib.pyplot as plt`. Import it in one cell and pass `plt` to the
+  others.
+- **`example/showcase.py`** raises `NameError: name 'MathTex' is not defined`:
+  add `MathTex`, `FadeOut` and `WHITE as MW` to its manim imports cell.
+
+**Non-goals**: the other Backlog bugs (`AnimatedGraph` destination labels,
+mixed-format gradients, `Closing` stats weight).
+
+**Acceptance criteria**
+- `make check` → green, including a unit test that captures the SSL context used
+  by `Slide._icon_src` for a URL (no network) and asserts
+  `verify_mode == ssl.CERT_REQUIRED` and `check_hostname is True`.
+- `tests/test_notebooks.py` has no `KNOWN_FAILURES` entries left; `uv run pytest
+  tests/test_notebooks.py` passes `test/04`, `05` and `07`.
+- `uv run pytest -m manim` → `example/showcase.py` passes (no xfail).
+- The four items are removed from the Backlog.
+
+---
+
+## [ ] M8 — Professional manim animations, player, and palette-aware plots
 
 **Needs a brainstorming pass before planning**: César wants the manim
 transitions "completely renewed to a much more professional style"; what
@@ -244,7 +280,7 @@ What exists today and is in scope:
 
 ---
 
-## [ ] M8 — Short, striking README
+## [ ] M9 — Short, striking README
 
 **Needs a brainstorming pass before planning**: César finds the current README
 (408 lines) confusing and disordered, and says it does not show off what
@@ -253,7 +289,7 @@ features lead, and what "striking" looks like, are still open.
 
 In scope:
 - Rewrite `README.md` around the 0.5 model from M6 (Template = Palette + Theme
-  + layouts) and the M7 animations; detailed API reference moves to the pdoc
+  + layouts) and the M8 animations; detailed API reference moves to the pdoc
   docs instead of the README.
 - Regenerate the demo GIFs (`demo-1-slide-types.gif`, `demo-2-content-types.gif`,
   `demo-3-backgrounds.gif`), which still show the 0.2 style.
@@ -300,7 +336,7 @@ Unplanned items found while working. Promote to a milestone when relevant.
   them, so the values are silently ignored. Either draw them or remove the parameters.
 - `Closing` stats values use a fixed `font-weight:700` instead of `Theme.title_weight`.
 - `test/01_intro.py` and `example/showcase.py` prose still describes the removed `icon`
-  parameter and the `start`/`mid`/`end` palette (M8 rewrites the notebook texts).
+  parameter and the `start`/`mid`/`end` palette (M9 rewrites the notebook texts).
 - A local `make publish` would put `.claude/settings.local.json` in the sdist: hatch only
   reads the project `.gitignore`, not the user's global git ignore file. The CI release
   builds from a clean checkout and is not affected. Fix: an `exclude` rule in `pyproject.toml`.
