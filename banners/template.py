@@ -89,8 +89,10 @@ class Template:
         bar_split: Fraction of the bar width taken by `primary`.
         scale: Multiplier applied to every font size.
         heading_font: CSS font-family for titles; `None` uses `font`.
-        cover_image: Photo used by `Cover` when the slide passes no `image`.
-        divider_image: Photo used by dividers when the slide passes no `image`.
+        cover_image: Photo used by `Cover` when the slide passes no `image`;
+            `Cover(image=False)` turns it off for one slide.
+        divider_image: Photo used by dividers when the slide passes no `image`;
+            `Section(image=False)` turns it off for one slide.
         divider_icon: Large icon on dividers without a photo: an icon name
             from `banners.icons.ICONS` or any image source.
         icon_color: Color of named icons (`mark`, `divider_icon`); defaults to
@@ -194,9 +196,20 @@ class Template:
         )
 
     def _on(self, bg: str, color: str) -> str:
-        """Return `color`, or a safe fallback (`on_dark` on dark backgrounds,
-        `text` on light ones) when `color` lacks contrast against `bg`
-        (WCAG contrast ratio below 3:1, the minimum for large text)."""
+        """Return `color`, or a readable fallback when it lacks contrast with `bg`.
+
+        The check uses the WCAG contrast ratio with a 3:1 minimum, the threshold
+        for large text. It does nothing when `auto_contrast` is off or when
+        either color cannot be parsed.
+
+        Args:
+            bg: CSS color of the background the text or icon sits on.
+            color: CSS color wanted for the text or icon.
+
+        Returns:
+            `color` when it is readable on `bg`; otherwise `on_dark` for dark
+            backgrounds and `text` for light ones.
+        """
         from .background import _parse_first_color, _relative_luminance
 
         if not self.auto_contrast:
@@ -210,15 +223,33 @@ class Template:
             return color
         return self.on_dark if la < 0.18 else self.text
 
-    def _title_color(self, slide, default: str | None = None) -> str:
-        """Title color: cycled from `section_colors` by section number."""
+    def _title_color(self, slide) -> str:
+        """Return the title color of a slide.
+
+        Args:
+            slide: The slide being rendered; a numbered `Section` picks its
+                color from `section_colors`.
+
+        Returns:
+            The `section_colors` entry for the section number (cycled), or
+            `primary` when there are no section colors or no number.
+        """
         number = getattr(slide, "number", None)
         if self.section_colors and number and str(number).isdigit():
             return self.section_colors[(int(number) - 1) % len(self.section_colors)]
-        return default or self.primary
+        return self.primary
 
     def _resolve(self, image, color: str):
-        """Turn an icon name into a colored icon URI; pass other sources through."""
+        """Turn an icon name into a colored icon; pass other sources through.
+
+        Args:
+            image: An icon name from `banners.icons.ICONS`, or any image
+                source (path, URL, bytes, `None`).
+            color: Stroke color for a named icon; `icon_color` wins when set.
+
+        Returns:
+            A `data:` URI for icon names, or `image` unchanged otherwise.
+        """
         from .icons import ICONS, icon
 
         if isinstance(image, str) and image in ICONS:
@@ -257,22 +288,27 @@ class Template:
     def _dark_logo(self, x: float, y: float, w: float) -> str:
         """Logo for dark backgrounds: `logo_on_dark`, or else `logo_on_light`
         turned solid white with a CSS filter."""
+        from .icons import ICONS
+
         if self.logo_on_dark is not None:
             return self._logo(self.logo_on_dark, x, y, w)
+        # A named icon is not part of the logo artwork, so the logo is not
+        # clipped and the icon is not drawn over it.
+        isotype = None if isinstance(self.mark, str) and self.mark in ICONS else self.mark
         white = self._img(self.logo_on_light, "width:100%;height:auto;filter:brightness(0) invert(1);"
-                          + (f"clip-path:inset(0 0 0 {self.logo_mark_width * 100:.1f}%);" if self.mark else ""))
+                          + (f"clip-path:inset(0 0 0 {self.logo_mark_width * 100:.1f}%);" if isotype else ""))
         if not white:
             return ""
         # Keep the isotype in color: the white copy hides its own mark area and
         # `mark` is drawn on top, at the left, with the logo's full height.
         color_mark = (
-            self._img(self.mark, "position:absolute;left:0;top:0;height:100%;width:auto;")
-            if self.mark else ""
+            self._img(isotype, "position:absolute;left:0;top:0;height:100%;width:auto;")
+            if isotype else ""
         )
         return self._box(x, y, w, None, f'<div style="position:relative;">{white}{color_mark}</div>')
 
     def _mark(self, color: str | None = None) -> str:
-        mark = self._resolve(self.mark, color or self.primary)
+        mark = self._resolve(self.mark, self._on(self.light, color or self.primary))
         return self._box(91.9, 5.7, 2.9, None, self._img(mark, "width:100%;height:auto;"))
 
     def _content(self, slide, items: list, color: str, columns: bool = True, lead: str = "") -> str:
@@ -323,6 +359,24 @@ class Template:
         )
 
     @staticmethod
+    def _slide_image(slide, default):
+        """Choose the photo of a slide: its own `image`, or the preset default.
+
+        Args:
+            slide: The slide being rendered; its `image` attribute may be a
+                source, `None` (use `default`) or `False` (no photo).
+            default: The template's photo for this layout (`cover_image` or
+                `divider_image`).
+
+        Returns:
+            The image source to draw, or `None` for no photo.
+        """
+        image = getattr(slide, "image", None)
+        if image is False:
+            return None
+        return default if image is None else image
+
+    @staticmethod
     def _items(slide) -> list:
         if slide.content is None:
             return []
@@ -331,7 +385,7 @@ class Template:
     # ── Layouts ──────────────────────────────────────────────────────────────
 
     def _cover(self, s) -> str:
-        image = getattr(s, "image", None) or self.cover_image
+        image = self._slide_image(s, self.cover_image)
         if image is None:
             inner = (
                 self._dark_logo(5.1, 6.1, 21.3)
@@ -353,12 +407,12 @@ class Template:
         return self._canvas(self.light, inner, self.text, bar_top=76.1)
 
     def _divider(self, s) -> str:
-        image = getattr(s, "image", None) or self.divider_image
+        image = self._slide_image(s, self.divider_image)
         accent = self._title_color(s)
         title_color = self.text if image is not None else self._on(self.light, accent)
         icon_html = ""
         if image is None and self.divider_icon is not None:
-            src = self._resolve(self.divider_icon, accent)
+            src = self._resolve(self.divider_icon, self._on(self.light, accent))
             icon_html = self._box(66, 24, 22, None, self._img(src, "width:100%;height:auto;opacity:0.9;"))
         width = 38 if image is not None or icon_html else 85
         inner = (
@@ -393,7 +447,7 @@ class Template:
             return self._divider(s)
         image = getattr(s, "image", None)
 
-        if image is not None:
+        if image:
             # Photo on the left half, title and content on the right.
             inner = (
                 self._photo(image, 0, 0, 54, 95.4)
@@ -444,7 +498,8 @@ class Template:
             )
             return self._canvas(self.dark, inner, self.on_dark)
 
-        closing_image = self._resolve(self.closing_image, self.primary)
+        accent = self._on(self.closing_bg, self.primary)
+        closing_image = self._resolve(self.closing_image, accent)
         has_image = self._src(closing_image) is not None
         dy = 6 if s.stats else 0  # push the title down to make room for the stats row
         if has_image:
@@ -468,7 +523,7 @@ class Template:
         if s.stats:
             cells = "".join(
                 f'<div style="text-align:center;padding:0 1cqw;">'
-                f'<div style="font-size:{self._fs("title")};font-weight:700;color:{self.primary};">{v}</div>'
+                f'<div style="font-size:{self._fs("title")};font-weight:700;color:{accent};">{v}</div>'
                 f'<div style="font-size:{self._fs("body")};color:{self.on_dark};margin-top:0.4cqw;">{label}</div>'
                 f'<div style="font-size:{self._fs("small")};color:{self.on_dark};opacity:0.7;">{cap}</div></div>'
                 for v, label, cap in s.stats
@@ -513,6 +568,15 @@ mine = replace(BECH, closing_image="assets/pato.png")
 
 
 def _commons(name: str, width: int = 1920) -> str:
+    """Build a Wikimedia Commons URL that serves a file resized.
+
+    Args:
+        name: File name on Wikimedia Commons, without the `File:` prefix.
+        width: Width in pixels of the served image.
+
+    Returns:
+        A `https://commons.wikimedia.org/wiki/Special:FilePath/...` URL.
+    """
     return f"{_COMMONS}{name}?width={width}"
 
 

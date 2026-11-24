@@ -1,15 +1,26 @@
 """Tests for icons, template extensions and built-in presets."""
 
+from dataclasses import replace
+from urllib.parse import quote
+
 import pytest
 
 from banners import Template, configure
 from banners.content import Text
 from banners.icons import ICONS, icon
-from banners.slides import Cover, Section
+from banners.slides import Closing, Cover, Section
 from banners.template import PRESETS
 
 
 def html(slide) -> str:
+    """Render a slide with the active template and return its HTML.
+
+    Args:
+        slide: Any slide (`Cover`, `Section`, `Intro`, `Closing`).
+
+    Returns:
+        The HTML string of the rendered slide.
+    """
     return slide.render().text
 
 
@@ -66,4 +77,46 @@ def test_auto_contrast_swaps_unreadable_title_color():
 def test_heading_font_applies_to_titles_only():
     configure(template=Template(heading_font="Georgia, serif"))
     out = html(Section(title="T", content=Text("body")))
-    assert out.count("font-family:Georgia, serif") >= 1
+    # Un solo título en la slide: la fuente aparece una vez y no se filtra al cuerpo.
+    assert out.count("font-family:Georgia, serif") == 1
+
+
+@pytest.mark.parametrize("name", ["EXECUTIVE", "INSTITUTIONAL"])
+def test_closing_stats_and_icon_contrast_with_closing_bg(name):
+    t = PRESETS[name]
+    configure(template=replace(t, closing_image="chart"))
+    out = html(Closing(title="Gracias", stats=[("42%", "Ahorro", "2026")]))
+    assert f"color:{t.primary};\">42%" not in out
+    assert quote(f'stroke="{t.primary}"') not in out
+
+
+def test_icon_mark_does_not_clip_white_logo():
+    configure(template=Template(logo_on_light="https://example.org/logo.svg", mark="chart"))
+    out = html(Cover(title="A"))
+    assert "clip-path" not in out
+
+
+def test_image_false_disables_preset_photo():
+    configure(template=Template(cover_image="https://example.org/a.jpg",
+                                divider_image="https://example.org/b.jpg"))
+    assert "https://example.org/a.jpg" not in html(Cover(title="A", image=False))
+    assert "https://example.org/b.jpg" not in html(Section(title="B", image=False))
+
+
+def test_divider_icon_follows_title_contrast():
+    configure(template=Template(primary="#f5f5f5", light="#ffffff", divider_icon="layers"))
+    out = html(Section(title="B"))
+    assert quote('stroke="#f5f5f5"') not in out
+
+
+def test_section_with_content_and_image_false_uses_column_layout():
+    configure(template=Template())
+    out = html(Section(title="B", content=[Text("x"), Text("y")], image=False))
+    assert "background:url(" not in out
+
+
+def test_presets_and_icons_are_exported():
+    import banners
+
+    for name in ("BECH", "EXECUTIVE", "INSTITUTIONAL", "COSMOS", "VIBRANT", "TERRA", "PRESETS", "icon", "ICONS"):
+        assert name in banners.__all__ and hasattr(banners, name)

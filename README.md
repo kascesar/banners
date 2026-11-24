@@ -373,7 +373,8 @@ to imply endorsement by the National Park Service.
 
 Icons come from `banners.icons` (original line icons, inline SVG, no network):
 `Template(mark="chart", divider_icon="layers")`. Customize any preset with
-`dataclasses.replace(COSMOS, cover_image="my_photo.jpg")`.
+`dataclasses.replace(COSMOS, cover_image="my_photo.jpg")`. A single slide
+drops the preset photo with `image=False`, for example `Section(title="Agenda", image=False)`.
 
 Other template options: `heading_font`, `cover_image`, `divider_image`,
 `divider_icon`, `icon_color`, `bar_colors`, `section_colors`, `panel`, and
