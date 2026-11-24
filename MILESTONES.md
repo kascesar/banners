@@ -201,7 +201,7 @@ left to César.
 
 ---
 
-## [ ] M7 — Security and broken notebooks
+## [x] M7 — Security and broken notebooks
 
 Short fix milestone before the manim work: one security issue and the four
 visual notebooks that do not run. M9 regenerates the README GIFs from these
@@ -319,19 +319,6 @@ Unplanned items found while working. Promote to a milestone when relevant.
   first color does not win: `linear-gradient(#fff, #000000)` yields black and the automatic
   text turns white over a white start. Test:
   `tests/test_background.py::test_parse_first_color_gradient_mixed_formats_first_wins` (xfail).
-- `test/04_graph.py` and `test/05_animated_graph.py` do not compile (`SyntaxError`): the
-  documentation cell uses `mo.md(r"""...""")` and the code example inside it contains another
-  triple quote (`Graph("""...`), which closes the string too early. Test:
-  `tests/test_notebooks.py` (xfail).
-- `test/07_plot.py` does not run: several cells import `matplotlib.pyplot as plt` and marimo
-  raises `MultipleDefinitionError`. Test: `tests/test_notebooks.py` (xfail).
-- `example/showcase.py` fails with `NameError: name 'MathTex' is not defined`: the
-  `BasicScene` cell takes `MathTex`, `FadeOut` and `MW` as parameters, but no cell defines
-  them (the imports cell only brings `Scene`, `Text as MT`, `Write`, `FadeIn`, `Create`,
-  `Line`, `LEFT`, `RIGHT` and `UP`). Test: `tests/test_notebooks.py` (xfail, `manim` marker).
-- `Slide._icon_src` disables TLS verification (`check_hostname = False`,
-  `verify_mode = ssl.CERT_NONE`) when downloading icons and images by URL, so it accepts
-  invalid or spoofed certificates. It affects `icon=` and `Background.image(url)`.
 - `Cover` and `Closing` accept `content=` and `footer=`, but the template layouts do not draw
   them, so the values are silently ignored. Either draw them or remove the parameters.
 - `Closing` stats values use a fixed `font-weight:700` instead of `Theme.title_weight`.
@@ -354,3 +341,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | 2026-11-23 | M5 | `milestone/m5-release` | Workflow `release.yml` that publishes to PyPI with Trusted Publishing when a `v*` tag is pushed (TestPyPI if the tag contains `rc`) and fails if the tag does not match the version; release steps in `CLAUDE.md`. |
 | 2026-11-23 | — | `design/editorial` | Editorial redesign of the slides (César's patch) plus visual fixes: icons without overlap, contrast on dark backgrounds, `Intro` summary size; docstrings, README with "Upgrading from 0.2" and version 0.3.0. |
 | 2026-11-24 | M6 | `milestone/m6-palette-theme-template` | One rendering model on the 16:9 canvas: `Template` = `Palette` (colors by role) + `Theme` (fonts, title weight, icon stroke, scale) + layouts; palette precedence slide > configure > template; editorial style, `content_kind`, `icon=` and `SectionPalette` removed; version 0.5.0. |
+| 2026-11-24 | M7 | `milestone/m7-security-notebooks` | TLS verification restored in `Slide._icon_src`; `test/04`, `05`, `07` and `example/showcase.py` run (no known notebook failures left); plotly added to the dev extra and CI for `test/07_plot.py`. |
