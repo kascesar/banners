@@ -91,9 +91,9 @@ slide mode.
 
 ## Learn more
 
+- [Documentation](https://kascesar.github.io/banners/) — the guide, in English and Spanish, and the API reference.
 - [`example/showcase.py`](example/showcase.py) — every feature, slide by slide.
 - [`example/ondas_electromagneticas.py`](example/ondas_electromagneticas.py) — a
   complete deck: Maxwell's equations with an animated derivation.
-- API reference: `make docs` builds it in `docs/`.
 
 Licensed under the [GPL-2.0](LICENSE).
