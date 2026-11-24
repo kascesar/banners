@@ -50,7 +50,8 @@ class Plot:
         figure is never modified: a matplotlib figure is deep-copied and the
         copy is restyled. The figure and axes backgrounds become transparent so
         the template panel shows through; titles, axis labels and legend texts
-        take `palette.text`; spines and ticks take `palette.muted`. Lines,
+        take `palette.text`; spines, ticks and grid lines take `palette.muted`;
+        the legend box takes `palette.panel` with a `palette.muted` edge. Lines,
         patches and legend handles whose color is one of matplotlib's automatic
         cycle colors (`C0`, `C1`, …) take the palette series
         (`palette.section_colors`, else `primary` and `secondary`); colors set
@@ -101,8 +102,12 @@ class Plot:
             ax.tick_params(colors=palette.muted)
             for spine in ax.spines.values():
                 spine.set_edgecolor(palette.muted)
+            for grid_line in ax.get_xgridlines() + ax.get_ygridlines():
+                grid_line.set_color(palette.muted)
             legend = ax.get_legend()
             if legend is not None:
+                legend.get_frame().set_facecolor(palette.panel)
+                legend.get_frame().set_edgecolor(palette.muted)
                 for text in legend.get_texts():
                     text.set_color(palette.text)
                 for handle in legend.legend_handles:

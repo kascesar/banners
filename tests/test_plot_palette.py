@@ -93,3 +93,16 @@ def test_plotly_plot_on_slide_unchanged():
     assert plot._with_palette(BLUE) is plot
     configure(template=Template())
     assert "aspect-ratio:16/9" in Section(title="S", content=plot).render().text
+
+
+def test_dark_legend_and_grid_follow_the_palette():
+    """A legend box and grid styled for a dark figure stay readable on the panel."""
+    fig, ax = line_figure(label="a")
+    ax.legend(facecolor="#1f2937", edgecolor="#374151", labelcolor="white")
+    ax.grid(color="#1f2937")
+    styled_ax = Plot(fig)._with_palette(BLUE).fig.axes[0]
+    frame = styled_ax.get_legend().get_frame()
+    assert to_hex(frame.get_facecolor()) == BLUE.panel
+    assert to_hex(frame.get_edgecolor()) == BLUE.muted
+    assert to_hex(styled_ax.get_legend().get_texts()[0].get_color()) == BLUE.text
+    assert {to_hex(g.get_color()) for g in styled_ax.get_xgridlines()} == {BLUE.muted}
