@@ -1,13 +1,15 @@
 """Template — render slides on a fixed 16:9 canvas, like a PowerPoint master.
 
-By default banners renders slides in its editorial style, which flows with the
-notebook width. A `Template` replaces that with a fixed 16:9 canvas where every
-element has a position and size relative to the slide, exactly like a
-corporate PowerPoint template. Font sizes are expressed in container-query
-units (`cqw`, percent of the slide width), so a slide keeps its proportions and
-stays legible at any screen size.
+Every slide is drawn by a `Template` on a fixed 16:9 canvas where every element
+has a position and size relative to the slide, like a corporate PowerPoint
+template. Font sizes are expressed in container-query units (`cqw`, percent of
+the slide width), so a slide keeps its proportions and stays legible at any
+screen size. A template combines its layouts with a `Palette` (colors) and a
+`Theme` (fonts, title weight, icon stroke, scale); a palette or theme set with
+`configure()` or on a slide replaces the template's one.
 
-Activate a template for the whole deck with `configure(template=...)`:
+Without `configure(template=...)` a default `Template()` is used. Activate your
+own for the whole deck:
 
 ```python
 from banners import Palette, Template, configure

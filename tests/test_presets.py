@@ -116,11 +116,15 @@ def test_section_with_content_and_image_false_uses_column_layout():
     assert "background:url(" not in out
 
 
-def test_presets_and_icons_are_exported():
+def test_public_api_is_exported():
+    """Presets, icons, `Palette` and `Theme` are exported; `SectionPalette` is not."""
     import banners
 
-    for name in ("BECH", "EXECUTIVE", "INSTITUTIONAL", "COSMOS", "VIBRANT", "TERRA", "PRESETS", "icon", "ICONS"):
-        assert name in banners.__all__ and hasattr(banners, name)
+    names = ("BECH", "EXECUTIVE", "INSTITUTIONAL", "COSMOS", "VIBRANT", "TERRA", "PRESETS",
+             "icon", "ICONS", "Palette", "Theme")
+    for name in names:
+        assert name in banners.__all__ and hasattr(banners, name), name
+    assert "SectionPalette" not in banners.__all__
 
 
 def test_every_preset_has_palette_and_theme():
