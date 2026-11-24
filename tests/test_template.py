@@ -119,3 +119,12 @@ def test_code_block_scales_with_the_slide():
     """A code block is sized relative to the slide text, with its own line height."""
     html = Section(title="T", content=Text("```python\nx = 1\n```")).render().text
     assert "pre{font-size:0.8em!important;line-height:1.45!important" in html
+
+
+@pytest.mark.parametrize("cover_image", [False, PNG])
+def test_cover_subtitle_follows_a_wrapped_title(cover_image):
+    """Title and subtitle share one box, so a two-line title pushes the subtitle down."""
+    configure(template=Template())
+    page = Cover(title="TITLE-TEXT", subtitle="SUBTITLE-TEXT", image=cover_image).render().text
+    between = page[page.index("TITLE-TEXT"):page.index("SUBTITLE-TEXT")]
+    assert "position:absolute" not in between

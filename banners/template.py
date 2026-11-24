@@ -396,16 +396,21 @@ class Template:
             inner = (
                 self._dark_logo(5.1, 6.1, 21.3)
                 + (self._box(50, 7, 44.9, None, self._text(s.team, "label", self.palette.on_dark, extra="text-align:right;")) if s.team else "")
-                + self._box(11.7, 37, 80, None, self._text(s.title, "display", self._on(self.palette.dark, self._title_color(s)), bold=True))
-                + (self._box(12.2, 52, 75, None, self._text(s.subtitle, "subtitle", self.palette.on_dark, extra="line-height:1.25;")) if s.subtitle else "")
+                # One box for title and subtitle: a wrapped title pushes the subtitle down.
+                + self._box(11.7, 37, 80, None,
+                            self._text(s.title, "display", self._on(self.palette.dark, self._title_color(s)), bold=True)
+                            + (self._text(s.subtitle, "subtitle", self.palette.on_dark,
+                                          extra="line-height:1.25;margin-top:1.5cqw;max-width:94%;") if s.subtitle else ""))
                 + (self._box(5.8, 87.5, 50, None, self._text(s.date, "small", self.palette.on_dark)) if s.date else "")
             )
             return self._canvas(self.palette.dark, inner, self.palette.on_dark)
         shade = "linear-gradient(90deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.15) 55%,rgba(0,0,0,0) 100%)"
         inner = (
             self._photo(image, 0, 0, 100, 76.1, overlay=shade)
-            + self._box(5.2, 29, 60, None, self._text(s.title, "display", "#ffffff", bold=True))
-            + (self._box(5.6, 44.5, 55, None, self._text(s.subtitle, "subtitle", "#ffffff", extra="line-height:1.25;")) if s.subtitle else "")
+            + self._box(5.2, 29, 60, None,
+                        self._text(s.title, "display", "#ffffff", bold=True)
+                        + (self._text(s.subtitle, "subtitle", "#ffffff",
+                                      extra="line-height:1.25;margin-top:1.5cqw;max-width:92%;") if s.subtitle else ""))
             + (self._box(5.6, 68.4, 60, None, self._text(s.team, "label", "#ffffff")) if s.team else "")
             + (self._box(7.3, 87.5, 50, None, self._text(s.date, "small", self.palette.text)) if s.date else "")
             + self._logo(self.logo_on_light, 77.9, 86, 18.4)
