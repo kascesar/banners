@@ -4,6 +4,7 @@ _state: dict = {
     "team": "",
     "date": "",
     "palette": None,
+    "theme": None,
     "background": None,
     "template": None,
     "_section_counter": 0,
@@ -16,6 +17,7 @@ def configure(
     team: str = _UNSET,
     date: str = _UNSET,
     palette=_UNSET,
+    theme=_UNSET,
     background=_UNSET,
     template=_UNSET,
 ) -> None:
@@ -28,9 +30,12 @@ def configure(
     Args:
         team: Team line shown in `Cover`, `Intro`, and `Closing` banners.
         date: Date string shown in `Cover` (e.g. `"April 2026"`).
-        palette: Color palette applied to `Cover`, `Intro`, and `Closing`.
-            Pass any `Palette` instance or predefined constant
-            (`BLUE`, `GREEN`, `PURPLE`, `GRAY`).
+        palette: `Palette` for every slide (e.g. `BLUE`). It replaces the
+            template's palette as a whole; a slide's own `palette=` replaces
+            it in turn. `None` uses the template's palette.
+        theme: `Theme` for every slide (fonts, title weight, icon stroke,
+            scale). It replaces the template's theme as a whole. `None` uses
+            the template's theme.
         background: Background applied to all slides. Pass a `Background`
             instance (`Background.color()`, `Background.gradient()`, or
             `Background.image()`). Individual slides can override this with
@@ -57,6 +62,8 @@ def configure(
         _state["date"] = date
     if palette is not _UNSET:
         _state["palette"] = palette
+    if theme is not _UNSET:
+        _state["theme"] = theme
     if background is not _UNSET:
         _state["background"] = background
     if template is not _UNSET:

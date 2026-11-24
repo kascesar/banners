@@ -38,7 +38,7 @@ Each slide type maps to a template layout:
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import marimo as mo
 
@@ -106,6 +106,10 @@ class Template:
     palette: Palette = field(default_factory=Palette)
     theme: Theme = field(default_factory=Theme)
 
+    # CSS of the `Background` of the slide being rendered; set by `render` on
+    # the copy that draws one slide, never on the template the user declared.
+    _background = None
+
     # ── Entry point ──────────────────────────────────────────────────────────
 
     def render(self, slide) -> mo.Html:
@@ -117,15 +121,24 @@ class Template:
         Returns:
             A `mo.Html` 16:9 canvas.
         """
+        palette, theme = _resolve_style(self, slide)
+        background = getattr(slide, "background", None)
+        if background is not None:
+            readable = background.text_color()
+            if readable:
+                palette = replace(palette, text=readable, muted=readable, on_dark=readable)
+        active = replace(self, palette=palette, theme=theme)
+        active._background = background.css if background is not None else None
+
         kind = type(slide).__name__
         if kind == "Cover":
-            html = self._cover(slide)
+            html = active._cover(slide)
         elif kind == "Closing":
-            html = self._closing(slide)
+            html = active._closing(slide)
         elif kind == "Intro":
-            html = self._intro(slide)
+            html = active._intro(slide)
         else:
-            html = self._section(slide)
+            html = active._section(slide)
         return mo.Html(html)
 
     # ── Primitives ───────────────────────────────────────────────────────────
@@ -150,7 +163,7 @@ class Template:
         return (
             '<div style="container-type:inline-size;width:100%;">'
             f'<div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;'
-            f'background:{bg};color:{color};font-family:{self.theme.font};">'
+            f'background:{self._background or bg};color:{color};font-family:{self.theme.font};">'
             f"{inner}{bar}</div></div>"
         )
 
@@ -505,6 +518,28 @@ class Template:
                               f'<div style="display:grid;grid-template-columns:repeat({len(s.stats)},1fr);">{cells}</div>')
         team = self._box(5.1, 86.5, 50, None, self._text(s.team, "label", self.palette.on_dark)) if s.team else ""
         return self._canvas(self.palette.closing_bg, head + sub + stats + team, self.palette.on_dark)
+
+
+def _resolve_style(template: Template, slide) -> tuple[Palette, Theme]:
+    """Choose the palette and the theme a slide is drawn with.
+
+    A palette or theme declared by the user replaces the template's one as a
+    whole; fields are never merged.
+
+    Args:
+        template: The template that draws the slide.
+        slide: The slide being rendered; its `palette` may be `None`.
+
+    Returns:
+        `(palette, theme)`: the slide palette, else `configure(palette=...)`,
+        else `template.palette`; and `configure(theme=...)`, else
+        `template.theme`.
+    """
+    from . import config as _cfg
+
+    palette = getattr(slide, "palette", None) or _cfg.get("palette") or template.palette
+    theme = _cfg.get("theme") or template.theme
+    return palette, theme
 
 
 # ── Presets ───────────────────────────────────────────────────────────────────
