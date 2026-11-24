@@ -4,17 +4,50 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Working by milestones
 
-Work is planned in `MILESTONES.md`. When asked to "take the next milestone":
+Work is planned in `MILESTONES.md` and follows the `superpowers` plugin flow
+(spec → plan → TDD → verification). Where a superpowers skill disagrees with
+this file, this file wins.
 
-1. Read `MILESTONES.md` and pick the **first** milestone whose status is `[ ]`.
-2. Work on a branch named `milestone/<id>-<slug>` (e.g. `milestone/m2-unit-tests`).
-3. Implement only that milestone. If you find unrelated issues, add them to the
-   **Backlog** section of `MILESTONES.md` instead of fixing them.
-4. A milestone is done only when **every** acceptance criterion passes. Run the
-   verification commands listed in it and paste their result in the commit message body.
-5. Mark it `[x]`, add a one-line entry to the **Log** section (date, branch, summary),
-   commit, and stop. Do not start the next milestone in the same session.
-6. If a criterion cannot be met, mark the milestone `[!]`, write why under it, and stop.
+When asked to "take the next milestone":
+
+1. **Pick.** Read `MILESTONES.md` and take the **first** milestone whose status
+   is `[ ]`. Its description is the spec and its acceptance criteria are the
+   definition of done. If the description is ambiguous, ask before planning.
+2. **Branch.** Create `milestone/<id>-<slug>` (e.g. `milestone/m6-font`) in the
+   main checkout. Do not create worktrees (`using-git-worktrees`) unless asked.
+3. **Plan.** Use `writing-plans` and save the plan to `plans/<id>-<slug>.md`
+   (e.g. `plans/m6-font.md`). Every acceptance criterion must map to at least one
+   task, and each task names the test or command that proves it. Wait for the
+   maintainer to approve the plan before writing code.
+4. **Execute.** Use `executing-plans` (inline). Do not use
+   `subagent-driven-development` or `dispatching-parallel-agents` unless asked.
+   - Logic in `banners/` follows `test-driven-development`: write a failing
+     pytest test in `tests/` first, then the code.
+   - Visual changes are checked with the notebooks in `test/` (marimo); TDD does
+     not apply to those notebooks.
+   - Any failing test or wrong render goes through `systematic-debugging`
+     before a fix is proposed.
+   - Stay inside the milestone. Unrelated issues go to the **Backlog** section
+     of `MILESTONES.md`, not into the code.
+5. **Commit.** Commit after each task on the milestone branch only. Commit
+   messages follow Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`,
+   `chore:`) and carry no `Co-Authored-By` line. Never commit on `main`.
+6. **Verify.** Before claiming the milestone is done, apply
+   `verification-before-completion`: run `make check` and every verification
+   command listed in the milestone, and paste their output in the body of the
+   last commit.
+7. **Close.** Mark the milestone `[x]`, add a one-line entry to the **Log**
+   section (date, branch, summary) and commit. `finishing-a-development-branch`
+   stops here: never merge, push, open a PR or delete branches; the maintainer
+   reviews, squashes if needed and merges. Do not start the next milestone in
+   the same session.
+8. **Blocked.** If a criterion cannot be met, mark the milestone `[!]`, write
+   why under it, commit, and stop.
+
+New ideas that are not a milestone yet go through `brainstorming`; the outcome
+is written as a new `[ ]` milestone in `MILESTONES.md` (description plus
+acceptance criteria), not as a separate design document. Before asking the
+maintainer for a review of finished work, `requesting-code-review` may be used.
 
 ## Commands
 
@@ -27,6 +60,11 @@ uv pip install -e ".[dev]"       # dev tools: hatch, pdoc, pandas, manim
 # Visual reference notebooks (one per feature)
 uv run marimo edit test/01_intro.py        # ... through test/10_background.py
 uv run marimo edit example/showcase.py     # full demo deck
+
+# Checks (run before claiming any work is done)
+make lint                        # ruff check banners tests
+make test                        # pytest (manim tests skipped)
+make check                       # lint + test
 
 # Docs
 make docs                        # pdoc → docs/
@@ -190,5 +228,9 @@ Add a factory function to `banners/scenes/` that lazily imports manim and return
 ## Conventions
 
 - Python ≥ 3.10. Use `uv` for everything (`uv run`, `uv pip`, `uv build`).
+- Everything in the repository is written in English: code, docstrings, comments,
+  tests, notebooks, README, `MILESTONES.md`, plans in `plans/`, workflow and config
+  comments, commit messages and PR comments. This overrides any personal rule that
+  asks for another language.
 - Public API changes must update `banners/__init__.py` `__all__`, the README, and docstrings (pdoc builds docs from them, Google style).
 - Do not commit rendered media (`*.mp4` is gitignored) or `__marimo__/` folders.
