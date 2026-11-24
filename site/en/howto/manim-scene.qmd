@@ -1,0 +1,4 @@
+---
+title: "A click-through Manim scene"
+---
+

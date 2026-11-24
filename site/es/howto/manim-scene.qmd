@@ -1,0 +1,4 @@
+---
+title: "Una escena Manim paso a paso"
+---
+

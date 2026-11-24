@@ -1,0 +1,12 @@
+---
+title: "banners"
+page-layout: full
+---
+
+<script>
+// The site has two languages; open the one the browser prefers.
+var lang = (navigator.language || "en").toLowerCase().startsWith("es") ? "es" : "en";
+window.location.replace(lang + "/index.html");
+</script>
+
+[English](en/index.qmd) · [Español](es/index.qmd)

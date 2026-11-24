@@ -1,0 +1,155 @@
+# Quarto website for the banners documentation, in English (en/) and Spanish (es/).
+# Both folders hold the same pages with the same file names; lang-switch.js adds
+# the language button that opens the same page in the other language.
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "banners"
+  site-url: https://kascesar.github.io/banners/
+  repo-url: https://github.com/kascesar/banners
+  page-navigation: true
+  search: true
+  navbar:
+    right:
+      - text: "API"
+        href: https://kascesar.github.io/banners/api/
+      - icon: github
+        href: https://github.com/kascesar/banners
+        aria-label: GitHub
+  # One sidebar per language; Quarto shows only the one that holds the page.
+  sidebar:
+    - id: en
+      style: floating
+      collapse-level: 1
+      contents:
+        - text: "Home"
+          href: en/index.qmd
+        - text: "Get started"
+          href: en/get-started.qmd
+        - section: "Look and feel"
+          contents:
+            - text: "Templates"
+              href: en/look/templates.qmd
+            - text: "Palettes"
+              href: en/look/palettes.qmd
+            - text: "Themes"
+              href: en/look/themes.qmd
+            - text: "Layouts"
+              href: en/look/layouts.qmd
+            - text: "Backgrounds"
+              href: en/look/backgrounds.qmd
+        - section: "Slides"
+          contents:
+            - text: "Cover"
+              href: en/slides/cover.qmd
+            - text: "Intro"
+              href: en/slides/intro.qmd
+            - text: "Section"
+              href: en/slides/section.qmd
+            - text: "Closing"
+              href: en/slides/closing.qmd
+        - section: "Content"
+          contents:
+            - text: "Text"
+              href: en/content/text.qmd
+            - text: "Image"
+              href: en/content/image.qmd
+            - text: "Table"
+              href: en/content/table.qmd
+            - text: "Plot"
+              href: en/content/plot.qmd
+            - text: "Graph"
+              href: en/content/graph.qmd
+            - text: "AnimatedGraph"
+              href: en/content/animated-graph.qmd
+            - text: "FlowAnimation"
+              href: en/content/flow-animation.qmd
+            - text: "Manim"
+              href: en/content/manim.qmd
+        - section: "How-to guides"
+          contents:
+            - text: "Present full screen"
+              href: en/howto/present.qmd
+            - text: "Your organization's template"
+              href: en/howto/organization-template.qmd
+            - text: "A click-through Manim scene"
+              href: en/howto/manim-scene.qmd
+            - text: "Cache and speed"
+              href: en/howto/cache.qmd
+        - text: "Examples"
+          href: en/examples.qmd
+        - text: "What's new"
+          href: en/whats-new.qmd
+    - id: es
+      style: floating
+      collapse-level: 1
+      contents:
+        - text: "Inicio"
+          href: es/index.qmd
+        - text: "Primeros pasos"
+          href: es/get-started.qmd
+        - section: "Apariencia"
+          contents:
+            - text: "Templates"
+              href: es/look/templates.qmd
+            - text: "Paletas"
+              href: es/look/palettes.qmd
+            - text: "Temas"
+              href: es/look/themes.qmd
+            - text: "Layouts"
+              href: es/look/layouts.qmd
+            - text: "Fondos"
+              href: es/look/backgrounds.qmd
+        - section: "Slides"
+          contents:
+            - text: "Cover"
+              href: es/slides/cover.qmd
+            - text: "Intro"
+              href: es/slides/intro.qmd
+            - text: "Section"
+              href: es/slides/section.qmd
+            - text: "Closing"
+              href: es/slides/closing.qmd
+        - section: "Contenido"
+          contents:
+            - text: "Text"
+              href: es/content/text.qmd
+            - text: "Image"
+              href: es/content/image.qmd
+            - text: "Table"
+              href: es/content/table.qmd
+            - text: "Plot"
+              href: es/content/plot.qmd
+            - text: "Graph"
+              href: es/content/graph.qmd
+            - text: "AnimatedGraph"
+              href: es/content/animated-graph.qmd
+            - text: "FlowAnimation"
+              href: es/content/flow-animation.qmd
+            - text: "Manim"
+              href: es/content/manim.qmd
+        - section: "Guías prácticas"
+          contents:
+            - text: "Presentar en pantalla completa"
+              href: es/howto/present.qmd
+            - text: "El template de tu organización"
+              href: es/howto/organization-template.qmd
+            - text: "Una escena Manim paso a paso"
+              href: es/howto/manim-scene.qmd
+            - text: "Caché y velocidad"
+              href: es/howto/cache.qmd
+        - text: "Ejemplos"
+          href: es/examples.qmd
+        - text: "Novedades"
+          href: es/whats-new.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    code-copy: true
+    lightbox: true
+    include-after-body: lang-switch.html
