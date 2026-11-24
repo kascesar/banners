@@ -314,6 +314,10 @@ class Template:
         uid = f"tp{uuid.uuid4().hex[:8]}"
         parts = []
         for item in items:
+            # Content that can follow the palette (plots, animations) gets a
+            # styled copy; the element itself never reads the configuration.
+            if hasattr(item, "_with_palette"):
+                item = item._with_palette(self.palette)
             if isinstance(item, (Text, str)):
                 body = item.body if isinstance(item, Text) else item
                 html = mo.as_html(Text(body).render()).text
