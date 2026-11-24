@@ -2,8 +2,6 @@
 
 import re
 
-import pytest
-
 from banners.content.animated_graph import _build_svg, _layout, _parse
 
 
@@ -27,11 +25,6 @@ def test_parse_source_and_solo_labels():
     assert nodes == {"B": "Validate", "A": "Raw data", "C": "C"}
 
 
-@pytest.mark.xfail(
-    reason="_edge_re is not anchored to the end of the line and the lazy label group "
-    "accepts an empty match, so the destination node label is lost. See Backlog.",
-    strict=True,
-)
 def test_parse_destination_label():
     """The label of an edge destination node should be read as well."""
     nodes, _, _ = _parse("graph LR\n  A --> B[Validate]")

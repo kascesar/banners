@@ -453,10 +453,6 @@ Unplanned items found while working. Promote to a milestone when relevant.
   slide" and shows `number="A1"` / `number=""` as if they were visible.
 - `banners/scenes/pipeline.py` and other `ImportError` messages suggest `uv pip install 'banners[manim]'`,
   but the package on PyPI is called `marimo-banners`.
-- `AnimatedGraph._parse` loses the label of an edge destination node: `A --> B[Validate]`
-  leaves `B` labeled `"B"`. `_edge_re` is not anchored to the end of the line and the lazy
-  label group accepts an empty match. It shows in `test/05_animated_graph.py` (`D[Load]`
-  appears as "D"). Test: `tests/test_animated_graph.py::test_parse_destination_label` (xfail).
 - `background._parse_first_color` searches each format over the whole string in a fixed order
   (`#rrggbbaa`, `#rrggbb`, `#rgba`, `#rgb`, `rgb()`), so in a gradient with mixed formats the
   first color does not win: `linear-gradient(#fff, #000000)` yields black and the automatic
