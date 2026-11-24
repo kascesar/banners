@@ -91,12 +91,10 @@ Make sure every notebook in `test/` and `example/` at least executes without err
 - `uv run pytest tests/test_notebooks.py` → green for all non-manim notebooks.
 - `uv run pytest -m manim` → green locally on César's Fedora (with system libs installed).
 
-Pending verification by César: `uv run pytest -m manim` on César's Fedora machine with the system libraries
-(`example/ondas_electromagneticas.py` fails with `ValueError: latex error converting to dvi`
-because the LaTeX class `standalone.cls`, used by the default `MathTex` template, is missing;
-`kpsewhich standalone.cls` finds nothing and `dvisvgm` is not on the PATH either.
-`test/08_manim.py` and `test/09_flow_animation.py` pass; `example/showcase.py` stays xfail
-because of the error recorded in the Backlog).
+Verified on 2026-11-24: `uv run pytest -m manim` on César's Fedora machine → 3 passed, 1 xfailed
+(`example/showcase.py`, the error recorded in the Backlog). The LaTeX error in
+`example/ondas_electromagneticas.py` was missing system packages, fixed with
+`sudo dnf install texlive-standalone texlive-dvisvgm`.
 
 `tests/test_notebooks.py` joins the M3 CI without workflow changes: the CI runs
 `uv run pytest` and `addopts = "-m 'not manim'"` leaves the manim notebooks out.
