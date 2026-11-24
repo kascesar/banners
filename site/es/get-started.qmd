@@ -96,8 +96,9 @@ código oculto:
    derecha, o <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>.</kbd>).
 2. En el menú de layout de la vista de app, elige **Slides**. marimo guarda
    esta elección en una carpeta `layouts/` junto al notebook.
-3. Para presentar, ejecuta el notebook como app y pon el navegador en pantalla
-   completa (<kbd>F11</kbd> en la mayoría de los sistemas):
+3. Para presentar, ejecuta el notebook como app y presiona el botón
+   **Fullscreen** abajo a la derecha de las slides; luego las flechas del
+   teclado avanzan y retroceden:
 
 ```bash
 marimo run deck.py

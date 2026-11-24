@@ -96,8 +96,9 @@ hidden:
    or <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>.</kbd>).
 2. In the layout menu of the app view, choose **Slides**. marimo saves this
    choice in a `layouts/` folder next to the notebook.
-3. To present, run the notebook as an app and make the browser full screen
-   (<kbd>F11</kbd> on most systems):
+3. To present, run the notebook as an app and press the **Fullscreen**
+   button at the bottom right of the slides; the arrow keys then move between
+   slides:
 
 ```bash
 marimo run deck.py

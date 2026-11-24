@@ -1,4 +1,40 @@
 ---
 title: "Novedades"
+description: "Los cambios de cada versión y los pasos para actualizar."
 ---
 
+La lista completa de cambios está en los
+[releases de GitHub](https://github.com/kascesar/banners/releases).
+
+## 0.6
+
+- Las animaciones siguen la paleta de la slide: `Manim` y `FlowAnimation` se
+  dibujan sobre `palette.panel`, y `FlowAnimation` y `PipelineScene` colorean
+  sus nodos con la paleta.
+- Movimiento más corto y directo: 30 cuadros por segundo y un paso de 0,25
+  segundos por clic.
+- Los gráficos de matplotlib en una slide toman los colores de la paleta y un
+  fondo transparente.
+- El reproductor muestra controles más grandes sobre la animación.
+
+**Cómo actualizar.** 0.6 necesita Python 3.11 o superior y manim 0.21 o
+superior. Los proyectos que se quedan en Python 3.10 pueden mantener la 0.5.1:
+
+```bash
+pip install "marimo-banners<0.6"
+```
+
+## 0.5
+
+La 0.5 introdujo el modelo actual: un `Template` dibuja cada slide sobre un
+lienzo de 16:9, con los colores en una `Palette` y la tipografía en un
+`Theme`. Se eliminó el estilo fluido "editorial" de las versiones 0.3 y 0.4,
+junto con estos parámetros, que ahora producen un error:
+
+| Eliminado | Reemplazo |
+|---|---|
+| `content_kind=` en las slides | Ninguno: el texto se muestra como texto normal. |
+| `icon=` en las slides y en `configure()` | `Template(mark=...)` para el símbolo de la esquina, `logo_on_light` / `logo_on_dark` para los logos. |
+| `Palette(start=..., mid=..., end=...)`, `Palette.gradient`, `text_*` | `Palette(primary=..., dark=..., closing_bg=...)`. |
+| `SectionPalette`, `Palette.to_section_palette()` | `Palette`, para todos los tipos de slide. |
+| `Template(primary=..., font=..., ...)` | `Template(palette=Palette(...), theme=Theme(...))`. |

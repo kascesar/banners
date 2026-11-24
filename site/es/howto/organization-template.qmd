@@ -1,4 +1,101 @@
 ---
 title: "El template de tu organización"
+description: "Arma un template con el logo, los colores y las fuentes de tu organización, y compártelo entre presentaciones."
 ---
 
+Esta guía arma un template completo para una organización: logos, colores,
+fuentes y fotos, guardados en un archivo que importa cada presentación.
+
+## El template
+
+```python
+from banners import Cover, Palette, Template, configure, icon
+
+corp = Template(
+    palette=Palette(primary="#0f766e", secondary="#f59e0b", dark="#0b2e2b"),
+    logo_on_dark=icon("building", color="#ffffff"),
+    mark=icon("building", color="#0f766e"),
+)
+configure(template=corp, team="Oficina de Datos", date="2026")
+Cover(title="Revisión trimestral", subtitle="Tu logo, tus colores.")
+```
+
+![](../../images/org-template.png){width=80%}
+
+El ejemplo usa un ícono incluido como logo de muestra. Con el logo real, las
+opciones de logo reciben una URL, una ruta de archivo o bytes:
+
+| Opción | Aparece en | Consejo |
+|---|---|---|
+| `logo_on_dark` | Portada y cierre (fondos oscuros). | Una versión blanca o clara del logo. |
+| `logo_on_light` | Slides de contenido (fondos claros). | El logo a color. Sin `logo_on_dark`, banners lo dibuja en blanco en las slides oscuras. |
+| `mark` | Esquina superior derecha de las slides de contenido. | Solo el símbolo, sin el nombre. |
+| `closing_image` | Junto al título de cierre. | Una mascota, la foto de un producto o el símbolo. |
+
+El logo conserva sus proporciones y no sale de su área, así que un logo
+cuadrado y uno ancho caben ambos sobre el título.
+
+## Colores y fuentes
+
+Escribe los colores de la marca en los roles de la paleta (ver
+[Paletas](../look/palettes.qmd)) y las fuentes de la marca en un tema (ver
+[Temas](../look/themes.qmd)):
+
+```python
+from banners import Palette, Template, Theme
+
+corp = Template(
+    palette=Palette(
+        primary="#0f766e",        # títulos y la barra
+        secondary="#f59e0b",      # final de la barra
+        dark="#0b2e2b",           # fondo de la portada
+        closing_bg="#0b2e2b",     # fondo del cierre
+        section_colors=("#0f766e", "#f59e0b", "#2563eb"),
+    ),
+    theme=Theme(font="'Inter', 'Helvetica Neue', sans-serif", heading_font="'Inter', sans-serif"),
+    auto_contrast=False,          # conservar los colores exactos de la marca
+)
+```
+
+`auto_contrast=False` conserva los colores de los títulos tal como se dieron,
+incluso donde se leerían mal; déjalo activo salvo que el manual de marca exija
+colores exactos.
+
+## Fotos
+
+`cover_image` y `divider_image` dan una foto a todas las portadas y a todos
+los separadores. Usa imágenes que puedas publicar: las de tu propia
+organización o imágenes de dominio público, como las de Wikimedia Commons. El
+navegador carga una URL cuando muestra la slide; una ruta o bytes quedan
+incrustados en la slide.
+
+## Compartirlo entre presentaciones
+
+Guarda el template en un archivo de Python, por ejemplo `nuestramarca.py`,
+junto a los notebooks o en un paquete que instale tu equipo:
+
+```python
+# fragment: nuestramarca.py
+from banners import Palette, Template
+
+TEMPLATE = Template(palette=Palette(primary="#0f766e", secondary="#f59e0b"))
+```
+
+Cada presentación empieza entonces con:
+
+```python
+# fragment: primera celda de cada presentación.
+from banners import configure
+from nuestramarca import TEMPLATE
+
+configure(template=TEMPLATE, team="Oficina de Datos", date="2026")
+```
+
+::: {.callout-important}
+## Los logos son marcas registradas
+
+Un logo pertenece a su organización, y sus reglas de marca deciden quién
+puede usarlo y cómo. Usa el logo de tu organización en sus propias
+presentaciones, sigue su manual de marca y no publiques un template con el
+logo de otra organización.
+:::
