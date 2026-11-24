@@ -16,8 +16,9 @@ test:
 
 check: lint test
 
+# Development environment exactly as pinned in uv.lock.
 uv-dev:
-	$(UV) pip install -e ".[dev]"
+	$(UV) sync --extra dev
 
 # Manual fallback: releases normally go through .github/workflows/release.yml when a
 # vX.Y.Z tag is pushed. This target uploads from the local machine and needs a PyPI token.

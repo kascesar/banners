@@ -40,6 +40,11 @@ Four slide types (`Cover`, `Intro`, `Section`, `Closing`) with five built-in pal
 
 ---
 
+# Upgrading to 0.6
+
+Version 0.6 requires Python 3.11 or newer, so it can use manim 0.21 or newer
+(faster rendering). Projects that stay on Python 3.10 keep version 0.5.1.
+
 # Upgrading to 0.5
 
 Version 0.5 has a single rendering model: every slide is drawn on the 16:9
@@ -59,6 +64,8 @@ and look different. These parameters were removed and now raise an error:
 ---
 
 # Installation
+
+banners needs Python 3.11 or newer.
 
 ```bash
 uv pip install marimo-banners

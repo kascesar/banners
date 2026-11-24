@@ -14,8 +14,8 @@ jobs:
       # result is reported.
       fail-fast: false
       matrix:
-        # Minimum supported version (requires-python = ">=3.10") and a recent one.
-        python-version: ["3.10", "3.12"]
+        # Minimum supported version (requires-python = ">=3.11") and a recent one.
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
