@@ -1,0 +1,2525 @@
+[
+  {
+    "objectID": "en/howto/present.html",
+    "href": "en/howto/present.html",
+    "title": "Present full screen",
+    "section": "",
+    "text": "This guide covers marimo’s slide view, presenting full screen and exporting a deck to a single HTML file.",
+    "crumbs": [
+      "How-to guides",
+      "Present full screen"
+    ]
+  },
+  {
+    "objectID": "en/howto/present.html#turn-on-the-slide-layout",
+    "href": "en/howto/present.html#turn-on-the-slide-layout",
+    "title": "Present full screen",
+    "section": "Turn on the slide layout",
+    "text": "Turn on the slide layout\nmarimo can lay out a notebook as slides: each cell output becomes a slide and the code is hidden.\n\nOpen the notebook with marimo edit deck.py.\nOpen the app view (the preview button at the bottom right, or Ctrl/Cmd + .).\nIn the layout menu of the app view, choose Slides.\n\nmarimo saves the choice in a layouts/deck.slides.json file and records it in the notebook header:\n# fragment: the first lines of a notebook that uses the slide layout.\nimport marimo\n\napp = marimo.App(width=\"full\", layout_file=\"layouts/deck.slides.json\")\nwidth=\"full\" lets the slides use the whole width of the window. Keep the layouts/ folder next to the notebook; without it, marimo shows the notebook as a page.",
+    "crumbs": [
+      "How-to guides",
+      "Present full screen"
+    ]
+  },
+  {
+    "objectID": "en/howto/present.html#present",
+    "href": "en/howto/present.html#present",
+    "title": "Present full screen",
+    "section": "Present",
+    "text": "Present\nRun the notebook as an app:\nmarimo run deck.py\nmarimo opens it in the browser with the slide layout. Press the Fullscreen button at the bottom right of the slides: the slides fill the screen and the arrow keys move between them (outside full screen, use the arrows on the sides of the slide). Because banners draws every slide on a 16:9 canvas sized by the window width, the slides fill a projector without changes.\n\n\n\n\n\n\nTipCheck the deck before the talk\n\n\n\nAnimations are rendered and cached the first time their cell runs. Running the deck once before the talk means that, during the talk, every animation comes from the cache and appears at once.",
+    "crumbs": [
+      "How-to guides",
+      "Present full screen"
+    ]
+  },
+  {
+    "objectID": "en/howto/present.html#share-as-a-file",
+    "href": "en/howto/present.html#share-as-a-file",
+    "title": "Present full screen",
+    "section": "Share as a file",
+    "text": "Share as a file\nmarimo export html runs the notebook and writes a single HTML file that opens in any browser, without Python:\nmarimo export html deck.py -o deck.html\nSlides, plots, tables, Mermaid diagrams and the click-through players of FlowAnimation and Manim work in the exported file. AnimatedGraph does not, because it needs the running notebook to answer the clicks.",
+    "crumbs": [
+      "How-to guides",
+      "Present full screen"
+    ]
+  },
+  {
+    "objectID": "en/howto/organization-template.html",
+    "href": "en/howto/organization-template.html",
+    "title": "Your organization’s template",
+    "section": "",
+    "text": "This guide builds a complete template for an organization: logos, colors, fonts and photos, kept in one file that every deck imports.",
+    "crumbs": [
+      "How-to guides",
+      "Your organization's template"
+    ]
+  },
+  {
+    "objectID": "en/howto/organization-template.html#the-template",
+    "href": "en/howto/organization-template.html#the-template",
+    "title": "Your organization’s template",
+    "section": "The template",
+    "text": "The template\nfrom banners import Cover, Palette, Template, configure, icon\n\ncorp = Template(\n    palette=Palette(primary=\"#0f766e\", secondary=\"#f59e0b\", dark=\"#0b2e2b\"),\n    logo_on_dark=icon(\"building\", color=\"#ffffff\"),\n    mark=icon(\"building\", color=\"#0f766e\"),\n)\nconfigure(template=corp, team=\"Data Office\", date=\"2026\")\nCover(title=\"Quarterly review\", subtitle=\"Your logo, your colors.\")\n\nThe example uses a built-in icon as a stand-in logo. With real artwork, the logo options take a URL, a file path or raw bytes:\n\n\n\n\n\n\n\n\nOption\nShown on\nTip\n\n\n\n\nlogo_on_dark\nCover and closing slides (dark backgrounds).\nA white or light version of the logo.\n\n\nlogo_on_light\nContent slides (light backgrounds).\nThe full-color logo. Without logo_on_dark, banners draws this one in white on dark slides.\n\n\nmark\nTop-right corner of content slides.\nThe symbol alone, without the name.\n\n\nclosing_image\nNext to the closing title.\nA mascot, a product picture or the symbol.\n\n\n\nThe logo keeps its proportions and stays within its area, so a square logo and a wide one both fit above the title.",
+    "crumbs": [
+      "How-to guides",
+      "Your organization's template"
+    ]
+  },
+  {
+    "objectID": "en/howto/organization-template.html#colors-and-fonts",
+    "href": "en/howto/organization-template.html#colors-and-fonts",
+    "title": "Your organization’s template",
+    "section": "Colors and fonts",
+    "text": "Colors and fonts\nWrite the brand colors into the palette roles (see Palettes) and the brand fonts into a theme (see Themes):\nfrom banners import Palette, Template, Theme\n\ncorp = Template(\n    palette=Palette(\n        primary=\"#0f766e\",        # titles and the bar\n        secondary=\"#f59e0b\",      # end of the bar\n        dark=\"#0b2e2b\",           # cover background\n        closing_bg=\"#0b2e2b\",     # closing background\n        section_colors=(\"#0f766e\", \"#f59e0b\", \"#2563eb\"),\n    ),\n    theme=Theme(font=\"'Inter', 'Helvetica Neue', sans-serif\", heading_font=\"'Inter', sans-serif\"),\n    auto_contrast=False,          # keep the exact brand colors\n)\nauto_contrast=False keeps the title colors exactly as given, even where they would be hard to read; leave it on unless the brand guide requires exact colors.",
+    "crumbs": [
+      "How-to guides",
+      "Your organization's template"
+    ]
+  },
+  {
+    "objectID": "en/howto/organization-template.html#photos",
+    "href": "en/howto/organization-template.html#photos",
+    "title": "Your organization’s template",
+    "section": "Photos",
+    "text": "Photos\ncover_image and divider_image give every cover and divider a photo. Use pictures you are allowed to publish: your organization’s own, or public-domain ones such as those on Wikimedia Commons. A URL is loaded by the browser when the slide is shown; a path or bytes are embedded in the slide.",
+    "crumbs": [
+      "How-to guides",
+      "Your organization's template"
+    ]
+  },
+  {
+    "objectID": "en/howto/organization-template.html#share-it-across-decks",
+    "href": "en/howto/organization-template.html#share-it-across-decks",
+    "title": "Your organization’s template",
+    "section": "Share it across decks",
+    "text": "Share it across decks\nPut the template in a Python file, for example ourbrand.py, next to the notebooks or in a package your team installs:\n# fragment: ourbrand.py\nfrom banners import Palette, Template\n\nTEMPLATE = Template(palette=Palette(primary=\"#0f766e\", secondary=\"#f59e0b\"))\nEach deck then starts with:\n# fragment: first cell of every deck.\nfrom banners import configure\nfrom ourbrand import TEMPLATE\n\nconfigure(template=TEMPLATE, team=\"Data Office\", date=\"2026\")\n\n\n\n\n\n\nImportantLogos are trademarks\n\n\n\nA logo belongs to its organization, and its brand rules decide who may use it and how. Use your organization’s logo for its own presentations, follow its brand guide, and do not publish a template with another organization’s logo.",
+    "crumbs": [
+      "How-to guides",
+      "Your organization's template"
+    ]
+  },
+  {
+    "objectID": "en/look/palettes.html",
+    "href": "en/look/palettes.html",
+    "title": "Palettes",
+    "section": "",
+    "text": "This page covers the color roles of a palette, the five built-in palettes, how to make your own, and which palette wins when several are set.",
+    "crumbs": [
+      "Look and feel",
+      "Palettes"
+    ]
+  },
+  {
+    "objectID": "en/look/palettes.html#colors-by-role",
+    "href": "en/look/palettes.html#colors-by-role",
+    "title": "Palettes",
+    "section": "Colors by role",
+    "text": "Colors by role\nA Palette does not list “the colors of the brand”; it says what each color is for. The template paints each part of a slide with the color of its role:\n\n\n\n\n\n\n\n\nRole\nDefault\nPaints\n\n\n\n\nprimary\n■ #e4572e\nTitles and the main segment of the bottom bar.\n\n\nsecondary\n■ #2a6fdb\nThe end segment of the bottom bar.\n\n\ndark\n■ #404040\nBackground of the cover and of the logo-only closing slide.\n\n\nclosing_bg\n■ #363e45\nBackground of the closing slide.\n\n\nlight\n■ #f5f5f5\nBackground of dividers and content slides.\n\n\ntext\n■ #343e46\nBody text on light backgrounds.\n\n\nmuted\n■ #6b7280\nSubtitles, labels and captions on light backgrounds.\n\n\non_dark\n■ #f5f5f5\nText on dark backgrounds.\n\n\npanel\n#ffffff\nBackground of the box that holds a chart or an animation.\n\n\n\nThree optional roles add variety:\n\nsection_colors: colors that Section slides take in turn by their number (section 01 the first, 02 the second, and so on).\nbar_colors: colors of the bottom bar in equal segments, instead of primary and secondary.\nicon_color: color of named icons; by default they take the title color.\n\nPlots and animations on a slide also follow the palette: their series use section_colors (or primary and secondary), their labels use text and muted, and their background is panel. See Plot and Manim.",
+    "crumbs": [
+      "Look and feel",
+      "Palettes"
+    ]
+  },
+  {
+    "objectID": "en/look/palettes.html#the-built-in-palettes",
+    "href": "en/look/palettes.html#the-built-in-palettes",
+    "title": "Palettes",
+    "section": "The built-in palettes",
+    "text": "The built-in palettes\nbanners ships five palettes. ORANGE is the default one.\n\n\n\n\n\n\nORANGE\n\n\n\n\n\n\n\nBLUE\n\n\n\n\n\n\n\nGREEN\n\n\n\n\n\n\n\n\n\nPURPLE\n\n\n\n\n\n\n\nGRAY",
+    "crumbs": [
+      "Look and feel",
+      "Palettes"
+    ]
+  },
+  {
+    "objectID": "en/look/palettes.html#your-own-palette",
+    "href": "en/look/palettes.html#your-own-palette",
+    "title": "Palettes",
+    "section": "Your own palette",
+    "text": "Your own palette\nCreate a Palette with the roles you want to change; the others keep their default value:\nfrom banners import Cover, Palette\n\nbrand = Palette(primary=\"#a78bfa\", secondary=\"#f472b6\", dark=\"#1a0533\")\nCover(title=\"Custom palette\", subtitle=\"Three colors change the whole slide.\", palette=brand)\n\nsection_colors gives each section its own color:\nfrom banners import Palette, Section\n\nrainbow = Palette(section_colors=(\"#e4572e\", \"#2a6fdb\", \"#2e9e5b\"))\nSection(title=\"Each section takes the next color\", number=\"02\", palette=rainbow)",
+    "crumbs": [
+      "Look and feel",
+      "Palettes"
+    ]
+  },
+  {
+    "objectID": "en/look/palettes.html#where-a-palette-is-set-and-which-one-wins",
+    "href": "en/look/palettes.html#where-a-palette-is-set-and-which-one-wins",
+    "title": "Palettes",
+    "section": "Where a palette is set, and which one wins",
+    "text": "Where a palette is set, and which one wins\nA palette can be set in three places. When more than one is set, the most specific one wins:\n\nOn a slide, with palette=: only that slide.\nFor the deck, with configure(palette=...): every slide after the call.\nIn the template, with Template(palette=...): the default.\n\nfrom banners import BLUE, GREEN, Section, configure\n\nconfigure(palette=BLUE)                        # every slide is blue...\nSection(title=\"Highlights\", palette=GREEN)     # ...except this one\nA palette always replaces the one below it as a whole: the roles are not mixed. Palette(primary=\"#0f766e\") keeps the default values for every other role, not the values of the template’s palette.\n\n\n\n\n\n\nTipReadable titles on any background\n\n\n\nWhen a title color would be hard to read on its background (a contrast ratio under 3:1), the template uses a readable color instead. To keep exact brand colors, create the template with auto_contrast=False.",
+    "crumbs": [
+      "Look and feel",
+      "Palettes"
+    ]
+  },
+  {
+    "objectID": "en/look/layouts.html",
+    "href": "en/look/layouts.html",
+    "title": "Layouts",
+    "section": "",
+    "text": "This page covers how banners picks the layout of each slide. There is no layout argument: the template decides from the kind of slide and from what you put in it, so the same code gives consistent slides across a deck.",
+    "crumbs": [
+      "Look and feel",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "en/look/layouts.html#the-rules",
+    "href": "en/look/layouts.html#the-rules",
+    "title": "Layouts",
+    "section": "The rules",
+    "text": "The rules\n\n\n\n\n\n\n\nSlide\nLayout\n\n\n\n\nCover()\nDark cover with the logo, the title in the primary color, subtitle and date.\n\n\nCover(image=...)\nPhoto cover, with the title over the picture.\n\n\nIntro()\nLarge title in the left column, content in columns on the right.\n\n\nSection() without content\nDivider: title, subtitle and a photo or a large icon.\n\n\nSection(content=[visual, Text(...)])\nThe visual on the left, title and text on the right.\n\n\nSection(content=..., image=...)\nPhoto on the left half, title and content on the right.\n\n\nSection(content=...) otherwise\nTitle on top, content in columns below.\n\n\nClosing()\nClosing background with the title, an optional row of figures and the team.\n\n\n\nA visual is a plot, a diagram, a table, an image or an animation; text is Text.",
+    "crumbs": [
+      "Look and feel",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "en/look/layouts.html#a-divider",
+    "href": "en/look/layouts.html#a-divider",
+    "title": "Layouts",
+    "section": "A divider",
+    "text": "A divider\nA Section with no content separates the parts of a talk:\nfrom banners import Section\n\nSection(title=\"Pipeline architecture\", subtitle=\"How the data moves.\")",
+    "crumbs": [
+      "Look and feel",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "en/look/layouts.html#content-in-columns",
+    "href": "en/look/layouts.html#content-in-columns",
+    "title": "Layouts",
+    "section": "Content in columns",
+    "text": "Content in columns\nSeveral Text elements sit side by side, one column each:\nfrom banners import Section, Text\n\nSection(\n    title=\"Three findings\",\n    content=[\n        Text(\"**Data** — Two sources disagree on 4% of rows.\"),\n        Text(\"**Model** — Recall improves by 6 points.\"),\n        Text(\"**Cost** — Training time drops by half.\"),\n    ],\n)",
+    "crumbs": [
+      "Look and feel",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "en/look/layouts.html#a-visual-next-to-its-explanation",
+    "href": "en/look/layouts.html#a-visual-next-to-its-explanation",
+    "title": "Layouts",
+    "section": "A visual next to its explanation",
+    "text": "A visual next to its explanation\nA visual followed by text puts the visual on the left and the explanation on the right:\nfrom banners import Graph, Section, Text\n\nSection(\n    title=\"Pipeline\",\n    content=[\n        Graph(\"graph LR\\n  A[Ingest] --&gt; B[Transform] --&gt; C[Serve]\"),\n        Text(\"Each stage is versioned and monitored on its own.\"),\n    ],\n)",
+    "crumbs": [
+      "Look and feel",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "en/look/layouts.html#a-photo-next-to-the-content",
+    "href": "en/look/layouts.html#a-photo-next-to-the-content",
+    "title": "Layouts",
+    "section": "A photo next to the content",
+    "text": "A photo next to the content\nimage= puts a photo on the left half:\nfrom banners import Section, Text\n\nSection(\n    title=\"Field work\",\n    content=[Text(\"A photo fills the left half; the content sits on the right.\")],\n    image=\"https://commons.wikimedia.org/wiki/Special:FilePath/Grand_Canyon_National_Park_GRCA9857.jpg?width=1600\",\n)",
+    "crumbs": [
+      "Look and feel",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "en/look/layouts.html#the-169-canvas",
+    "href": "en/look/layouts.html#the-169-canvas",
+    "title": "Layouts",
+    "section": "The 16:9 canvas",
+    "text": "The 16:9 canvas\nEvery layout places its parts on a fixed 16:9 canvas, with positions and font sizes relative to the slide width. A slide therefore looks the same in a notebook cell, in a browser window and full screen: only its size changes.",
+    "crumbs": [
+      "Look and feel",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "en/look/themes.html",
+    "href": "en/look/themes.html",
+    "title": "Themes",
+    "section": "",
+    "text": "This page covers the five settings of a Theme and where to set them. Colors are not part of a theme; they belong to the palette.",
+    "crumbs": [
+      "Look and feel",
+      "Themes"
+    ]
+  },
+  {
+    "objectID": "en/look/themes.html#the-settings",
+    "href": "en/look/themes.html#the-settings",
+    "title": "Themes",
+    "section": "The settings",
+    "text": "The settings\n\n\n\n\n\n\n\n\nSetting\nDefault\nWhat it changes\n\n\n\n\nfont\nCentury Gothic and similar geometric fonts\nEvery text of the slide.\n\n\nheading_font\nNone (same as font)\nTitles only.\n\n\ntitle_weight\n700\nBoldness of titles (400 regular, 600 semibold, 700 bold).\n\n\nicon_stroke\n1.6\nLine width of the built-in icons.\n\n\nscale\n1.0\nMultiplier of every font size.\n\n\n\nFonts are CSS font stacks: the browser uses the first font of the list that is installed. A stack that ends in a generic family (serif, sans-serif) always finds a font.",
+    "crumbs": [
+      "Look and feel",
+      "Themes"
+    ]
+  },
+  {
+    "objectID": "en/look/themes.html#examples",
+    "href": "en/look/themes.html#examples",
+    "title": "Themes",
+    "section": "Examples",
+    "text": "Examples\nA serif for titles, lighter than the default bold:\nfrom banners import Section, Template, Text, Theme, configure\n\nconfigure(template=Template(theme=Theme(heading_font=\"Georgia, serif\", title_weight=600)))\nSection(title=\"Serif titles\", content=[Text(\"`heading_font` and `title_weight` change the titles only.\")])\nLarger text, for a big room or a small screen:\nfrom banners import Section, Template, Text, Theme, configure\n\nconfigure(template=Template(theme=Theme(scale=1.25)))\nSection(title=\"Larger text\", content=[Text(\"`scale=1.25` makes every font 25% larger.\")])\n\n\n\n\n\n\nDefault theme\n\n\n\n\n\n\n\nSerif titles\n\n\n\n\n\n\n\nscale=1.25",
+    "crumbs": [
+      "Look and feel",
+      "Themes"
+    ]
+  },
+  {
+    "objectID": "en/look/themes.html#where-to-set-a-theme",
+    "href": "en/look/themes.html#where-to-set-a-theme",
+    "title": "Themes",
+    "section": "Where to set a theme",
+    "text": "Where to set a theme\nA theme lives in a template (Template(theme=...)), and configure(theme=...) replaces it for the whole deck:\nfrom banners import TERRA, Theme, configure\n\nconfigure(template=TERRA, theme=Theme(font=\"'Inter', sans-serif\"))\nAs with palettes, a theme replaces the template’s theme as a whole: settings that you do not pass take their default value. Unlike palettes, there is no theme per slide; a deck keeps one typography.\n\n\n\n\n\n\nNoteSizes follow the slide\n\n\n\nFont sizes are relative to the slide width, so a slide keeps its proportions in a notebook cell, in a browser window and full screen. scale multiplies those sizes; it does not set them in pixels.",
+    "crumbs": [
+      "Look and feel",
+      "Themes"
+    ]
+  },
+  {
+    "objectID": "en/index.html",
+    "href": "en/index.html",
+    "title": "banners",
+    "section": "",
+    "text": "banners is a Python library for building slide decks in marimo notebooks. Each slide is a Python object drawn on a fixed 16:9 canvas, so the text, plots, tables, diagrams and animations of a talk sit next to the code that produced them, and the deck keeps its proportions from a notebook cell to a projector.",
+    "crumbs": [
+      "Home"
+    ]
+  },
+  {
+    "objectID": "en/index.html#one-slide-six-looks",
+    "href": "en/index.html#one-slide-six-looks",
+    "title": "banners",
+    "section": "One slide, six looks",
+    "text": "One slide, six looks\nThe same slide drawn with each built-in template. Changing the template is one line of code; the slides themselves do not change.\n\n\n\n\n\n\nTemplate()\n\n\n\n\n\n\n\nEXECUTIVE\n\n\n\n\n\n\n\n\n\nINSTITUTIONAL\n\n\n\n\n\n\n\nCOSMOS\n\n\n\n\n\n\n\n\n\nVIBRANT\n\n\n\n\n\n\n\nTERRA",
+    "crumbs": [
+      "Home"
+    ]
+  },
+  {
+    "objectID": "en/index.html#animations-that-advance-with-each-click",
+    "href": "en/index.html#animations-that-advance-with-each-click",
+    "title": "banners",
+    "section": "Animations that advance with each click",
+    "text": "Animations that advance with each click\nA Manim scene can run step by step inside a slide: each click shows the next step, drawn in the colors of the slide.\n\n\n\nA derivation from Maxwell’s equations, one step per click.",
+    "crumbs": [
+      "Home"
+    ]
+  },
+  {
+    "objectID": "en/index.html#install",
+    "href": "en/index.html#install",
+    "title": "banners",
+    "section": "Install",
+    "text": "Install\npip install marimo-banners\nbanners needs Python 3.11 or newer. Animations need the manim extra; the Manim page explains it.",
+    "crumbs": [
+      "Home"
+    ]
+  },
+  {
+    "objectID": "en/index.html#a-deck-in-a-few-lines",
+    "href": "en/index.html#a-deck-in-a-few-lines",
+    "title": "banners",
+    "section": "A deck in a few lines",
+    "text": "A deck in a few lines\nfrom banners import TERRA, Closing, Cover, Section, Text, configure\n\nconfigure(template=TERRA, team=\"Analytics Team\", date=\"2026\")\n\nCover(title=\"Churn Prediction v2\", subtitle=\"Model migration and deployment.\")\nSection(title=\"Results\", content=[Text(\"**Accuracy** — 91% AUC.\")])\nClosing(title=\"One framework for all models.\")\nIn a marimo notebook each slide goes at the end of its own cell, where marimo displays it. Get started walks through it, from installation to presenting full screen.",
+    "crumbs": [
+      "Home"
+    ]
+  },
+  {
+    "objectID": "en/index.html#where-to-go-next",
+    "href": "en/index.html#where-to-go-next",
+    "title": "banners",
+    "section": "Where to go next",
+    "text": "Where to go next\n\nGet started: a first deck in five minutes.\nLook and feel: templates, palettes, themes, layouts and backgrounds.\nSlides: the four slide types and their options.\nContent: text, images, tables, plots, diagrams and animations.\nHow-to guides: presenting, your organization’s template, Manim scenes.",
+    "crumbs": [
+      "Home"
+    ]
+  },
+  {
+    "objectID": "en/get-started.html",
+    "href": "en/get-started.html",
+    "title": "Get started",
+    "section": "",
+    "text": "This page takes you from installing banners to presenting a three-slide deck full screen. It covers installation, the first notebook, the three most common slide types and marimo’s slide view.",
+    "crumbs": [
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "en/get-started.html#install",
+    "href": "en/get-started.html#install",
+    "title": "Get started",
+    "section": "Install",
+    "text": "Install\nbanners needs Python 3.11 or newer. It installs marimo with it.\n\npipuv\n\n\npip install marimo-banners\n\n\nuv add marimo-banners\n\n\n\nThe animated elements (FlowAnimation, Manim) need an extra and a few system libraries; the Manim page lists them. Nothing on this page needs them.",
+    "crumbs": [
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "en/get-started.html#create-a-notebook",
+    "href": "en/get-started.html#create-a-notebook",
+    "title": "Get started",
+    "section": "Create a notebook",
+    "text": "Create a notebook\nmarimo notebooks are Python files. Create one and open it in the editor:\nmarimo edit deck.py",
+    "crumbs": [
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "en/get-started.html#write-three-slides",
+    "href": "en/get-started.html#write-three-slides",
+    "title": "Get started",
+    "section": "Write three slides",
+    "text": "Write three slides\nWrite each block below in its own cell. A cell displays the value of its last expression, so each cell shows one slide.\n# Cell 1: settings shared by every slide.\nfrom banners import Closing, Cover, Section, Text, configure\n\nconfigure(team=\"Analytics Team\", date=\"2026\")\n\n# Cell 2: the cover opens the talk.\nCover(title=\"Churn Prediction v2\", subtitle=\"Model migration and deployment.\")\n\n# Cell 3: a section holds the content.\nSection(\n    title=\"Results\",\n    content=[\n        Text(\"**Accuracy** — 91% AUC on the test set.\"),\n        Text(\"**Latency** — p99 under 30 ms.\"),\n    ],\n)\n\n# Cell 4: the closing slide carries the final message.\nClosing(title=\"One framework for all models.\")\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe three slides that the cells above display.\nconfigure() stores the values that every slide shares, such as the team name and the date, so the slides do not repeat them. The Slides pages describe each slide type and its options.\n\n\n\n\n\n\nNoteCell order matters\n\n\n\nA Section takes its number (01, 02, …) when its cell runs, so sections are numbered in the order of the notebook cells, and calling configure() starts the count again. The number picks the color of each section in palettes that have one color per section.",
+    "crumbs": [
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "en/get-started.html#show-it-as-slides",
+    "href": "en/get-started.html#show-it-as-slides",
+    "title": "Get started",
+    "section": "Show it as slides",
+    "text": "Show it as slides\nmarimo can show a notebook as slides, one cell per slide, with the code hidden:\n\nIn the editor, open the app view (the preview button at the bottom right, or Ctrl/Cmd + .).\nIn the layout menu of the app view, choose Slides. marimo saves this choice in a layouts/ folder next to the notebook.\nTo present, run the notebook as an app and press the Fullscreen button at the bottom right of the slides; the arrow keys then move between slides:\n\nmarimo run deck.py\nPresent full screen covers the details, such as hiding cells that are not slides.",
+    "crumbs": [
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "en/get-started.html#change-the-look",
+    "href": "en/get-started.html#change-the-look",
+    "title": "Get started",
+    "section": "Change the look",
+    "text": "Change the look\nThe deck above uses the default template. One argument changes it:\nfrom banners import COSMOS, configure\n\nconfigure(template=COSMOS)\nEvery slide created after this call takes the dark COSMOS look. The Templates page shows all of them, and the next pages of the guide explain how to change colors, fonts and backgrounds.",
+    "crumbs": [
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "en/slides/cover.html",
+    "href": "en/slides/cover.html",
+    "title": "Cover",
+    "section": "",
+    "text": "This page covers the Cover slide: what it shows, its options and the photo variant.",
+    "crumbs": [
+      "Slides",
+      "Cover"
+    ]
+  },
+  {
+    "objectID": "en/slides/cover.html#a-first-cover",
+    "href": "en/slides/cover.html#a-first-cover",
+    "title": "Cover",
+    "section": "A first cover",
+    "text": "A first cover\nfrom banners import Cover, configure\n\nconfigure(team=\"Analytics Team\", date=\"2026\")\nCover(title=\"Churn Prediction v2\", subtitle=\"Model migration and deployment.\")\n\nThe template draws a dark cover with the logo, the team at the top right, the title, the subtitle and the date. The team and the date come from configure(), so every cover of the deck shows the same ones without repeating them.",
+    "crumbs": [
+      "Slides",
+      "Cover"
+    ]
+  },
+  {
+    "objectID": "en/slides/cover.html#a-cover-with-a-photo",
+    "href": "en/slides/cover.html#a-cover-with-a-photo",
+    "title": "Cover",
+    "section": "A cover with a photo",
+    "text": "A cover with a photo\nimage= puts a photo behind the title. It accepts a URL, a file path or bytes:\nfrom banners import Cover\n\nCover(\n    title=\"Earth observation\",\n    subtitle=\"Ten years of satellite data.\",\n    image=\"https://commons.wikimedia.org/wiki/Special:FilePath/The_Earth_seen_from_Apollo_17.jpg?width=1600\",\n)\n\nA template can set a photo for every cover with cover_image (COSMOS and TERRA do). Cover(image=False) turns it off for one slide.",
+    "crumbs": [
+      "Slides",
+      "Cover"
+    ]
+  },
+  {
+    "objectID": "en/slides/cover.html#options",
+    "href": "en/slides/cover.html#options",
+    "title": "Cover",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument\nDefault\nMeaning\n\n\n\n\ntitle\n—\nMain title of the presentation.\n\n\nsubtitle\n\"\"\nOne sentence of context under the title.\n\n\ndate\nconfigure(date=...)\nDate shown at the bottom.\n\n\nteam\nconfigure(team=...)\nTeam or author line.\n\n\nimage\nthe template’s cover_image\nPhoto behind the title; False hides the template’s photo.\n\n\npalette\nthe deck’s palette\nColors for this slide only.\n\n\nbackground\nconfigure(background=...)\nBackground of the canvas.\n\n\n\ncontent and footer exist so that every slide type accepts the same arguments, but the cover layout does not draw them.",
+    "crumbs": [
+      "Slides",
+      "Cover"
+    ]
+  },
+  {
+    "objectID": "en/slides/section.html",
+    "href": "en/slides/section.html",
+    "title": "Section",
+    "section": "",
+    "text": "This page covers Section, the slide that carries most of a talk: how it numbers itself, how it becomes a divider, and its options. Which layout a section takes depends on its content; Layouts has the rules.",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "en/slides/section.html#content-slides",
+    "href": "en/slides/section.html#content-slides",
+    "title": "Section",
+    "section": "Content slides",
+    "text": "Content slides\nfrom banners import Section, Text\n\nSection(\n    title=\"Three findings\",\n    content=[\n        Text(\"**Data** — Two sources disagree on 4% of rows.\"),\n        Text(\"**Model** — Recall improves by 6 points.\"),\n        Text(\"**Cost** — Training time drops by half.\"),\n    ],\n)\n\ncontent takes one element or a list. Any element of the Content part of this guide works: text, images, tables, plots, diagrams and animations.",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "en/slides/section.html#dividers",
+    "href": "en/slides/section.html#dividers",
+    "title": "Section",
+    "section": "Dividers",
+    "text": "Dividers\nWithout content, a section becomes a divider that opens a part of the talk. It shows a photo or a large icon when the template has one:\nfrom banners import Section, Template, configure\n\nconfigure(template=Template(divider_icon=\"flow\"))\nSection(title=\"Pipeline architecture\", subtitle=\"How the data moves.\")\n\nThe icon names are chart, layers, target, compass, spark, leaf, globe, shield, grid, orbit, pulse, building, flow and mountain. Any image source works as well.",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "en/slides/section.html#numbering-and-section-colors",
+    "href": "en/slides/section.html#numbering-and-section-colors",
+    "title": "Section",
+    "section": "Numbering and section colors",
+    "text": "Numbering and section colors\nEach section takes the next number (01, 02, …) when it is created. Because marimo runs cells in notebook order, the numbers follow the order of the cells, and configure() restarts the count. The layouts do not print the number: it picks the color of the section when the palette has section_colors, so consecutive sections cycle through those colors. number= sets the number by hand:\nfrom banners import Palette, Section\n\nrainbow = Palette(section_colors=(\"#e4572e\", \"#2a6fdb\", \"#2e9e5b\"))\nSection(title=\"Each section takes the next color\", number=\"02\", palette=rainbow)",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "en/slides/section.html#options",
+    "href": "en/slides/section.html#options",
+    "title": "Section",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument\nDefault\nMeaning\n\n\n\n\ntitle\n—\nHeading of the slide.\n\n\nsubtitle\n\"\"\nSupport sentence under the title.\n\n\ncontent\nNone\nOne element or a list; None makes a divider.\n\n\nnumber\nautomatic\nSection number; with section_colors it picks the color.\n\n\nimage\nthe template’s divider_image\nPhoto: right half of a divider, left half of a content slide; False hides the template’s photo.\n\n\nfooter\n\"\"\nNote at the bottom right.\n\n\npalette\nthe deck’s palette\nColors for this slide only.\n\n\nbackground\nconfigure(background=...)\nBackground of the canvas.",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "en/content/animated-graph.html",
+    "href": "en/content/animated-graph.html",
+    "title": "AnimatedGraph",
+    "section": "",
+    "text": "This page covers AnimatedGraph, an interactive flowchart for explaining a process one step at a time.",
+    "crumbs": [
+      "Content",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "en/content/animated-graph.html#example",
+    "href": "en/content/animated-graph.html#example",
+    "title": "AnimatedGraph",
+    "section": "Example",
+    "text": "Example\nfrom banners import AnimatedGraph, Section\n\nSection(\n    title=\"AnimatedGraph\",\n    content=[AnimatedGraph(\"\"\"\ngraph LR\nA[Raw data] --&gt; B[Validate]\nB --&gt; C[Train]\nB --&gt; D[Report]\n\"\"\")],\n)\n\n\n\nEach click highlights a node; clicking it again turns it off.",
+    "crumbs": [
+      "Content",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "en/content/animated-graph.html#what-it-accepts",
+    "href": "en/content/animated-graph.html#what-it-accepts",
+    "title": "AnimatedGraph",
+    "section": "What it accepts",
+    "text": "What it accepts\nAnimatedGraph reads a subset of Mermaid flowchart syntax:\n\nA first line graph LR (left to right) or graph TD (top down).\nOne edge per line: A --&gt; B, with optional labels on the nodes (A[Raw data], B(Round), C{Decision}) and on the edge (A --&gt;|yes| B).\nA node on its own line, such as E[Archive], to add a node without edges.\n\nbanners parses the diagram and lays out the nodes itself, so the result does not depend on a browser library.",
+    "crumbs": [
+      "Content",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "en/content/animated-graph.html#options",
+    "href": "en/content/animated-graph.html#options",
+    "title": "AnimatedGraph",
+    "section": "Options",
+    "text": "Options\n\n\n\nArgument\nDefault\nMeaning\n\n\n\n\ndiagram\n—\nThe Mermaid graph LR / graph TD source.\n\n\nhighlight_color\n\"#ea580c\"\nFill color of a highlighted node.",
+    "crumbs": [
+      "Content",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "en/content/animated-graph.html#limits",
+    "href": "en/content/animated-graph.html#limits",
+    "title": "AnimatedGraph",
+    "section": "Limits",
+    "text": "Limits\n\nIt needs a running marimo notebook (marimo edit or marimo run): the clicks are handled by the notebook, so a static HTML export shows an error in its place.\nIt supports flowcharts only. For other Mermaid diagrams, or for chained edges such as A --&gt; B --&gt; C on one line, use Graph.",
+    "crumbs": [
+      "Content",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "en/content/text.html",
+    "href": "en/content/text.html",
+    "title": "Text",
+    "section": "",
+    "text": "This page covers Text, the element for words, lists and formulas.",
+    "crumbs": [
+      "Content",
+      "Text"
+    ]
+  },
+  {
+    "objectID": "en/content/text.html#example",
+    "href": "en/content/text.html#example",
+    "title": "Text",
+    "section": "Example",
+    "text": "Example\nfrom banners import Section, Text\n\nSection(\n    title=\"Text\",\n    content=[\n        Text(\"**Bold**, *italic* and `code`.\\n\\n- Lists\\n- With items\"),\n        Text(\"Formulas with LaTeX:\\n\\n$$E = mc^2$$\"),\n    ],\n)",
+    "crumbs": [
+      "Content",
+      "Text"
+    ]
+  },
+  {
+    "objectID": "en/content/text.html#what-it-accepts",
+    "href": "en/content/text.html#what-it-accepts",
+    "title": "Text",
+    "section": "What it accepts",
+    "text": "What it accepts\nText(body) takes a markdown string: paragraphs, bold, italic, code, lists, links, tables and code blocks. Formulas use LaTeX between $…$ (inline) or $$…$$ (on their own line). In Python strings with backslashes, such as LaTeX commands, a raw string avoids doubling them:\nfrom banners import Text\n\nText(r\"The wave equation: $\\nabla^2 \\mathbf{E} = \\frac{1}{c^2}\\frac{\\partial^2 \\mathbf{E}}{\\partial t^2}$\")",
+    "crumbs": [
+      "Content",
+      "Text"
+    ]
+  },
+  {
+    "objectID": "en/content/text.html#how-it-looks-on-a-slide",
+    "href": "en/content/text.html#how-it-looks-on-a-slide",
+    "title": "Text",
+    "section": "How it looks on a slide",
+    "text": "How it looks on a slide\nThe template sets the font, the size and the color of the text, so a Text looks the same in every slide of the deck. Each Text in content becomes a column; a list of three Text elements gives three columns side by side. Inline code takes the color of the slide text, so it stays readable on dark backgrounds; code blocks keep their own light box.\nA common pattern is a bold lead followed by a dash and the detail, one Text per idea:\nfrom banners import Section, Text\n\nSection(\n    title=\"Results\",\n    content=[\n        Text(\"**Accuracy** — 91% AUC on the test set.\"),\n        Text(\"**Latency** — p99 under 30 ms.\"),\n    ],\n)",
+    "crumbs": [
+      "Content",
+      "Text"
+    ]
+  },
+  {
+    "objectID": "en/content/plot.html",
+    "href": "en/content/plot.html",
+    "title": "Plot",
+    "section": "",
+    "text": "This page covers Plot, how a figure takes the colors of the slide, and when it does not.",
+    "crumbs": [
+      "Content",
+      "Plot"
+    ]
+  },
+  {
+    "objectID": "en/content/plot.html#example",
+    "href": "en/content/plot.html#example",
+    "title": "Plot",
+    "section": "Example",
+    "text": "Example\nimport matplotlib.pyplot as plt\nfrom banners import Plot, Section, Text\n\nfig, ax = plt.subplots(figsize=(5, 3))\nax.plot([1, 2, 3, 4], [3.1, 3.8, 4.6, 5.9], marker=\"o\", label=\"Revenue\")\nax.plot([1, 2, 3, 4], [2.0, 2.4, 2.5, 3.1], marker=\"o\", label=\"Cost\")\nax.legend()\nSection(title=\"Plot\", content=[Plot(fig), Text(\"The lines take the palette colors.\")])\nThe same figure on two slides with different palettes:\n\n\n\n\n\n\nDefault palette\n\n\n\n\n\n\n\npalette=BLUE",
+    "crumbs": [
+      "Content",
+      "Plot"
+    ]
+  },
+  {
+    "objectID": "en/content/plot.html#how-a-figure-follows-the-palette",
+    "href": "en/content/plot.html#how-a-figure-follows-the-palette",
+    "title": "Plot",
+    "section": "How a figure follows the palette",
+    "text": "How a figure follows the palette\nWhen a matplotlib figure is placed on a slide, banners restyles a copy of it (your figure is not modified):\n\nThe figure and axes backgrounds become transparent, so the slide shows through.\nLines, bars and markers drawn with matplotlib’s automatic colors take the palette series: section_colors, or primary and secondary.\nTitles, axis labels and legend text take palette.text; ticks, spines and grid lines take palette.muted; the legend box takes palette.panel.\n\nColors you set by hand (color=\"#3b82f6\") are kept. To keep a figure exactly as drawn, set its colors explicitly.",
+    "crumbs": [
+      "Content",
+      "Plot"
+    ]
+  },
+  {
+    "objectID": "en/content/plot.html#plotly",
+    "href": "en/content/plot.html#plotly",
+    "title": "Plot",
+    "section": "plotly",
+    "text": "plotly\nPlot also accepts a plotly figure and detects the library by itself. plotly figures are shown as they are, without the palette restyling:\n# fragment: needs plotly installed.\nimport plotly.express as px\nfrom banners import Plot, Section\n\nfig = px.line(x=[1, 2, 3, 4], y=[3.1, 3.8, 4.6, 5.9])\nSection(title=\"Plotly\", content=[Plot(fig)])\nA figure that is neither matplotlib nor plotly raises a TypeError when the slide is drawn.",
+    "crumbs": [
+      "Content",
+      "Plot"
+    ]
+  },
+  {
+    "objectID": "en/content/table.html",
+    "href": "en/content/table.html",
+    "title": "Table",
+    "section": "",
+    "text": "This page covers Table, the element for tabular data.",
+    "crumbs": [
+      "Content",
+      "Table"
+    ]
+  },
+  {
+    "objectID": "en/content/table.html#example",
+    "href": "en/content/table.html#example",
+    "title": "Table",
+    "section": "Example",
+    "text": "Example\nimport pandas as pd\nfrom banners import Section, Table\n\ndf = pd.DataFrame({\"Model\": [\"XGBoost\", \"LightGBM\", \"Logistic\"], \"AUC\": [0.91, 0.89, 0.84]})\nSection(title=\"Table\", content=[Table(df)])\n\nTable(df) shows the DataFrame with marimo’s table component, which adds a search box, column types and export buttons.",
+    "crumbs": [
+      "Content",
+      "Table"
+    ]
+  },
+  {
+    "objectID": "en/content/table.html#limits",
+    "href": "en/content/table.html#limits",
+    "title": "Table",
+    "section": "Limits",
+    "text": "Limits\n\nThe marimo table has its own font sizes, so it does not grow with the slide the way text does. Keep tables short (a handful of rows and columns) so they read well full screen.\nFor a few figures, a markdown table inside a Text follows the slide’s font and colors:\n\nfrom banners import Section, Text\n\nSection(\n    title=\"Model comparison\",\n    content=[Text(\"| Model | AUC |\\n|---|---|\\n| XGBoost | 0.91 |\\n| Logistic | 0.84 |\")],\n)\npandas is not a dependency of banners; install it to use Table.",
+    "crumbs": [
+      "Content",
+      "Table"
+    ]
+  },
+  {
+    "objectID": "es/howto/present.html",
+    "href": "es/howto/present.html",
+    "title": "Presentar en pantalla completa",
+    "section": "",
+    "text": "Esta guía cubre la vista de slides de marimo, cómo presentar en pantalla completa y cómo exportar una presentación a un solo archivo HTML.",
+    "crumbs": [
+      "Guías prácticas",
+      "Presentar en pantalla completa"
+    ]
+  },
+  {
+    "objectID": "es/howto/present.html#activar-el-layout-de-slides",
+    "href": "es/howto/present.html#activar-el-layout-de-slides",
+    "title": "Presentar en pantalla completa",
+    "section": "Activar el layout de slides",
+    "text": "Activar el layout de slides\nmarimo puede mostrar un notebook como slides: la salida de cada celda se vuelve una slide y el código queda oculto.\n\nAbre el notebook con marimo edit deck.py.\nAbre la vista de app (el botón de vista previa abajo a la derecha, o Ctrl/Cmd + .).\nEn el menú de layout de la vista de app, elige Slides.\n\nmarimo guarda esa elección en un archivo layouts/deck.slides.json y la anota en el encabezado del notebook:\n# fragment: las primeras líneas de un notebook que usa el layout de slides.\nimport marimo\n\napp = marimo.App(width=\"full\", layout_file=\"layouts/deck.slides.json\")\nwidth=\"full\" permite que las slides usen todo el ancho de la ventana. Mantén la carpeta layouts/ junto al notebook; sin ella, marimo muestra el notebook como una página.",
+    "crumbs": [
+      "Guías prácticas",
+      "Presentar en pantalla completa"
+    ]
+  },
+  {
+    "objectID": "es/howto/present.html#presentar",
+    "href": "es/howto/present.html#presentar",
+    "title": "Presentar en pantalla completa",
+    "section": "Presentar",
+    "text": "Presentar\nEjecuta el notebook como app:\nmarimo run deck.py\nmarimo lo abre en el navegador con el layout de slides. Presiona el botón Fullscreen abajo a la derecha de las slides: las slides llenan la pantalla y las flechas del teclado avanzan y retroceden (fuera de la pantalla completa, usa las flechas a los costados de la slide). Como banners dibuja cada slide sobre un lienzo de 16:9 que se ajusta al ancho de la ventana, las slides llenan un proyector sin cambios.\n\n\n\n\n\n\nTipRevisa la presentación antes de la charla\n\n\n\nLas animaciones se dibujan y se guardan en caché la primera vez que se ejecuta su celda. Recorrer la presentación una vez antes de la charla hace que, durante la charla, cada animación salga de la caché y aparezca de inmediato.",
+    "crumbs": [
+      "Guías prácticas",
+      "Presentar en pantalla completa"
+    ]
+  },
+  {
+    "objectID": "es/howto/present.html#compartir-como-archivo",
+    "href": "es/howto/present.html#compartir-como-archivo",
+    "title": "Presentar en pantalla completa",
+    "section": "Compartir como archivo",
+    "text": "Compartir como archivo\nmarimo export html ejecuta el notebook y escribe un solo archivo HTML que se abre en cualquier navegador, sin Python:\nmarimo export html deck.py -o deck.html\nLas slides, los gráficos, las tablas, los diagramas de Mermaid y los reproductores paso a paso de FlowAnimation y Manim funcionan en el archivo exportado. AnimatedGraph no, porque necesita el notebook en ejecución para responder a los clics.",
+    "crumbs": [
+      "Guías prácticas",
+      "Presentar en pantalla completa"
+    ]
+  },
+  {
+    "objectID": "es/howto/organization-template.html",
+    "href": "es/howto/organization-template.html",
+    "title": "El template de tu organización",
+    "section": "",
+    "text": "Esta guía arma un template completo para una organización: logos, colores, fuentes y fotos, guardados en un archivo que importa cada presentación.",
+    "crumbs": [
+      "Guías prácticas",
+      "El template de tu organización"
+    ]
+  },
+  {
+    "objectID": "es/howto/organization-template.html#el-template",
+    "href": "es/howto/organization-template.html#el-template",
+    "title": "El template de tu organización",
+    "section": "El template",
+    "text": "El template\nfrom banners import Cover, Palette, Template, configure, icon\n\ncorp = Template(\n    palette=Palette(primary=\"#0f766e\", secondary=\"#f59e0b\", dark=\"#0b2e2b\"),\n    logo_on_dark=icon(\"building\", color=\"#ffffff\"),\n    mark=icon(\"building\", color=\"#0f766e\"),\n)\nconfigure(template=corp, team=\"Oficina de Datos\", date=\"2026\")\nCover(title=\"Revisión trimestral\", subtitle=\"Tu logo, tus colores.\")\n\nEl ejemplo usa un ícono incluido como logo de muestra. Con el logo real, las opciones de logo reciben una URL, una ruta de archivo o bytes:\n\n\n\n\n\n\n\n\nOpción\nAparece en\nConsejo\n\n\n\n\nlogo_on_dark\nPortada y cierre (fondos oscuros).\nUna versión blanca o clara del logo.\n\n\nlogo_on_light\nSlides de contenido (fondos claros).\nEl logo a color. Sin logo_on_dark, banners lo dibuja en blanco en las slides oscuras.\n\n\nmark\nEsquina superior derecha de las slides de contenido.\nSolo el símbolo, sin el nombre.\n\n\nclosing_image\nJunto al título de cierre.\nUna mascota, la foto de un producto o el símbolo.\n\n\n\nEl logo conserva sus proporciones y no sale de su área, así que un logo cuadrado y uno ancho caben ambos sobre el título.",
+    "crumbs": [
+      "Guías prácticas",
+      "El template de tu organización"
+    ]
+  },
+  {
+    "objectID": "es/howto/organization-template.html#colores-y-fuentes",
+    "href": "es/howto/organization-template.html#colores-y-fuentes",
+    "title": "El template de tu organización",
+    "section": "Colores y fuentes",
+    "text": "Colores y fuentes\nEscribe los colores de la marca en los roles de la paleta (ver Paletas) y las fuentes de la marca en un tema (ver Temas):\nfrom banners import Palette, Template, Theme\n\ncorp = Template(\n    palette=Palette(\n        primary=\"#0f766e\",        # títulos y la barra\n        secondary=\"#f59e0b\",      # final de la barra\n        dark=\"#0b2e2b\",           # fondo de la portada\n        closing_bg=\"#0b2e2b\",     # fondo del cierre\n        section_colors=(\"#0f766e\", \"#f59e0b\", \"#2563eb\"),\n    ),\n    theme=Theme(font=\"'Inter', 'Helvetica Neue', sans-serif\", heading_font=\"'Inter', sans-serif\"),\n    auto_contrast=False,          # conservar los colores exactos de la marca\n)\nauto_contrast=False conserva los colores de los títulos tal como se dieron, incluso donde se leerían mal; déjalo activo salvo que el manual de marca exija colores exactos.",
+    "crumbs": [
+      "Guías prácticas",
+      "El template de tu organización"
+    ]
+  },
+  {
+    "objectID": "es/howto/organization-template.html#fotos",
+    "href": "es/howto/organization-template.html#fotos",
+    "title": "El template de tu organización",
+    "section": "Fotos",
+    "text": "Fotos\ncover_image y divider_image dan una foto a todas las portadas y a todos los separadores. Usa imágenes que puedas publicar: las de tu propia organización o imágenes de dominio público, como las de Wikimedia Commons. El navegador carga una URL cuando muestra la slide; una ruta o bytes quedan incrustados en la slide.",
+    "crumbs": [
+      "Guías prácticas",
+      "El template de tu organización"
+    ]
+  },
+  {
+    "objectID": "es/howto/organization-template.html#compartirlo-entre-presentaciones",
+    "href": "es/howto/organization-template.html#compartirlo-entre-presentaciones",
+    "title": "El template de tu organización",
+    "section": "Compartirlo entre presentaciones",
+    "text": "Compartirlo entre presentaciones\nGuarda el template en un archivo de Python, por ejemplo nuestramarca.py, junto a los notebooks o en un paquete que instale tu equipo:\n# fragment: nuestramarca.py\nfrom banners import Palette, Template\n\nTEMPLATE = Template(palette=Palette(primary=\"#0f766e\", secondary=\"#f59e0b\"))\nCada presentación empieza entonces con:\n# fragment: primera celda de cada presentación.\nfrom banners import configure\nfrom nuestramarca import TEMPLATE\n\nconfigure(template=TEMPLATE, team=\"Oficina de Datos\", date=\"2026\")\n\n\n\n\n\n\nImportanteLos logos son marcas registradas\n\n\n\nUn logo pertenece a su organización, y sus reglas de marca deciden quién puede usarlo y cómo. Usa el logo de tu organización en sus propias presentaciones, sigue su manual de marca y no publiques un template con el logo de otra organización.",
+    "crumbs": [
+      "Guías prácticas",
+      "El template de tu organización"
+    ]
+  },
+  {
+    "objectID": "es/look/palettes.html",
+    "href": "es/look/palettes.html",
+    "title": "Paletas",
+    "section": "",
+    "text": "Esta página cubre los roles de color de una paleta, las cinco paletas incluidas, cómo crear una propia y qué paleta gana cuando hay varias.",
+    "crumbs": [
+      "Apariencia",
+      "Paletas"
+    ]
+  },
+  {
+    "objectID": "es/look/palettes.html#colores-por-rol",
+    "href": "es/look/palettes.html#colores-por-rol",
+    "title": "Paletas",
+    "section": "Colores por rol",
+    "text": "Colores por rol\nUna Palette no enumera “los colores de la marca”: dice para qué sirve cada color. El template pinta cada parte de una slide con el color de su rol:\n\n\n\n\n\n\n\n\nRol\nPor defecto\nPinta\n\n\n\n\nprimary\n■ #e4572e\nLos títulos y el tramo principal de la barra inferior.\n\n\nsecondary\n■ #2a6fdb\nEl tramo final de la barra inferior.\n\n\ndark\n■ #404040\nFondo de la portada y del cierre que muestra solo el logo.\n\n\nclosing_bg\n■ #363e45\nFondo de la slide de cierre.\n\n\nlight\n■ #f5f5f5\nFondo de los separadores y de las slides de contenido.\n\n\ntext\n■ #343e46\nTexto sobre fondos claros.\n\n\nmuted\n■ #6b7280\nSubtítulos, etiquetas y notas sobre fondos claros.\n\n\non_dark\n■ #f5f5f5\nTexto sobre fondos oscuros.\n\n\npanel\n#ffffff\nFondo del recuadro que contiene un gráfico o una animación.\n\n\n\nTres roles opcionales agregan variedad:\n\nsection_colors: colores que las slides Section toman por turno según su número (la sección 01 el primero, la 02 el segundo, y así).\nbar_colors: colores de la barra inferior en tramos iguales, en vez de primary y secondary.\nicon_color: color de los íconos por nombre; por defecto toman el color del título.\n\nLos gráficos y las animaciones de una slide también siguen la paleta: sus series usan section_colors (o primary y secondary), sus etiquetas usan text y muted, y su fondo es panel. Ver Plot y Manim.",
+    "crumbs": [
+      "Apariencia",
+      "Paletas"
+    ]
+  },
+  {
+    "objectID": "es/look/palettes.html#las-paletas-incluidas",
+    "href": "es/look/palettes.html#las-paletas-incluidas",
+    "title": "Paletas",
+    "section": "Las paletas incluidas",
+    "text": "Las paletas incluidas\nbanners trae cinco paletas. ORANGE es la de por defecto.\n\n\n\n\n\n\nORANGE\n\n\n\n\n\n\n\nBLUE\n\n\n\n\n\n\n\nGREEN\n\n\n\n\n\n\n\n\n\nPURPLE\n\n\n\n\n\n\n\nGRAY",
+    "crumbs": [
+      "Apariencia",
+      "Paletas"
+    ]
+  },
+  {
+    "objectID": "es/look/palettes.html#una-paleta-propia",
+    "href": "es/look/palettes.html#una-paleta-propia",
+    "title": "Paletas",
+    "section": "Una paleta propia",
+    "text": "Una paleta propia\nCrea una Palette con los roles que quieras cambiar; los demás conservan su valor por defecto:\nfrom banners import Cover, Palette\n\nmarca = Palette(primary=\"#a78bfa\", secondary=\"#f472b6\", dark=\"#1a0533\")\nCover(title=\"Paleta propia\", subtitle=\"Tres colores cambian toda la slide.\", palette=marca)\n\nsection_colors le da a cada sección su propio color:\nfrom banners import Palette, Section\n\narcoiris = Palette(section_colors=(\"#e4572e\", \"#2a6fdb\", \"#2e9e5b\"))\nSection(title=\"Cada sección toma el color siguiente\", number=\"02\", palette=arcoiris)",
+    "crumbs": [
+      "Apariencia",
+      "Paletas"
+    ]
+  },
+  {
+    "objectID": "es/look/palettes.html#dónde-se-fija-una-paleta-y-cuál-gana",
+    "href": "es/look/palettes.html#dónde-se-fija-una-paleta-y-cuál-gana",
+    "title": "Paletas",
+    "section": "Dónde se fija una paleta y cuál gana",
+    "text": "Dónde se fija una paleta y cuál gana\nUna paleta se puede fijar en tres lugares. Cuando hay más de una, gana la más específica:\n\nEn una slide, con palette=: solo esa slide.\nPara la presentación, con configure(palette=...): todas las slides creadas después de la llamada.\nEn el template, con Template(palette=...): la de por defecto.\n\nfrom banners import BLUE, GREEN, Section, configure\n\nconfigure(palette=BLUE)                        # todas las slides en azul...\nSection(title=\"Destacados\", palette=GREEN)     # ...salvo esta\nUna paleta siempre reemplaza completa a la de abajo: los roles no se mezclan. Palette(primary=\"#0f766e\") conserva los valores por defecto en todos los demás roles, no los valores de la paleta del template.\n\n\n\n\n\n\nTipTítulos legibles sobre cualquier fondo\n\n\n\nCuando el color de un título se leería mal sobre su fondo (un contraste menor a 3:1), el template usa un color legible en su lugar. Para conservar los colores exactos de una marca, crea el template con auto_contrast=False.",
+    "crumbs": [
+      "Apariencia",
+      "Paletas"
+    ]
+  },
+  {
+    "objectID": "es/look/layouts.html",
+    "href": "es/look/layouts.html",
+    "title": "Layouts",
+    "section": "",
+    "text": "Esta página cubre cómo banners elige el layout de cada slide. No hay un argumento de layout: el template decide según el tipo de slide y lo que pongas en ella, de modo que el mismo código produce slides coherentes en toda la presentación.",
+    "crumbs": [
+      "Apariencia",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "es/look/layouts.html#las-reglas",
+    "href": "es/look/layouts.html#las-reglas",
+    "title": "Layouts",
+    "section": "Las reglas",
+    "text": "Las reglas\n\n\n\n\n\n\n\nSlide\nLayout\n\n\n\n\nCover()\nPortada oscura con el logo, el título en el color primario, subtítulo y fecha.\n\n\nCover(image=...)\nPortada con foto y el título sobre la imagen.\n\n\nIntro()\nTítulo grande en la columna izquierda, contenido en columnas a la derecha.\n\n\nSection() sin contenido\nSeparador: título, subtítulo y una foto o un ícono grande.\n\n\nSection(content=[visual, Text(...)])\nEl visual a la izquierda, título y texto a la derecha.\n\n\nSection(content=..., image=...)\nFoto en la mitad izquierda, título y contenido a la derecha.\n\n\nSection(content=...) en otro caso\nTítulo arriba, contenido en columnas debajo.\n\n\nClosing()\nFondo de cierre con el título, una fila opcional de cifras y el equipo.\n\n\n\nUn visual es un gráfico, un diagrama, una tabla, una imagen o una animación; el texto es Text.",
+    "crumbs": [
+      "Apariencia",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "es/look/layouts.html#un-separador",
+    "href": "es/look/layouts.html#un-separador",
+    "title": "Layouts",
+    "section": "Un separador",
+    "text": "Un separador\nUna Section sin contenido separa las partes de una charla:\nfrom banners import Section\n\nSection(title=\"Arquitectura del pipeline\", subtitle=\"Cómo se mueven los datos.\")",
+    "crumbs": [
+      "Apariencia",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "es/look/layouts.html#contenido-en-columnas",
+    "href": "es/look/layouts.html#contenido-en-columnas",
+    "title": "Layouts",
+    "section": "Contenido en columnas",
+    "text": "Contenido en columnas\nVarios elementos Text quedan lado a lado, una columna cada uno:\nfrom banners import Section, Text\n\nSection(\n    title=\"Tres hallazgos\",\n    content=[\n        Text(\"**Datos** — Dos fuentes difieren en el 4% de las filas.\"),\n        Text(\"**Modelo** — El recall mejora en 6 puntos.\"),\n        Text(\"**Costo** — El tiempo de entrenamiento baja a la mitad.\"),\n    ],\n)",
+    "crumbs": [
+      "Apariencia",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "es/look/layouts.html#un-visual-junto-a-su-explicación",
+    "href": "es/look/layouts.html#un-visual-junto-a-su-explicación",
+    "title": "Layouts",
+    "section": "Un visual junto a su explicación",
+    "text": "Un visual junto a su explicación\nUn visual seguido de texto deja el visual a la izquierda y la explicación a la derecha:\nfrom banners import Graph, Section, Text\n\nSection(\n    title=\"Pipeline\",\n    content=[\n        Graph(\"graph LR\\n  A[Ingesta] --&gt; B[Transformación] --&gt; C[Servicio]\"),\n        Text(\"Cada etapa se versiona y se monitorea por separado.\"),\n    ],\n)",
+    "crumbs": [
+      "Apariencia",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "es/look/layouts.html#una-foto-junto-al-contenido",
+    "href": "es/look/layouts.html#una-foto-junto-al-contenido",
+    "title": "Layouts",
+    "section": "Una foto junto al contenido",
+    "text": "Una foto junto al contenido\nimage= pone una foto en la mitad izquierda:\nfrom banners import Section, Text\n\nSection(\n    title=\"Trabajo de campo\",\n    content=[Text(\"Una foto ocupa la mitad izquierda; el contenido queda a la derecha.\")],\n    image=\"https://commons.wikimedia.org/wiki/Special:FilePath/Grand_Canyon_National_Park_GRCA9857.jpg?width=1600\",\n)",
+    "crumbs": [
+      "Apariencia",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "es/look/layouts.html#el-lienzo-de-169",
+    "href": "es/look/layouts.html#el-lienzo-de-169",
+    "title": "Layouts",
+    "section": "El lienzo de 16:9",
+    "text": "El lienzo de 16:9\nCada layout ubica sus partes sobre un lienzo fijo de 16:9, con posiciones y tamaños de fuente relativos al ancho de la slide. Por eso una slide se ve igual en una celda del notebook, en una ventana del navegador y en pantalla completa: solo cambia su tamaño.",
+    "crumbs": [
+      "Apariencia",
+      "Layouts"
+    ]
+  },
+  {
+    "objectID": "es/look/themes.html",
+    "href": "es/look/themes.html",
+    "title": "Temas",
+    "section": "",
+    "text": "Esta página cubre los cinco ajustes de un Theme y dónde se fijan. Los colores no son parte de un tema; pertenecen a la paleta.",
+    "crumbs": [
+      "Apariencia",
+      "Temas"
+    ]
+  },
+  {
+    "objectID": "es/look/themes.html#los-ajustes",
+    "href": "es/look/themes.html#los-ajustes",
+    "title": "Temas",
+    "section": "Los ajustes",
+    "text": "Los ajustes\n\n\n\n\n\n\n\n\nAjuste\nPor defecto\nQué cambia\n\n\n\n\nfont\nCentury Gothic y fuentes geométricas similares\nTodo el texto de la slide.\n\n\nheading_font\nNone (igual a font)\nSolo los títulos.\n\n\ntitle_weight\n700\nEl grosor de los títulos (400 normal, 600 seminegrita, 700 negrita).\n\n\nicon_stroke\n1.6\nEl grosor de línea de los íconos incluidos.\n\n\nscale\n1.0\nMultiplicador de todos los tamaños de fuente.\n\n\n\nLas fuentes son listas de CSS: el navegador usa la primera fuente de la lista que esté instalada. Una lista que termina en una familia genérica (serif, sans-serif) siempre encuentra una fuente.",
+    "crumbs": [
+      "Apariencia",
+      "Temas"
+    ]
+  },
+  {
+    "objectID": "es/look/themes.html#ejemplos",
+    "href": "es/look/themes.html#ejemplos",
+    "title": "Temas",
+    "section": "Ejemplos",
+    "text": "Ejemplos\nUna fuente con serifa para los títulos, menos gruesa que la negrita por defecto:\nfrom banners import Section, Template, Text, Theme, configure\n\nconfigure(template=Template(theme=Theme(heading_font=\"Georgia, serif\", title_weight=600)))\nSection(title=\"Títulos con serifa\", content=[Text(\"`heading_font` y `title_weight` cambian solo los títulos.\")])\nTexto más grande, para una sala grande o una pantalla pequeña:\nfrom banners import Section, Template, Text, Theme, configure\n\nconfigure(template=Template(theme=Theme(scale=1.25)))\nSection(title=\"Texto más grande\", content=[Text(\"`scale=1.25` agranda todas las fuentes en un 25%.\")])\n\n\n\n\n\n\nTema por defecto\n\n\n\n\n\n\n\nTítulos con serifa\n\n\n\n\n\n\n\nscale=1.25",
+    "crumbs": [
+      "Apariencia",
+      "Temas"
+    ]
+  },
+  {
+    "objectID": "es/look/themes.html#dónde-se-fija-un-tema",
+    "href": "es/look/themes.html#dónde-se-fija-un-tema",
+    "title": "Temas",
+    "section": "Dónde se fija un tema",
+    "text": "Dónde se fija un tema\nUn tema vive en un template (Template(theme=...)), y configure(theme=...) lo reemplaza para toda la presentación:\nfrom banners import TERRA, Theme, configure\n\nconfigure(template=TERRA, theme=Theme(font=\"'Inter', sans-serif\"))\nIgual que con las paletas, un tema reemplaza completo al tema del template: los ajustes que no pases toman su valor por defecto. A diferencia de las paletas, no hay un tema por slide; una presentación mantiene una sola tipografía.\n\n\n\n\n\n\nNotaLos tamaños siguen a la slide\n\n\n\nLos tamaños de fuente son relativos al ancho de la slide, así que una slide conserva sus proporciones en una celda del notebook, en una ventana del navegador y en pantalla completa. scale multiplica esos tamaños; no los fija en píxeles.",
+    "crumbs": [
+      "Apariencia",
+      "Temas"
+    ]
+  },
+  {
+    "objectID": "es/index.html",
+    "href": "es/index.html",
+    "title": "banners",
+    "section": "",
+    "text": "banners es una librería de Python para armar presentaciones en notebooks de marimo. Cada slide es un objeto de Python dibujado sobre un lienzo fijo de 16:9, de modo que el texto, los gráficos, las tablas, los diagramas y las animaciones de una charla quedan junto al código que los produjo, y la presentación conserva sus proporciones desde una celda del notebook hasta un proyector.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "es/index.html#una-slide-seis-estilos",
+    "href": "es/index.html#una-slide-seis-estilos",
+    "title": "banners",
+    "section": "Una slide, seis estilos",
+    "text": "Una slide, seis estilos\nLa misma slide dibujada con cada template incluido. Cambiar el template es una línea de código; las slides no cambian.\n\n\n\n\n\n\nTemplate()\n\n\n\n\n\n\n\nEXECUTIVE\n\n\n\n\n\n\n\n\n\nINSTITUTIONAL\n\n\n\n\n\n\n\nCOSMOS\n\n\n\n\n\n\n\n\n\nVIBRANT\n\n\n\n\n\n\n\nTERRA",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "es/index.html#animaciones-que-avanzan-con-cada-clic",
+    "href": "es/index.html#animaciones-que-avanzan-con-cada-clic",
+    "title": "banners",
+    "section": "Animaciones que avanzan con cada clic",
+    "text": "Animaciones que avanzan con cada clic\nUna escena de Manim puede correr paso a paso dentro de una slide: cada clic muestra el paso siguiente, dibujado con los colores de la slide.\n\n\n\nUna derivación desde las ecuaciones de Maxwell, un paso por clic.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "es/index.html#instalación",
+    "href": "es/index.html#instalación",
+    "title": "banners",
+    "section": "Instalación",
+    "text": "Instalación\npip install marimo-banners\nbanners necesita Python 3.11 o superior. Las animaciones necesitan el extra manim; la página de Manim lo explica.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "es/index.html#una-presentación-en-pocas-líneas",
+    "href": "es/index.html#una-presentación-en-pocas-líneas",
+    "title": "banners",
+    "section": "Una presentación en pocas líneas",
+    "text": "Una presentación en pocas líneas\nfrom banners import TERRA, Closing, Cover, Section, Text, configure\n\nconfigure(template=TERRA, team=\"Equipo de Analítica\", date=\"2026\")\n\nCover(title=\"Predicción de fuga v2\", subtitle=\"Migración y despliegue del modelo.\")\nSection(title=\"Resultados\", content=[Text(\"**Precisión** — 91% de AUC.\")])\nClosing(title=\"Un solo marco para todos los modelos.\")\nEn un notebook de marimo cada slide va al final de su propia celda, donde marimo la muestra. Primeros pasos lo recorre completo, desde la instalación hasta presentar en pantalla completa.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "es/index.html#por-dónde-seguir",
+    "href": "es/index.html#por-dónde-seguir",
+    "title": "banners",
+    "section": "Por dónde seguir",
+    "text": "Por dónde seguir\n\nPrimeros pasos: una primera presentación en cinco minutos.\nApariencia: templates, paletas, temas, layouts y fondos.\nSlides: los cuatro tipos de slide y sus opciones.\nContenido: texto, imágenes, tablas, gráficos, diagramas y animaciones.\nGuías prácticas: presentar, el template de tu organización, escenas de Manim.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "es/get-started.html",
+    "href": "es/get-started.html",
+    "title": "Primeros pasos",
+    "section": "",
+    "text": "Esta página va desde instalar banners hasta presentar en pantalla completa una presentación de tres slides. Cubre la instalación, el primer notebook, los tres tipos de slide más comunes y la vista de slides de marimo.",
+    "crumbs": [
+      "Primeros pasos"
+    ]
+  },
+  {
+    "objectID": "es/get-started.html#instalación",
+    "href": "es/get-started.html#instalación",
+    "title": "Primeros pasos",
+    "section": "Instalación",
+    "text": "Instalación\nbanners necesita Python 3.11 o superior e instala marimo junto con él.\n\npipuv\n\n\npip install marimo-banners\n\n\nuv add marimo-banners\n\n\n\nLos elementos animados (FlowAnimation, Manim) necesitan un extra y algunas librerías del sistema; la página de Manim las enumera. Nada de esta página las necesita.",
+    "crumbs": [
+      "Primeros pasos"
+    ]
+  },
+  {
+    "objectID": "es/get-started.html#crear-un-notebook",
+    "href": "es/get-started.html#crear-un-notebook",
+    "title": "Primeros pasos",
+    "section": "Crear un notebook",
+    "text": "Crear un notebook\nLos notebooks de marimo son archivos de Python. Crea uno y ábrelo en el editor:\nmarimo edit deck.py",
+    "crumbs": [
+      "Primeros pasos"
+    ]
+  },
+  {
+    "objectID": "es/get-started.html#escribir-tres-slides",
+    "href": "es/get-started.html#escribir-tres-slides",
+    "title": "Primeros pasos",
+    "section": "Escribir tres slides",
+    "text": "Escribir tres slides\nEscribe cada bloque en su propia celda. Una celda muestra el valor de su última expresión, así que cada celda muestra una slide.\n# Celda 1: valores que comparten todas las slides.\nfrom banners import Closing, Cover, Section, Text, configure\n\nconfigure(team=\"Equipo de Analítica\", date=\"2026\")\n\n# Celda 2: la portada abre la charla.\nCover(title=\"Predicción de fuga v2\", subtitle=\"Migración y despliegue del modelo.\")\n\n# Celda 3: una sección contiene el contenido.\nSection(\n    title=\"Resultados\",\n    content=[\n        Text(\"**Precisión** — 91% de AUC en el conjunto de prueba.\"),\n        Text(\"**Latencia** — p99 bajo 30 ms.\"),\n    ],\n)\n\n# Celda 4: la slide de cierre lleva el mensaje final.\nClosing(title=\"Un solo marco para todos los modelos.\")\n\n\n\n\n\n\n\n\n\n\n\n\n\nLas tres slides que muestran las celdas de arriba.\nconfigure() guarda los valores que comparten todas las slides, como el nombre del equipo y la fecha, para que las slides no los repitan. Las páginas de Slides describen cada tipo de slide y sus opciones.\n\n\n\n\n\n\nNotaEl orden de las celdas importa\n\n\n\nUna Section toma su número (01, 02, …) cuando se ejecuta su celda, así que las secciones se numeran en el orden de las celdas del notebook, y llamar a configure() reinicia la cuenta. El número elige el color de cada sección en las paletas que tienen un color por sección.",
+    "crumbs": [
+      "Primeros pasos"
+    ]
+  },
+  {
+    "objectID": "es/get-started.html#verla-como-slides",
+    "href": "es/get-started.html#verla-como-slides",
+    "title": "Primeros pasos",
+    "section": "Verla como slides",
+    "text": "Verla como slides\nmarimo puede mostrar un notebook como slides, una celda por slide y con el código oculto:\n\nEn el editor, abre la vista de app (el botón de vista previa abajo a la derecha, o Ctrl/Cmd + .).\nEn el menú de layout de la vista de app, elige Slides. marimo guarda esta elección en una carpeta layouts/ junto al notebook.\nPara presentar, ejecuta el notebook como app y presiona el botón Fullscreen abajo a la derecha de las slides; luego las flechas del teclado avanzan y retroceden:\n\nmarimo run deck.py\nPresentar en pantalla completa cubre los detalles, como ocultar las celdas que no son slides.",
+    "crumbs": [
+      "Primeros pasos"
+    ]
+  },
+  {
+    "objectID": "es/get-started.html#cambiar-la-apariencia",
+    "href": "es/get-started.html#cambiar-la-apariencia",
+    "title": "Primeros pasos",
+    "section": "Cambiar la apariencia",
+    "text": "Cambiar la apariencia\nLa presentación de arriba usa el template por defecto. Un argumento lo cambia:\nfrom banners import COSMOS, configure\n\nconfigure(template=COSMOS)\nCada slide creada después de esta llamada toma el estilo oscuro de COSMOS. La página de Templates los muestra todos, y las páginas siguientes de la guía explican cómo cambiar colores, fuentes y fondos.",
+    "crumbs": [
+      "Primeros pasos"
+    ]
+  },
+  {
+    "objectID": "es/slides/cover.html",
+    "href": "es/slides/cover.html",
+    "title": "Cover",
+    "section": "",
+    "text": "Esta página cubre la slide Cover: qué muestra, sus opciones y la variante con foto.",
+    "crumbs": [
+      "Slides",
+      "Cover"
+    ]
+  },
+  {
+    "objectID": "es/slides/cover.html#una-primera-portada",
+    "href": "es/slides/cover.html#una-primera-portada",
+    "title": "Cover",
+    "section": "Una primera portada",
+    "text": "Una primera portada\nfrom banners import Cover, configure\n\nconfigure(team=\"Equipo de Analítica\", date=\"2026\")\nCover(title=\"Predicción de fuga v2\", subtitle=\"Migración y despliegue del modelo.\")\n\nEl template dibuja una portada oscura con el logo, el equipo arriba a la derecha, el título, el subtítulo y la fecha. El equipo y la fecha vienen de configure(), así que todas las portadas de la presentación los muestran sin repetirlos.",
+    "crumbs": [
+      "Slides",
+      "Cover"
+    ]
+  },
+  {
+    "objectID": "es/slides/cover.html#una-portada-con-foto",
+    "href": "es/slides/cover.html#una-portada-con-foto",
+    "title": "Cover",
+    "section": "Una portada con foto",
+    "text": "Una portada con foto\nimage= pone una foto detrás del título. Acepta una URL, una ruta de archivo o bytes:\nfrom banners import Cover\n\nCover(\n    title=\"Observación de la Tierra\",\n    subtitle=\"Diez años de datos satelitales.\",\n    image=\"https://commons.wikimedia.org/wiki/Special:FilePath/The_Earth_seen_from_Apollo_17.jpg?width=1600\",\n)\n\nUn template puede fijar una foto para todas las portadas con cover_image (COSMOS y TERRA lo hacen). Cover(image=False) la quita en una slide.",
+    "crumbs": [
+      "Slides",
+      "Cover"
+    ]
+  },
+  {
+    "objectID": "es/slides/cover.html#opciones",
+    "href": "es/slides/cover.html#opciones",
+    "title": "Cover",
+    "section": "Opciones",
+    "text": "Opciones\n\n\n\n\n\n\n\n\nArgumento\nPor defecto\nSignificado\n\n\n\n\ntitle\n—\nTítulo principal de la presentación.\n\n\nsubtitle\n\"\"\nUna frase de contexto bajo el título.\n\n\ndate\nconfigure(date=...)\nFecha que aparece abajo.\n\n\nteam\nconfigure(team=...)\nLínea del equipo o del autor.\n\n\nimage\nel cover_image del template\nFoto detrás del título; False oculta la foto del template.\n\n\npalette\nla paleta de la presentación\nColores solo para esta slide.\n\n\nbackground\nconfigure(background=...)\nFondo del lienzo.\n\n\n\ncontent y footer existen para que todos los tipos de slide acepten los mismos argumentos, pero el layout de portada no los dibuja.",
+    "crumbs": [
+      "Slides",
+      "Cover"
+    ]
+  },
+  {
+    "objectID": "es/slides/section.html",
+    "href": "es/slides/section.html",
+    "title": "Section",
+    "section": "",
+    "text": "Esta página cubre Section, la slide que lleva la mayor parte de una charla: cómo se numera, cómo se vuelve separador y sus opciones. El layout que toma una sección depende de su contenido; Layouts tiene las reglas.",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "es/slides/section.html#slides-de-contenido",
+    "href": "es/slides/section.html#slides-de-contenido",
+    "title": "Section",
+    "section": "Slides de contenido",
+    "text": "Slides de contenido\nfrom banners import Section, Text\n\nSection(\n    title=\"Tres hallazgos\",\n    content=[\n        Text(\"**Datos** — Dos fuentes difieren en el 4% de las filas.\"),\n        Text(\"**Modelo** — El recall mejora en 6 puntos.\"),\n        Text(\"**Costo** — El tiempo de entrenamiento baja a la mitad.\"),\n    ],\n)\n\ncontent recibe un elemento o una lista. Sirve cualquier elemento de la parte de Contenido de esta guía: texto, imágenes, tablas, gráficos, diagramas y animaciones.",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "es/slides/section.html#separadores",
+    "href": "es/slides/section.html#separadores",
+    "title": "Section",
+    "section": "Separadores",
+    "text": "Separadores\nSin contenido, una sección se vuelve un separador que abre una parte de la charla. Muestra una foto o un ícono grande cuando el template tiene uno:\nfrom banners import Section, Template, configure\n\nconfigure(template=Template(divider_icon=\"flow\"))\nSection(title=\"Arquitectura del pipeline\", subtitle=\"Cómo se mueven los datos.\")\n\nLos nombres de íconos son chart, layers, target, compass, spark, leaf, globe, shield, grid, orbit, pulse, building, flow y mountain. También sirve cualquier fuente de imagen.",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "es/slides/section.html#numeración-y-colores-por-sección",
+    "href": "es/slides/section.html#numeración-y-colores-por-sección",
+    "title": "Section",
+    "section": "Numeración y colores por sección",
+    "text": "Numeración y colores por sección\nCada sección toma el número siguiente (01, 02, …) cuando se crea. Como marimo ejecuta las celdas en el orden del notebook, los números siguen el orden de las celdas, y configure() reinicia la cuenta. Los layouts no imprimen el número: este elige el color de la sección cuando la paleta tiene section_colors, de modo que las secciones consecutivas recorren esos colores. number= fija el número a mano:\nfrom banners import Palette, Section\n\narcoiris = Palette(section_colors=(\"#e4572e\", \"#2a6fdb\", \"#2e9e5b\"))\nSection(title=\"Cada sección toma el color siguiente\", number=\"02\", palette=arcoiris)",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "es/slides/section.html#opciones",
+    "href": "es/slides/section.html#opciones",
+    "title": "Section",
+    "section": "Opciones",
+    "text": "Opciones\n\n\n\n\n\n\n\n\nArgumento\nPor defecto\nSignificado\n\n\n\n\ntitle\n—\nEncabezado de la slide.\n\n\nsubtitle\n\"\"\nFrase de apoyo bajo el título.\n\n\ncontent\nNone\nUn elemento o una lista; None crea un separador.\n\n\nnumber\nautomático\nNúmero de la sección; con section_colors elige el color.\n\n\nimage\nel divider_image del template\nFoto: mitad derecha de un separador, mitad izquierda de una slide de contenido; False oculta la foto del template.\n\n\nfooter\n\"\"\nNota abajo a la derecha.\n\n\npalette\nla paleta de la presentación\nColores solo para esta slide.\n\n\nbackground\nconfigure(background=...)\nFondo del lienzo.",
+    "crumbs": [
+      "Slides",
+      "Section"
+    ]
+  },
+  {
+    "objectID": "es/content/animated-graph.html",
+    "href": "es/content/animated-graph.html",
+    "title": "AnimatedGraph",
+    "section": "",
+    "text": "Esta página cubre AnimatedGraph, un diagrama de flujo interactivo para explicar un proceso paso a paso.",
+    "crumbs": [
+      "Contenido",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "es/content/animated-graph.html#ejemplo",
+    "href": "es/content/animated-graph.html#ejemplo",
+    "title": "AnimatedGraph",
+    "section": "Ejemplo",
+    "text": "Ejemplo\nfrom banners import AnimatedGraph, Section\n\nSection(\n    title=\"AnimatedGraph\",\n    content=[AnimatedGraph(\"\"\"\ngraph LR\nA[Datos crudos] --&gt; B[Validar]\nB --&gt; C[Entrenar]\nB --&gt; D[Reportar]\n\"\"\")],\n)\n\n\n\nCada clic resalta un nodo; un segundo clic lo apaga.",
+    "crumbs": [
+      "Contenido",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "es/content/animated-graph.html#qué-acepta",
+    "href": "es/content/animated-graph.html#qué-acepta",
+    "title": "AnimatedGraph",
+    "section": "Qué acepta",
+    "text": "Qué acepta\nAnimatedGraph lee una parte de la sintaxis de diagramas de flujo de Mermaid:\n\nUna primera línea graph LR (de izquierda a derecha) o graph TD (de arriba abajo).\nUna conexión por línea: A --&gt; B, con etiquetas opcionales en los nodos (A[Datos crudos], B(Redondo), C{Decisión}) y en la conexión (A --&gt;|sí| B).\nUn nodo solo en su línea, como E[Archivo], para agregar un nodo sin conexiones.\n\nbanners lee el diagrama y ubica los nodos por su cuenta, así que el resultado no depende de una librería del navegador.",
+    "crumbs": [
+      "Contenido",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "es/content/animated-graph.html#opciones",
+    "href": "es/content/animated-graph.html#opciones",
+    "title": "AnimatedGraph",
+    "section": "Opciones",
+    "text": "Opciones\n\n\n\n\n\n\n\n\nArgumento\nPor defecto\nSignificado\n\n\n\n\ndiagram\n—\nEl código de Mermaid graph LR / graph TD.\n\n\nhighlight_color\n\"#ea580c\"\nColor de relleno de un nodo resaltado.",
+    "crumbs": [
+      "Contenido",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "es/content/animated-graph.html#límites",
+    "href": "es/content/animated-graph.html#límites",
+    "title": "AnimatedGraph",
+    "section": "Límites",
+    "text": "Límites\n\nNecesita un notebook de marimo en ejecución (marimo edit o marimo run): el notebook atiende los clics, así que una exportación estática a HTML muestra un error en su lugar.\nSolo admite diagramas de flujo. Para otros diagramas de Mermaid, o para conexiones encadenadas como A --&gt; B --&gt; C en una línea, usa Graph.",
+    "crumbs": [
+      "Contenido",
+      "AnimatedGraph"
+    ]
+  },
+  {
+    "objectID": "es/content/text.html",
+    "href": "es/content/text.html",
+    "title": "Text",
+    "section": "",
+    "text": "Esta página cubre Text, el elemento para palabras, listas y fórmulas.",
+    "crumbs": [
+      "Contenido",
+      "Text"
+    ]
+  },
+  {
+    "objectID": "es/content/text.html#ejemplo",
+    "href": "es/content/text.html#ejemplo",
+    "title": "Text",
+    "section": "Ejemplo",
+    "text": "Ejemplo\nfrom banners import Section, Text\n\nSection(\n    title=\"Texto\",\n    content=[\n        Text(\"**Negrita**, *cursiva* y `código`.\\n\\n- Listas\\n- Con elementos\"),\n        Text(\"Fórmulas con LaTeX:\\n\\n$$E = mc^2$$\"),\n    ],\n)",
+    "crumbs": [
+      "Contenido",
+      "Text"
+    ]
+  },
+  {
+    "objectID": "es/content/text.html#qué-acepta",
+    "href": "es/content/text.html#qué-acepta",
+    "title": "Text",
+    "section": "Qué acepta",
+    "text": "Qué acepta\nText(body) recibe un texto en markdown: párrafos, negrita, cursiva, código, listas, enlaces, tablas y bloques de código. Las fórmulas usan LaTeX entre $…$ (en la línea) o $$…$$ (en su propia línea). En textos de Python con barras invertidas, como los comandos de LaTeX, un raw string evita duplicarlas:\nfrom banners import Text\n\nText(r\"La ecuación de onda: $\\nabla^2 \\mathbf{E} = \\frac{1}{c^2}\\frac{\\partial^2 \\mathbf{E}}{\\partial t^2}$\")",
+    "crumbs": [
+      "Contenido",
+      "Text"
+    ]
+  },
+  {
+    "objectID": "es/content/text.html#cómo-se-ve-en-una-slide",
+    "href": "es/content/text.html#cómo-se-ve-en-una-slide",
+    "title": "Text",
+    "section": "Cómo se ve en una slide",
+    "text": "Cómo se ve en una slide\nEl template fija la fuente, el tamaño y el color del texto, así que un Text se ve igual en todas las slides de la presentación. Cada Text de content se vuelve una columna; una lista de tres Text da tres columnas lado a lado. El código en línea toma el color del texto de la slide, por lo que sigue legible sobre fondos oscuros; los bloques de código conservan su propio recuadro claro.\nUn patrón común es un comienzo en negrita seguido de un guion y el detalle, un Text por idea:\nfrom banners import Section, Text\n\nSection(\n    title=\"Resultados\",\n    content=[\n        Text(\"**Precisión** — 91% de AUC en el conjunto de prueba.\"),\n        Text(\"**Latencia** — p99 bajo 30 ms.\"),\n    ],\n)",
+    "crumbs": [
+      "Contenido",
+      "Text"
+    ]
+  },
+  {
+    "objectID": "es/content/plot.html",
+    "href": "es/content/plot.html",
+    "title": "Plot",
+    "section": "",
+    "text": "Esta página cubre Plot, cómo un gráfico toma los colores de la slide y cuándo no lo hace.",
+    "crumbs": [
+      "Contenido",
+      "Plot"
+    ]
+  },
+  {
+    "objectID": "es/content/plot.html#ejemplo",
+    "href": "es/content/plot.html#ejemplo",
+    "title": "Plot",
+    "section": "Ejemplo",
+    "text": "Ejemplo\nimport matplotlib.pyplot as plt\nfrom banners import Plot, Section, Text\n\nfig, ax = plt.subplots(figsize=(5, 3))\nax.plot([1, 2, 3, 4], [3.1, 3.8, 4.6, 5.9], marker=\"o\", label=\"Ingresos\")\nax.plot([1, 2, 3, 4], [2.0, 2.4, 2.5, 3.1], marker=\"o\", label=\"Costos\")\nax.legend()\nSection(title=\"Gráfico\", content=[Plot(fig), Text(\"Las líneas toman los colores de la paleta.\")])\nEl mismo gráfico en dos slides con paletas distintas:\n\n\n\n\n\n\nPaleta por defecto\n\n\n\n\n\n\n\npalette=BLUE",
+    "crumbs": [
+      "Contenido",
+      "Plot"
+    ]
+  },
+  {
+    "objectID": "es/content/plot.html#cómo-un-gráfico-sigue-la-paleta",
+    "href": "es/content/plot.html#cómo-un-gráfico-sigue-la-paleta",
+    "title": "Plot",
+    "section": "Cómo un gráfico sigue la paleta",
+    "text": "Cómo un gráfico sigue la paleta\nCuando un gráfico de matplotlib se pone en una slide, banners le da estilo a una copia (tu figura no se modifica):\n\nLos fondos de la figura y de los ejes se vuelven transparentes, así que se ve la slide detrás.\nLas líneas, barras y marcadores dibujados con los colores automáticos de matplotlib toman las series de la paleta: section_colors, o primary y secondary.\nLos títulos, las etiquetas de los ejes y el texto de la leyenda toman palette.text; las marcas, los bordes y la grilla toman palette.muted; el recuadro de la leyenda toma palette.panel.\n\nLos colores que fijes a mano (color=\"#3b82f6\") se conservan. Para mantener un gráfico exactamente como lo dibujaste, fija sus colores de forma explícita.",
+    "crumbs": [
+      "Contenido",
+      "Plot"
+    ]
+  },
+  {
+    "objectID": "es/content/plot.html#plotly",
+    "href": "es/content/plot.html#plotly",
+    "title": "Plot",
+    "section": "plotly",
+    "text": "plotly\nPlot también acepta un gráfico de plotly y detecta la librería por sí mismo. Los gráficos de plotly se muestran tal cual, sin el estilo de la paleta:\n# fragment: necesita plotly instalado.\nimport plotly.express as px\nfrom banners import Plot, Section\n\nfig = px.line(x=[1, 2, 3, 4], y=[3.1, 3.8, 4.6, 5.9])\nSection(title=\"Plotly\", content=[Plot(fig)])\nUn gráfico que no es de matplotlib ni de plotly produce un TypeError al dibujar la slide.",
+    "crumbs": [
+      "Contenido",
+      "Plot"
+    ]
+  },
+  {
+    "objectID": "es/content/table.html",
+    "href": "es/content/table.html",
+    "title": "Table",
+    "section": "",
+    "text": "Esta página cubre Table, el elemento para datos en tabla.",
+    "crumbs": [
+      "Contenido",
+      "Table"
+    ]
+  },
+  {
+    "objectID": "es/content/table.html#ejemplo",
+    "href": "es/content/table.html#ejemplo",
+    "title": "Table",
+    "section": "Ejemplo",
+    "text": "Ejemplo\nimport pandas as pd\nfrom banners import Section, Table\n\ndf = pd.DataFrame({\"Modelo\": [\"XGBoost\", \"LightGBM\", \"Logística\"], \"AUC\": [0.91, 0.89, 0.84]})\nSection(title=\"Tabla\", content=[Table(df)])\n\nTable(df) muestra el DataFrame con el componente de tabla de marimo, que agrega un buscador, los tipos de cada columna y botones para exportar.",
+    "crumbs": [
+      "Contenido",
+      "Table"
+    ]
+  },
+  {
+    "objectID": "es/content/table.html#límites",
+    "href": "es/content/table.html#límites",
+    "title": "Table",
+    "section": "Límites",
+    "text": "Límites\n\nLa tabla de marimo tiene sus propios tamaños de fuente, así que no crece con la slide como el texto. Mantén las tablas cortas (pocas filas y columnas) para que se lean bien en pantalla completa.\nPara pocas cifras, una tabla en markdown dentro de un Text sigue la fuente y los colores de la slide:\n\nfrom banners import Section, Text\n\nSection(\n    title=\"Comparación de modelos\",\n    content=[Text(\"| Modelo | AUC |\\n|---|---|\\n| XGBoost | 0.91 |\\n| Logística | 0.84 |\")],\n)\npandas no es una dependencia de banners; instálalo para usar Table.",
+    "crumbs": [
+      "Contenido",
+      "Table"
+    ]
+  },
+  {
+    "objectID": "es/content/manim.html",
+    "href": "es/content/manim.html",
+    "title": "Manim",
+    "section": "",
+    "text": "Esta página cubre Manim: cómo instalarlo, las tres formas de mostrar una escena y cómo la escena sigue los colores de la slide.",
+    "crumbs": [
+      "Contenido",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "es/content/manim.html#instalación",
+    "href": "es/content/manim.html#instalación",
+    "title": "Manim",
+    "section": "Instalación",
+    "text": "Instalación\npip install \"marimo-banners[manim]\"\nManim dibuja con cairo y pango y codifica video con ffmpeg, así que el sistema necesita esas librerías:\n\nUbuntu / DebianFedora\n\n\nsudo apt install python3-dev libpango1.0-dev pkg-config libcairo2-dev libx11-dev libgl1-mesa-dev ffmpeg\n\n\nsudo dnf install gcc-c++ python3-devel pkgconf-pkg-config cairo-devel pango-devel libX11-devel mesa-libGL-devel ffmpeg\n\n\n\nLas escenas que escriben fórmulas con MathTex también necesitan una instalación de LaTeX con el paquete standalone y dvisvgm (en Fedora, texlive-standalone y texlive-dvisvgm).",
+    "crumbs": [
+      "Contenido",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "es/content/manim.html#una-escena-paso-a-paso",
+    "href": "es/content/manim.html#una-escena-paso-a-paso",
+    "title": "Manim",
+    "section": "Una escena paso a paso",
+    "text": "Una escena paso a paso\nCon interactive=True, cada self.next_section() de la escena se vuelve un paso, y cada clic en el reproductor muestra el siguiente:\nfrom banners import ORANGE, Manim, Section\nfrom manim import Circle, Create, Scene, Square, Transform\n\nclass ShapeScene(Scene):\n    def construct(self):\n        self.next_section(\"circulo\")\n        forma = Circle(color=ORANGE.primary, fill_opacity=0.2)\n        self.play(Create(forma), run_time=0.4)\n        self.next_section(\"cuadrado\")\n        self.play(Transform(forma, Square(color=ORANGE.secondary, fill_opacity=0.2)), run_time=0.4)\n\nSection(title=\"Manim\", content=[Manim(ShapeScene, interactive=True)])\n\nPasa la clase de la escena, no una instancia. Una escena Manim paso a paso explica cómo escribir escenas que se presenten bien.",
+    "crumbs": [
+      "Contenido",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "es/content/manim.html#imágenes-y-videos",
+    "href": "es/content/manim.html#imágenes-y-videos",
+    "title": "Manim",
+    "section": "Imágenes y videos",
+    "text": "Imágenes y videos\nSin interactive, la escena completa se reproduce de una vez:\n\n\n\n\n\n\n\nformat\nSe muestra como\n\n\n\n\n\"gif\" (por defecto)\nUna imagen animada que se repite.\n\n\n\"png\"\nEl último cuadro, como imagen fija.\n\n\n\"mp4\"\nUn video con controles; autoplay=True lo reproduce sin sonido y en bucle.",
+    "crumbs": [
+      "Contenido",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "es/content/manim.html#colores",
+    "href": "es/content/manim.html#colores",
+    "title": "Manim",
+    "section": "Colores",
+    "text": "Colores\nLa escena se dibuja sobre el color palette.panel de la slide, así que se integra con ella, y los botones del reproductor usan muted y primary. Una escena que fija self.camera.background_color conserva su propio fondo. Las formas y los textos mantienen los colores que la escena les da; importar una paleta (como ORANGE arriba) permite que una escena use los colores de la presentación.",
+    "crumbs": [
+      "Contenido",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "es/content/manim.html#opciones",
+    "href": "es/content/manim.html#opciones",
+    "title": "Manim",
+    "section": "Opciones",
+    "text": "Opciones\n\n\n\n\n\n\n\n\nArgumento\nPor defecto\nSignificado\n\n\n\n\nscene\n—\nUna subclase de Scene de Manim, o una función que devuelve una.\n\n\nformat\n\"gif\"\n\"gif\", \"png\" o \"mp4\" cuando no es interactiva.\n\n\nquality\n\"low\"\n\"low\", \"medium\" o \"high\"; más alta es más nítida y más lenta.\n\n\ninteractive\nFalse\nUn paso por next_section(), que avanza con clics.\n\n\nwidth\n\"100%\"\nAncho máximo del reproductor.\n\n\nautoplay\nFalse\nInteractiva: avanza sola; mp4 estático: se reproduce sin sonido y en bucle.\n\n\npalette\nla paleta de la slide\nColores del fondo y del reproductor.",
+    "crumbs": [
+      "Contenido",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "es/content/manim.html#una-escena-lista-para-usar",
+    "href": "es/content/manim.html#una-escena-lista-para-usar",
+    "title": "Manim",
+    "section": "Una escena lista para usar",
+    "text": "Una escena lista para usar\nbanners.scenes.PipelineScene es una animación de un pipeline de datos en siete pasos que sigue la paleta:\nfrom banners import Manim, Section\nfrom banners.scenes import PipelineScene\n\nSection(title=\"Nuestro pipeline\", content=[Manim(PipelineScene, interactive=True)])\nLos renders se guardan en una caché en disco, así que una escena se dibuja una sola vez; ver Caché y velocidad.",
+    "crumbs": [
+      "Contenido",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "es/content/flow-animation.html",
+    "href": "es/content/flow-animation.html",
+    "title": "FlowAnimation",
+    "section": "",
+    "text": "Esta página cubre FlowAnimation: sus tres formatos de entrada, sus opciones y lo que necesita para correr.",
+    "crumbs": [
+      "Contenido",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "es/content/flow-animation.html#ejemplo",
+    "href": "es/content/flow-animation.html#ejemplo",
+    "title": "FlowAnimation",
+    "section": "Ejemplo",
+    "text": "Ejemplo\nfrom banners import FlowAnimation, Section\n\nSection(\n    title=\"FlowAnimation\",\n    content=[FlowAnimation([\n        {\"name\": \"S3\", \"detail\": \"archivos crudos\"},\n        {\"name\": \"Glue\", \"detail\": \"proceso ETL\"},\n        {\"name\": \"Athena\", \"detail\": \"SQL\"},\n        {\"name\": \"Dashboard\", \"detail\": \"BI\"},\n    ])],\n)\n\n\n\nCada clic agrega el nodo siguiente y su flecha.\n\n\nEl reproductor sobre la animación tiene botones para retroceder y avanzar, un contador de pasos y un botón de reproducción automática; un clic en la animación también la hace avanzar. Cada paso dura un cuarto de segundo, y los nodos y las flechas toman los colores de la paleta de la slide.",
+    "crumbs": [
+      "Contenido",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "es/content/flow-animation.html#tres-formas-de-describir-el-flujo",
+    "href": "es/content/flow-animation.html#tres-formas-de-describir-el-flujo",
+    "title": "FlowAnimation",
+    "section": "Tres formas de describir el flujo",
+    "text": "Tres formas de describir el flujo\nUna lista da una cadena, de izquierda a derecha:\nfrom banners import FlowAnimation\n\nFlowAnimation([\"S3\", \"Glue\", \"Athena\"])\nCada nodo es un nombre, o un diccionario con name y un detail que aparece debajo.\nUna lista de listas da capas, de arriba abajo; cada nodo de una capa se conecta con cada nodo de la siguiente:\nfrom banners import FlowAnimation\n\nFlowAnimation([\n    [\"Ingesta\"],\n    [{\"name\": \"Transformación A\", \"detail\": \"variables\"}, {\"name\": \"Transformación B\", \"detail\": \"filtros\"}],\n    [\"Carga\"],\n])\nNodos y conexiones dan cualquier grafo; la disposición se calcula a partir de las conexiones:\nfrom banners import FlowAnimation\n\nFlowAnimation(\n    nodes=[\"Ingesta A\", \"Ingesta B\", \"Validar\", \"Entrenar\"],\n    edges=[(\"Ingesta A\", \"Validar\"), (\"Ingesta B\", \"Validar\"), (\"Validar\", \"Entrenar\")],\n)",
+    "crumbs": [
+      "Contenido",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "es/content/flow-animation.html#opciones",
+    "href": "es/content/flow-animation.html#opciones",
+    "title": "FlowAnimation",
+    "section": "Opciones",
+    "text": "Opciones\n\n\n\n\n\n\n\n\nArgumento\nPor defecto\nSignificado\n\n\n\n\nnodes\n—\nLos nodos, en uno de los tres formatos anteriores.\n\n\nedges\nNone\nPares (origen, destino); activa el formato de grafo.\n\n\ndirection\n\"LR\" en listas y grafos, \"TD\" en capas\n\"LR\" (de izquierda a derecha) o \"TD\" (de arriba abajo).\n\n\nquality\n\"low\"\nCalidad del render: \"low\", \"medium\" o \"high\".\n\n\nwidth\n\"100%\"\nAncho máximo del reproductor, cualquier valor de CSS.\n\n\nautoplay\nFalse\nAvanzar solo al terminar cada paso.\n\n\npalette\nla paleta de la slide\nColores de la animación.",
+    "crumbs": [
+      "Contenido",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "es/content/flow-animation.html#requisitos",
+    "href": "es/content/flow-animation.html#requisitos",
+    "title": "FlowAnimation",
+    "section": "Requisitos",
+    "text": "Requisitos\nFlowAnimation se dibuja con Manim, así que necesita el extra manim y sus librerías del sistema. El primer render de un flujo toma unos segundos; los siguientes salen de una caché en disco (ver Caché y velocidad).",
+    "crumbs": [
+      "Contenido",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "es/content/graph.html",
+    "href": "es/content/graph.html",
+    "title": "Graph",
+    "section": "",
+    "text": "Esta página cubre Graph, el elemento para diagramas escritos como texto.",
+    "crumbs": [
+      "Contenido",
+      "Graph"
+    ]
+  },
+  {
+    "objectID": "es/content/graph.html#ejemplo",
+    "href": "es/content/graph.html#ejemplo",
+    "title": "Graph",
+    "section": "Ejemplo",
+    "text": "Ejemplo\nfrom banners import Graph, Section\n\nSection(\n    title=\"Diagrama\",\n    content=[Graph(\"graph LR\\n  A[Datos crudos] --&gt; B[Validar]\\n  B --&gt; C[Entrenar]\\n  B --&gt; D[Reportar]\")],\n)\n\nGraph(diagram) recibe código de Mermaid y lo dibuja con el soporte de Mermaid de marimo. Sirve cualquier tipo de diagrama de Mermaid: de flujo (graph LR, graph TD), de secuencia, de estados y otros.",
+    "crumbs": [
+      "Contenido",
+      "Graph"
+    ]
+  },
+  {
+    "objectID": "es/content/graph.html#diagramas-de-varias-líneas",
+    "href": "es/content/graph.html#diagramas-de-varias-líneas",
+    "title": "Graph",
+    "section": "Diagramas de varias líneas",
+    "text": "Diagramas de varias líneas\nUn texto entre comillas triples mantiene el diagrama legible:\nfrom banners import Graph\n\nGraph(\"\"\"\ngraph TD\n    A[Ingesta] --&gt; B{¿Válido?}\n    B -- sí --&gt; C[Cargar]\n    B -- no --&gt; D[Cuarentena]\n\"\"\")\nbanners agrega un tema neutro de Mermaid, salvo que el diagrama fije el suyo con una línea %%{init: …}%%.",
+    "crumbs": [
+      "Contenido",
+      "Graph"
+    ]
+  },
+  {
+    "objectID": "es/content/graph.html#graph-o-animatedgraph",
+    "href": "es/content/graph.html#graph-o-animatedgraph",
+    "title": "Graph",
+    "section": "Graph o AnimatedGraph",
+    "text": "Graph o AnimatedGraph\nGraph es estático y admite todas las funciones de Mermaid. Para un diagrama de flujo que la audiencia recorre haciendo clic en sus nodos, usa AnimatedGraph.",
+    "crumbs": [
+      "Contenido",
+      "Graph"
+    ]
+  },
+  {
+    "objectID": "es/content/image.html",
+    "href": "es/content/image.html",
+    "title": "Image",
+    "section": "",
+    "text": "Esta página cubre Image, el elemento para imágenes dentro de una slide.",
+    "crumbs": [
+      "Contenido",
+      "Image"
+    ]
+  },
+  {
+    "objectID": "es/content/image.html#ejemplo",
+    "href": "es/content/image.html#ejemplo",
+    "title": "Image",
+    "section": "Ejemplo",
+    "text": "Ejemplo\nfrom banners import Image, Section, Text\n\nSection(\n    title=\"Imagen\",\n    content=[\n        Image(\"https://commons.wikimedia.org/wiki/Special:FilePath/The_Earth_seen_from_Apollo_17.jpg?width=1600\"),\n        Text(\"Una ruta, una URL o bytes.\"),\n    ],\n)\n\nUna imagen seguida de texto toma el layout de visual y texto: la imagen a la izquierda y la explicación a la derecha.",
+    "crumbs": [
+      "Contenido",
+      "Image"
+    ]
+  },
+  {
+    "objectID": "es/content/image.html#fuentes",
+    "href": "es/content/image.html#fuentes",
+    "title": "Image",
+    "section": "Fuentes",
+    "text": "Fuentes\n\n\n\n\n\n\n\n\nFuente\nEjemplo\nNotas\n\n\n\n\nRuta de archivo\nImage(\"img/arquitectura.png\")\nRelativa a donde corre marimo.\n\n\nBytes\nImage(Path(\"img/arquitectura.png\").read_bytes())\nViaja con la salida del notebook; sirve cuando se exporta la presentación.\n\n\nURL\nImage(\"https://…/foto.jpg\")\nSe carga desde la web.",
+    "crumbs": [
+      "Contenido",
+      "Image"
+    ]
+  },
+  {
+    "objectID": "es/content/image.html#opciones",
+    "href": "es/content/image.html#opciones",
+    "title": "Image",
+    "section": "Opciones",
+    "text": "Opciones\n\n\n\n\n\n\n\n\nArgumento\nPor defecto\nSignificado\n\n\n\n\nsrc\n—\nLa imagen: una ruta, bytes o una URL.\n\n\nwidth\n\"100%\"\nAncho en CSS, como \"80%\" o \"400px\".\n\n\nalt\n\"\"\nTexto que leen los lectores de pantalla y que aparece si la imagen no carga.\n\n\n\nPara una foto que ocupe media slide, el argumento image= de Section da un mejor resultado que una Image en el contenido.",
+    "crumbs": [
+      "Contenido",
+      "Image"
+    ]
+  },
+  {
+    "objectID": "es/slides/closing.html",
+    "href": "es/slides/closing.html",
+    "title": "Closing",
+    "section": "",
+    "text": "Esta página cubre la slide Closing y su fila de cifras.",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "es/slides/closing.html#un-mensaje-de-cierre",
+    "href": "es/slides/closing.html#un-mensaje-de-cierre",
+    "title": "Closing",
+    "section": "Un mensaje de cierre",
+    "text": "Un mensaje de cierre\nfrom banners import Closing\n\nClosing(title=\"Un solo marco para todos los modelos.\", subtitle=\"Preguntas bienvenidas.\")\n\nMantén el título corto y conclusivo: es la frase con la que se va la audiencia. El equipo viene de configure(team=...).",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "es/slides/closing.html#cifras-clave",
+    "href": "es/slides/closing.html#cifras-clave",
+    "title": "Closing",
+    "section": "Cifras clave",
+    "text": "Cifras clave\nstats agrega una fila de cifras sobre el título. Cada cifra es una tupla con un valor, una etiqueta y una nota:\nfrom banners import Closing\n\nClosing(\n    title=\"Un solo marco para todos los modelos.\",\n    stats=[\n        (\"100%\", \"Trazabilidad\", \"De punta a punta\"),\n        (\"3×\", \"Despliegues más rápidos\", \"Desde enero\"),\n        (\"1\", \"Código compartido\", \"Todos contribuyen\"),\n    ],\n)\n\nSe leen mejor entre dos y cuatro cifras, con valores cortos.",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "es/slides/closing.html#solo-el-logo",
+    "href": "es/slides/closing.html#solo-el-logo",
+    "title": "Closing",
+    "section": "Solo el logo",
+    "text": "Solo el logo\nClosing(title=\"\") muestra el logo del template, centrado, y el equipo. Necesita un template con logo; ver El template de tu organización.",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "es/slides/closing.html#opciones",
+    "href": "es/slides/closing.html#opciones",
+    "title": "Closing",
+    "section": "Opciones",
+    "text": "Opciones\n\n\n\n\n\n\n\n\nArgumento\nPor defecto\nSignificado\n\n\n\n\ntitle\n—\nMensaje final; \"\" muestra el logo centrado.\n\n\nsubtitle\n\"\"\nFrase de apoyo bajo el título.\n\n\nstats\nNone\nLista de (valor, etiqueta, nota) que se muestra sobre el título.\n\n\nteam\nconfigure(team=...)\nLínea del equipo.\n\n\npalette\nla paleta de la presentación\nColores solo para esta slide.\n\n\nbackground\nconfigure(background=...)\nFondo del lienzo.",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "es/slides/intro.html",
+    "href": "es/slides/intro.html",
+    "title": "Intro",
+    "section": "",
+    "text": "Esta página cubre la slide Intro, normalmente la segunda o tercera de una charla, donde se plantea el problema o el contexto.",
+    "crumbs": [
+      "Slides",
+      "Intro"
+    ]
+  },
+  {
+    "objectID": "es/slides/intro.html#ejemplo",
+    "href": "es/slides/intro.html#ejemplo",
+    "title": "Intro",
+    "section": "Ejemplo",
+    "text": "Ejemplo\nfrom banners import Intro, Text\n\nIntro(\n    title=\"Por qué estamos aquí\",\n    tag=\"Contexto\",\n    summary=\"Los modelos corrían en servidores con fecha de apagado confirmada.\",\n    content=[Text(\"**Riesgo** — Sin respaldo.\"), Text(\"**Proceso** — Manual y sin documentar.\")],\n    footer=\"Fuente: equipo de plataforma, 2026.\",\n)\n\nEl título ocupa la columna izquierda en letra grande. A la derecha, summary plantea en negrita la idea que la audiencia debe recordar, y cada elemento de content se vuelve una columna bajo ella.",
+    "crumbs": [
+      "Slides",
+      "Intro"
+    ]
+  },
+  {
+    "objectID": "es/slides/intro.html#opciones",
+    "href": "es/slides/intro.html#opciones",
+    "title": "Intro",
+    "section": "Opciones",
+    "text": "Opciones\n\n\n\n\n\n\n\n\nArgumento\nPor defecto\nSignificado\n\n\n\n\ntitle\n—\nEncabezado, en grande a la izquierda.\n\n\nsubtitle\n\"\"\nFrase de apoyo bajo el título.\n\n\ntag\n\"\"\nEtiqueta corta bajo el título cuando no hay subtítulo, como \"Contexto\".\n\n\nsummary\n\"\"\nFrase clave en negrita sobre el contenido; acepta markdown.\n\n\ncontent\nNone\nElementos que se muestran lado a lado a la derecha.\n\n\nfooter\n\"\"\nNota abajo a la derecha, como una fuente.\n\n\nteam\nconfigure(team=...)\nLínea del equipo.\n\n\npalette\nla paleta de la presentación\nColores solo para esta slide.\n\n\nbackground\nconfigure(background=...)\nFondo del lienzo.",
+    "crumbs": [
+      "Slides",
+      "Intro"
+    ]
+  },
+  {
+    "objectID": "es/examples.html",
+    "href": "es/examples.html",
+    "title": "Ejemplos",
+    "section": "",
+    "text": "El repositorio trae dos presentaciones de ejemplo en la carpeta example/. Clónalo para ejecutarlas:",
+    "crumbs": [
+      "Ejemplos"
+    ]
+  },
+  {
+    "objectID": "es/examples.html#showcase",
+    "href": "es/examples.html#showcase",
+    "title": "Ejemplos",
+    "section": "Showcase",
+    "text": "Showcase\nexample/showcase.py recorre cada función, una slide a la vez, con el código de cada slide al lado.\n\n\n\n\n\n\nTipos de slide y paletas\n\n\n\n\n\n\n\n\n\nContenido\n\n\n\n\n\n\n\n\n\nFondos\n\n\n\n\n\nuv run marimo edit example/showcase.py",
+    "crumbs": [
+      "Ejemplos"
+    ]
+  },
+  {
+    "objectID": "es/examples.html#ondas-electromagnéticas",
+    "href": "es/examples.html#ondas-electromagnéticas",
+    "title": "Ejemplos",
+    "section": "Ondas electromagnéticas",
+    "text": "Ondas electromagnéticas\nexample/ondas_electromagneticas.py es una charla completa: las ecuaciones de Maxwell, una derivación animada paso a paso de la ecuación de onda y un gráfico de la onda resultante. Necesita el extra manim y LaTeX.\n\n\n\nLa derivación, un paso por clic.\n\n\nuv run marimo edit example/ondas_electromagneticas.py",
+    "crumbs": [
+      "Ejemplos"
+    ]
+  },
+  {
+    "objectID": "es/whats-new.html",
+    "href": "es/whats-new.html",
+    "title": "Novedades",
+    "section": "",
+    "text": "La lista completa de cambios está en los releases de GitHub.",
+    "crumbs": [
+      "Novedades"
+    ]
+  },
+  {
+    "objectID": "es/whats-new.html#section",
+    "href": "es/whats-new.html#section",
+    "title": "Novedades",
+    "section": "0.6",
+    "text": "0.6\n\nLas animaciones siguen la paleta de la slide: Manim y FlowAnimation se dibujan sobre palette.panel, y FlowAnimation y PipelineScene colorean sus nodos con la paleta.\nMovimiento más corto y directo: 30 cuadros por segundo y un paso de 0,25 segundos por clic.\nLos gráficos de matplotlib en una slide toman los colores de la paleta y un fondo transparente.\nEl reproductor muestra controles más grandes sobre la animación.\n\nCómo actualizar. 0.6 necesita Python 3.11 o superior y manim 0.21 o superior. Los proyectos que se quedan en Python 3.10 pueden mantener la 0.5.1:\npip install \"marimo-banners&lt;0.6\"",
+    "crumbs": [
+      "Novedades"
+    ]
+  },
+  {
+    "objectID": "es/whats-new.html#section-1",
+    "href": "es/whats-new.html#section-1",
+    "title": "Novedades",
+    "section": "0.5",
+    "text": "0.5\nLa 0.5 introdujo el modelo actual: un Template dibuja cada slide sobre un lienzo de 16:9, con los colores en una Palette y la tipografía en un Theme. Se eliminó el estilo fluido “editorial” de las versiones 0.3 y 0.4, junto con estos parámetros, que ahora producen un error:\n\n\n\n\n\n\n\nEliminado\nReemplazo\n\n\n\n\ncontent_kind= en las slides\nNinguno: el texto se muestra como texto normal.\n\n\nicon= en las slides y en configure()\nTemplate(mark=...) para el símbolo de la esquina, logo_on_light / logo_on_dark para los logos.\n\n\nPalette(start=..., mid=..., end=...), Palette.gradient, text_*\nPalette(primary=..., dark=..., closing_bg=...).\n\n\nSectionPalette, Palette.to_section_palette()\nPalette, para todos los tipos de slide.\n\n\nTemplate(primary=..., font=..., ...)\nTemplate(palette=Palette(...), theme=Theme(...)).",
+    "crumbs": [
+      "Novedades"
+    ]
+  },
+  {
+    "objectID": "es/look/backgrounds.html",
+    "href": "es/look/backgrounds.html",
+    "title": "Fondos",
+    "section": "",
+    "text": "Esta página cubre los tres tipos de fondo, cómo se adapta el color del texto a ellos y cómo fijar un fondo para una slide o para toda la presentación.",
+    "crumbs": [
+      "Apariencia",
+      "Fondos"
+    ]
+  },
+  {
+    "objectID": "es/look/backgrounds.html#tres-tipos",
+    "href": "es/look/backgrounds.html#tres-tipos",
+    "title": "Fondos",
+    "section": "Tres tipos",
+    "text": "Tres tipos\nBackground tiene un constructor por tipo:\n\n\n\n\n\n\n\nConstructor\nPinta\n\n\n\n\nBackground.color(c)\nUn color de CSS.\n\n\nBackground.gradient(start, end, mid=None, angle=135)\nUn degradado lineal de dos o tres colores, en un ángulo en grados.\n\n\nBackground.image(src, overlay=\"rgba(0,0,0,0.55)\")\nUna foto desde una URL, una ruta de archivo o bytes, bajo una capa oscura.\n\n\n\nfrom banners import Background, Section, Text\n\nSection(\n    title=\"Color sólido\",\n    content=[Text(\"El texto se vuelve blanco sobre un color oscuro.\")],\n    background=Background.color(\"#0f172a\"),\n)\nfrom banners import Background, Section, Text\n\nSection(\n    title=\"Degradado\",\n    content=[Text(\"Dos o tres colores en cualquier ángulo.\")],\n    background=Background.gradient(\"#1e3a5f\", \"#6d28d9\", angle=135),\n)\n# fragment: descarga la foto al crear el fondo.\nfrom banners import Background, Section, Text\n\nSection(\n    title=\"Foto\",\n    content=[Text(\"Una capa oscura mantiene el texto legible.\")],\n    background=Background.image(\n        \"https://commons.wikimedia.org/wiki/Special:FilePath/\"\n        \"Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg?width=1600\"\n    ),\n)\n\n\n\n\n\n\nColor\n\n\n\n\n\n\n\nDegradado\n\n\n\n\n\n\n\nFoto",
+    "crumbs": [
+      "Apariencia",
+      "Fondos"
+    ]
+  },
+  {
+    "objectID": "es/look/backgrounds.html#el-texto-se-adapta",
+    "href": "es/look/backgrounds.html#el-texto-se-adapta",
+    "title": "Fondos",
+    "section": "El texto se adapta",
+    "text": "El texto se adapta\nbanners lee el primer color del fondo y mide qué tan claro es. Sobre un fondo oscuro, el texto y los subtítulos se vuelven blancos; sobre uno claro, siguen oscuros. Por eso un degradado oscuro no requiere cambiar la paleta. El título conserva el color primary de la paleta, salvo que se leyera mal.\nEn una foto decide la capa: la capa oscura por defecto vuelve blanco el texto. overlay=None la quita; entonces banners no puede medir la foto, el texto conserva los colores de la paleta, y una foto oscura puede necesitar una paleta con texto claro.",
+    "crumbs": [
+      "Apariencia",
+      "Fondos"
+    ]
+  },
+  {
+    "objectID": "es/look/backgrounds.html#una-slide-o-toda-la-presentación",
+    "href": "es/look/backgrounds.html#una-slide-o-toda-la-presentación",
+    "title": "Fondos",
+    "section": "Una slide o toda la presentación",
+    "text": "Una slide o toda la presentación\nbackground= en una slide pinta esa slide. configure(background=...) pinta todas las slides que no fijan el suyo:\nfrom banners import Background, configure\n\nconfigure(background=Background.gradient(\"#0f172a\", \"#1e3a5f\"))\nUna foto dada por URL se descarga una vez, al crear el fondo, y queda incrustada en las slides. La descarga verifica el certificado del servidor; si falla, se produce un error en vez de una slide en blanco.",
+    "crumbs": [
+      "Apariencia",
+      "Fondos"
+    ]
+  },
+  {
+    "objectID": "es/look/templates.html",
+    "href": "es/look/templates.html",
+    "title": "Templates",
+    "section": "",
+    "text": "Esta página cubre qué es un template, los seis templates que trae banners y las opciones que puede fijar un template propio.",
+    "crumbs": [
+      "Apariencia",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "es/look/templates.html#una-línea-cambia-toda-la-presentación",
+    "href": "es/look/templates.html#una-línea-cambia-toda-la-presentación",
+    "title": "Templates",
+    "section": "Una línea cambia toda la presentación",
+    "text": "Una línea cambia toda la presentación\nUn template dibuja todas las slides de la presentación. Las slides solo guardan su contenido (títulos, texto, gráficos); el template decide dónde va cada parte y qué colores y fuentes usa. Por eso una sola llamada cambia la apariencia de toda la presentación:\nfrom banners import EXECUTIVE, configure\n\nconfigure(template=EXECUTIVE)\nCada slide creada después de esta llamada usa EXECUTIVE. Sin una llamada a configure(template=...), banners usa Template(), el template por defecto.",
+    "crumbs": [
+      "Apariencia",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "es/look/templates.html#los-templates-incluidos",
+    "href": "es/look/templates.html#los-templates-incluidos",
+    "title": "Templates",
+    "section": "Los templates incluidos",
+    "text": "Los templates incluidos\nLa misma slide dibujada con cada template:\n\n\n\n\n\n\nTemplate() — el de por defecto: slides claras, títulos naranjos.\n\n\n\n\n\n\n\nEXECUTIVE — blanco, títulos negros con serifa, ícono de gráfico.\n\n\n\n\n\n\n\n\n\nINSTITUTIONAL — azul marino y celeste, títulos con serifa.\n\n\n\n\n\n\n\nCOSMOS — slides oscuras, cian, violeta y rosado, fotos del espacio.\n\n\n\n\n\n\n\n\n\nVIBRANT — blanco, una barra de cuatro colores y un color distinto por sección.\n\n\n\n\n\n\n\nTERRA — fondo arena, verde bosque, fotos de paisajes.\n\n\n\n\n\nTodos se importan desde banners:\nfrom banners import COSMOS, EXECUTIVE, INSTITUTIONAL, TERRA, VIBRANT, Template",
+    "crumbs": [
+      "Apariencia",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "es/look/templates.html#de-qué-está-hecho-un-template",
+    "href": "es/look/templates.html#de-qué-está-hecho-un-template",
+    "title": "Templates",
+    "section": "De qué está hecho un template",
+    "text": "De qué está hecho un template\nUn Template combina tres cosas:\n\nLayouts: dónde van el título, el contenido, el logo y la barra inferior en cada tipo de slide. Vienen incluidos en banners; la página de Layouts muestra cómo una slide elige el suyo.\nUna Palette: los colores, por rol (título, texto, fondo, barra…). Ver Paletas.\nUn Theme: fuentes, peso de los títulos, grosor de los íconos y un multiplicador de tamaño. Ver Temas.\n\nAdemás, un template puede llevar logos, imágenes y algunos interruptores:\n\n\n\n\n\n\n\nOpción\nQué hace\n\n\n\n\nlogo_on_dark, logo_on_light\nLogo dibujado en las slides oscuras (portada, cierre) y en las claras. Una URL, una ruta de archivo o bytes.\n\n\nmark\nSímbolo pequeño en la esquina superior derecha de las slides de contenido: una imagen o el nombre de un ícono, como \"chart\".\n\n\ncover_image, divider_image\nFoto que usan todas las portadas, o todos los separadores, salvo que la slide fije la suya.\n\n\ndivider_icon\nÍcono grande en los separadores sin foto.\n\n\nclosing_image\nImagen junto al título de cierre.\n\n\nbar, bar_split\nDibujar la barra de dos colores en el borde inferior, y cuánto de ella ocupa el color primario.\n\n\nauto_contrast\nReemplazar un color de título que se leería mal sobre su fondo. Desactívalo para conservar los colores exactos de una marca.\n\n\n\nEl navegador carga las imágenes dadas como URL cuando muestra la slide; las rutas y los bytes quedan incrustados en la slide.",
+    "crumbs": [
+      "Apariencia",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "es/look/templates.html#un-template-propio",
+    "href": "es/look/templates.html#un-template-propio",
+    "title": "Templates",
+    "section": "Un template propio",
+    "text": "Un template propio\nUn template es un objeto de Python común, así que una presentación puede definir el suyo en una celda del notebook y usarlo con configure():\nfrom banners import Palette, Template, Theme, configure\n\nnuestro = Template(\n    palette=Palette(primary=\"#0f766e\", secondary=\"#f59e0b\"),\n    theme=Theme(heading_font=\"Georgia, serif\"),\n    mark=\"chart\",\n)\nconfigure(template=nuestro, team=\"Oficina de Datos\", date=\"2026\")\nEl template de tu organización arma uno completo, con logos.",
+    "crumbs": [
+      "Apariencia",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "es/look/templates.html#cambiar-solo-los-colores-o-las-fuentes",
+    "href": "es/look/templates.html#cambiar-solo-los-colores-o-las-fuentes",
+    "title": "Templates",
+    "section": "Cambiar solo los colores o las fuentes",
+    "text": "Cambiar solo los colores o las fuentes\nPara conservar los layouts de un template y cambiar solo sus colores o sus fuentes, pasa una paleta o un tema a configure() en vez de crear un template nuevo:\nfrom banners import BLUE, COSMOS, configure\n\nconfigure(template=COSMOS, palette=BLUE)\nLa paleta que recibe configure() reemplaza completa la paleta del template. Las páginas siguientes explican en detalle las paletas y los temas.",
+    "crumbs": [
+      "Apariencia",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "es/howto/cache.html",
+    "href": "es/howto/cache.html",
+    "title": "Caché y velocidad",
+    "section": "",
+    "text": "Esta guía cubre la caché de renders de Manim y FlowAnimation y los ajustes que hacen que una presentación abra rápido.",
+    "crumbs": [
+      "Guías prácticas",
+      "Caché y velocidad"
+    ]
+  },
+  {
+    "objectID": "es/howto/cache.html#dónde-vive-la-caché",
+    "href": "es/howto/cache.html#dónde-vive-la-caché",
+    "title": "Caché y velocidad",
+    "section": "Dónde vive la caché",
+    "text": "Dónde vive la caché\nLa primera vez que se ejecuta una celda con una animación, Manim la dibuja, lo que toma entre uno y varios segundos. banners guarda el resultado en\n~/.cache/banners/manim/\ny las ejecuciones siguientes lo leen de ahí de inmediato, también después de reiniciar marimo.",
+    "crumbs": [
+      "Guías prácticas",
+      "Caché y velocidad"
+    ]
+  },
+  {
+    "objectID": "es/howto/cache.html#cuándo-se-vuelve-a-dibujar-una-animación",
+    "href": "es/howto/cache.html#cuándo-se-vuelve-a-dibujar-una-animación",
+    "title": "Caché y velocidad",
+    "section": "Cuándo se vuelve a dibujar una animación",
+    "text": "Cuándo se vuelve a dibujar una animación\nLa clave de la caché incluye todo lo que cambia la imagen:\n\nel código fuente de la escena (para una escena definida en una celda del notebook, su código compilado), así que editar la escena la vuelve a dibujar;\nquality, format e interactive;\nen FlowAnimation, los nodos, las conexiones y la dirección;\nla paleta de la slide, así que la misma escena en una slide con otra paleta es un render distinto.\n\nEl código fuera de la escena que la escena lee al ejecutarse, como una variable global o un archivo de datos, no es parte de la clave. Después de cambiarlo, limpia la caché.",
+    "crumbs": [
+      "Guías prácticas",
+      "Caché y velocidad"
+    ]
+  },
+  {
+    "objectID": "es/howto/cache.html#limpiar-la-caché",
+    "href": "es/howto/cache.html#limpiar-la-caché",
+    "title": "Caché y velocidad",
+    "section": "Limpiar la caché",
+    "text": "Limpiar la caché\nBorrar la carpeta es seguro; las animaciones se vuelven a dibujar cuando se necesitan:\nrm -rf ~/.cache/banners/manim",
+    "crumbs": [
+      "Guías prácticas",
+      "Caché y velocidad"
+    ]
+  },
+  {
+    "objectID": "es/howto/cache.html#mantener-rápida-una-presentación",
+    "href": "es/howto/cache.html#mantener-rápida-una-presentación",
+    "title": "Caché y velocidad",
+    "section": "Mantener rápida una presentación",
+    "text": "Mantener rápida una presentación\n\nTrabaja con quality=\"low\" y cambia a \"medium\" o \"high\" solo para la versión final.\nPrefiere interactive=True o format=\"mp4\" a los GIF largos. Un GIF guarda cada cuadro como imagen: unos segundos en alta calidad pueden pesar decenas de megabytes y superar el límite de salida de marimo, que entonces muestra “Your output is too large” en vez de la animación. Un MP4 pesa una fracción de eso.\nDibuja todo una vez antes de la charla, para que cada animación salga de la caché durante la presentación.",
+    "crumbs": [
+      "Guías prácticas",
+      "Caché y velocidad"
+    ]
+  },
+  {
+    "objectID": "es/howto/manim-scene.html",
+    "href": "es/howto/manim-scene.html",
+    "title": "Una escena Manim paso a paso",
+    "section": "",
+    "text": "Esta guía escribe una escena de Manim para una charla: pasos que siguen al expositor, movimiento corto y directo, y colores que combinan con la slide.",
+    "crumbs": [
+      "Guías prácticas",
+      "Una escena Manim paso a paso"
+    ]
+  },
+  {
+    "objectID": "es/howto/manim-scene.html#un-paso-por-idea",
+    "href": "es/howto/manim-scene.html#un-paso-por-idea",
+    "title": "Una escena Manim paso a paso",
+    "section": "Un paso por idea",
+    "text": "Un paso por idea\nself.next_section() inicia un paso nuevo. Con Manim(..., interactive=True), cada paso espera un clic, así que el expositor decide cuándo aparece la idea siguiente:\nfrom banners import BLUE, Manim, Section\nfrom manim import DOWN, RIGHT, Arrow, FadeIn, GrowArrow, RoundedRectangle, Scene, VGroup, rate_functions\nfrom manim import Text as MText\n\nclass Pipeline(Scene):\n    def construct(self):\n        nombres = [\"Ingesta\", \"Limpieza\", \"Entrenamiento\"]\n        cajas = VGroup(*[\n            VGroup(\n                RoundedRectangle(width=2.4, height=1, corner_radius=0.12,\n                                 color=BLUE.primary, fill_opacity=0.15),\n                MText(nombre, font_size=26, color=BLUE.text),\n            )\n            for nombre in nombres\n        ]).arrange(RIGHT, buff=1.2)\n        for i, caja in enumerate(cajas):\n            self.next_section(f\"paso_{i}\")\n            partes = [FadeIn(caja, shift=RIGHT * 0.15)]\n            if i:\n                partes.append(GrowArrow(Arrow(cajas[i - 1].get_right(), caja.get_left(),\n                                              buff=0.1, color=BLUE.muted)))\n            self.play(*partes, run_time=0.25, rate_func=rate_functions.ease_out_cubic)\n\nSection(title=\"Nuestro pipeline\", content=[Manim(Pipeline, interactive=True)], palette=BLUE)",
+    "crumbs": [
+      "Guías prácticas",
+      "Una escena Manim paso a paso"
+    ]
+  },
+  {
+    "objectID": "es/howto/manim-scene.html#reglas-para-que-una-escena-se-presente-bien",
+    "href": "es/howto/manim-scene.html#reglas-para-que-una-escena-se-presente-bien",
+    "title": "Una escena Manim paso a paso",
+    "section": "Reglas para que una escena se presente bien",
+    "text": "Reglas para que una escena se presente bien\n\nUn cambio por clic. Cada paso muestra una idea nueva; la audiencia la lee mientras habla el expositor.\nPasos cortos. Entre 0,2 y 0,4 segundos por paso, con una curva que desacelera al final (rate_functions.ease_out_cubic): el movimiento parte rápido y se asienta. Las animaciones largas hacen esperar a la audiencia.\nSin pausa al final. Un paso termina cuando termina su movimiento; un self.wait() al final solo retrasa el clic siguiente.\nSin adornos. Cada elemento en pantalla es parte de la explicación.\nLos colores de la slide. No fijes self.camera.background_color: banners dibuja la escena sobre el color del panel de la slide. Toma los colores de las formas y los textos de la paleta, como BLUE.primary y BLUE.text arriba.",
+    "crumbs": [
+      "Guías prácticas",
+      "Una escena Manim paso a paso"
+    ]
+  },
+  {
+    "objectID": "es/howto/manim-scene.html#nombres-que-chocan-con-banners",
+    "href": "es/howto/manim-scene.html#nombres-que-chocan-con-banners",
+    "title": "Una escena Manim paso a paso",
+    "section": "Nombres que chocan con banners",
+    "text": "Nombres que chocan con banners\nbanners y Manim exportan ambos Text, y las constantes de color de Manim (como BLUE) tienen los mismos nombres que las paletas de banners. Importa las de Manim con otro nombre, como from manim import Text as MText arriba, para que un notebook de marimo no vea dos definiciones del mismo nombre.",
+    "crumbs": [
+      "Guías prácticas",
+      "Una escena Manim paso a paso"
+    ]
+  },
+  {
+    "objectID": "es/howto/manim-scene.html#escenas-que-siguen-cualquier-paleta",
+    "href": "es/howto/manim-scene.html#escenas-que-siguen-cualquier-paleta",
+    "title": "Una escena Manim paso a paso",
+    "section": "Escenas que siguen cualquier paleta",
+    "text": "Escenas que siguen cualquier paleta\nUna función que recibe palette y devuelve una clase Scene recibe de banners la paleta de la slide:\nfrom banners import Manim, Section\nfrom manim import Circle, Create, Scene\n\ndef Punto(palette):\n    class _Punto(Scene):\n        def construct(self):\n            self.play(Create(Circle(color=palette.primary)), run_time=0.3)\n    return _Punto\n\nSection(title=\"Sigue a la slide\", content=[Manim(Punto)])\nbanners.scenes.PipelineScene está construida así.",
+    "crumbs": [
+      "Guías prácticas",
+      "Una escena Manim paso a paso"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "banners",
+    "section": "",
+    "text": "English · Español"
+  },
+  {
+    "objectID": "en/content/manim.html",
+    "href": "en/content/manim.html",
+    "title": "Manim",
+    "section": "",
+    "text": "This page covers Manim: installing it, the three ways to show a scene, and how the scene follows the slide colors.",
+    "crumbs": [
+      "Content",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "en/content/manim.html#install",
+    "href": "en/content/manim.html#install",
+    "title": "Manim",
+    "section": "Install",
+    "text": "Install\npip install \"marimo-banners[manim]\"\nManim draws with cairo and pango and encodes video with ffmpeg, so the system needs those libraries:\n\nUbuntu / DebianFedora\n\n\nsudo apt install python3-dev libpango1.0-dev pkg-config libcairo2-dev libx11-dev libgl1-mesa-dev ffmpeg\n\n\nsudo dnf install gcc-c++ python3-devel pkgconf-pkg-config cairo-devel pango-devel libX11-devel mesa-libGL-devel ffmpeg\n\n\n\nScenes that write formulas with MathTex also need a LaTeX installation with the standalone package and dvisvgm (on Fedora, texlive-standalone and texlive-dvisvgm).",
+    "crumbs": [
+      "Content",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "en/content/manim.html#a-click-through-scene",
+    "href": "en/content/manim.html#a-click-through-scene",
+    "title": "Manim",
+    "section": "A click-through scene",
+    "text": "A click-through scene\nWith interactive=True, each self.next_section() of the scene becomes one step, and each click on the player shows the next one:\nfrom banners import ORANGE, Manim, Section\nfrom manim import Circle, Create, Scene, Square, Transform\n\nclass ShapeScene(Scene):\n    def construct(self):\n        self.next_section(\"circle\")\n        shape = Circle(color=ORANGE.primary, fill_opacity=0.2)\n        self.play(Create(shape), run_time=0.4)\n        self.next_section(\"square\")\n        self.play(Transform(shape, Square(color=ORANGE.secondary, fill_opacity=0.2)), run_time=0.4)\n\nSection(title=\"Manim\", content=[Manim(ShapeScene, interactive=True)])\n\nPass the scene class, not an instance. A click-through Manim scene explains how to write scenes that present well.",
+    "crumbs": [
+      "Content",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "en/content/manim.html#still-images-and-videos",
+    "href": "en/content/manim.html#still-images-and-videos",
+    "title": "Manim",
+    "section": "Still images and videos",
+    "text": "Still images and videos\nWithout interactive, the whole scene plays as one piece:\n\n\n\n\n\n\n\nformat\nShown as\n\n\n\n\n\"gif\" (default)\nAn animated image that loops.\n\n\n\"png\"\nThe last frame, as a still image.\n\n\n\"mp4\"\nA video with controls; autoplay=True plays it muted and in a loop.",
+    "crumbs": [
+      "Content",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "en/content/manim.html#colors",
+    "href": "en/content/manim.html#colors",
+    "title": "Manim",
+    "section": "Colors",
+    "text": "Colors\nThe scene is drawn on the slide’s palette.panel color, so it blends into the slide, and the player buttons use muted and primary. A scene that sets self.camera.background_color keeps its own background. Shapes and text keep the colors the scene gives them; importing a palette (as ORANGE above) lets a scene use the deck colors.",
+    "crumbs": [
+      "Content",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "en/content/manim.html#options",
+    "href": "en/content/manim.html#options",
+    "title": "Manim",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument\nDefault\nMeaning\n\n\n\n\nscene\n—\nA Manim Scene subclass, or a function that returns one.\n\n\nformat\n\"gif\"\n\"gif\", \"png\" or \"mp4\" when not interactive.\n\n\nquality\n\"low\"\n\"low\", \"medium\" or \"high\"; higher is sharper and slower.\n\n\ninteractive\nFalse\nOne step per next_section(), advanced by clicks.\n\n\nwidth\n\"100%\"\nMaximum width of the player.\n\n\nautoplay\nFalse\nInteractive: advance by itself; static mp4: play muted in a loop.\n\n\npalette\nthe slide’s palette\nBackground and player colors.",
+    "crumbs": [
+      "Content",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "en/content/manim.html#a-ready-made-scene",
+    "href": "en/content/manim.html#a-ready-made-scene",
+    "title": "Manim",
+    "section": "A ready-made scene",
+    "text": "A ready-made scene\nbanners.scenes.PipelineScene is a data-pipeline animation in seven steps that follows the palette:\nfrom banners import Manim, Section\nfrom banners.scenes import PipelineScene\n\nSection(title=\"Our pipeline\", content=[Manim(PipelineScene, interactive=True)])\nRenders are cached on disk, so a scene is rendered once; see Cache and speed.",
+    "crumbs": [
+      "Content",
+      "Manim"
+    ]
+  },
+  {
+    "objectID": "en/content/flow-animation.html",
+    "href": "en/content/flow-animation.html",
+    "title": "FlowAnimation",
+    "section": "",
+    "text": "This page covers FlowAnimation: its three input formats, its options and what it needs to run.",
+    "crumbs": [
+      "Content",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "en/content/flow-animation.html#example",
+    "href": "en/content/flow-animation.html#example",
+    "title": "FlowAnimation",
+    "section": "Example",
+    "text": "Example\nfrom banners import FlowAnimation, Section\n\nSection(\n    title=\"FlowAnimation\",\n    content=[FlowAnimation([\n        {\"name\": \"S3\", \"detail\": \"raw files\"},\n        {\"name\": \"Glue\", \"detail\": \"ETL job\"},\n        {\"name\": \"Athena\", \"detail\": \"SQL\"},\n        {\"name\": \"Dashboard\", \"detail\": \"BI\"},\n    ])],\n)\n\n\n\nEach click adds the next node and its arrow.\n\n\nThe player above the animation has back and forward buttons, a step counter and an autoplay toggle; clicking the animation itself also advances it. Each step lasts a quarter of a second, and the nodes and arrows take the colors of the slide’s palette.",
+    "crumbs": [
+      "Content",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "en/content/flow-animation.html#three-ways-to-describe-the-flow",
+    "href": "en/content/flow-animation.html#three-ways-to-describe-the-flow",
+    "title": "FlowAnimation",
+    "section": "Three ways to describe the flow",
+    "text": "Three ways to describe the flow\nA list gives a chain, left to right:\nfrom banners import FlowAnimation\n\nFlowAnimation([\"S3\", \"Glue\", \"Athena\"])\nEach node is a name, or a dictionary with a name and a detail shown under it.\nA list of lists gives layers, top down; every node of a layer connects to every node of the next one:\nfrom banners import FlowAnimation\n\nFlowAnimation([\n    [\"Ingest\"],\n    [{\"name\": \"Transform A\", \"detail\": \"features\"}, {\"name\": \"Transform B\", \"detail\": \"filters\"}],\n    [\"Load\"],\n])\nNodes and edges give any graph; the layout is computed from the edges:\nfrom banners import FlowAnimation\n\nFlowAnimation(\n    nodes=[\"Ingest A\", \"Ingest B\", \"Validate\", \"Train\"],\n    edges=[(\"Ingest A\", \"Validate\"), (\"Ingest B\", \"Validate\"), (\"Validate\", \"Train\")],\n)",
+    "crumbs": [
+      "Content",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "en/content/flow-animation.html#options",
+    "href": "en/content/flow-animation.html#options",
+    "title": "FlowAnimation",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument\nDefault\nMeaning\n\n\n\n\nnodes\n—\nThe nodes, in one of the three formats above.\n\n\nedges\nNone\n(source, target) pairs; switches to the graph format.\n\n\ndirection\n\"LR\" for lists and graphs, \"TD\" for layers\n\"LR\" (left to right) or \"TD\" (top down).\n\n\nquality\n\"low\"\nRender quality: \"low\", \"medium\" or \"high\".\n\n\nwidth\n\"100%\"\nMaximum width of the player, any CSS value.\n\n\nautoplay\nFalse\nAdvance by itself at the end of each step.\n\n\npalette\nthe slide’s palette\nColors of the animation.",
+    "crumbs": [
+      "Content",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "en/content/flow-animation.html#requirements",
+    "href": "en/content/flow-animation.html#requirements",
+    "title": "FlowAnimation",
+    "section": "Requirements",
+    "text": "Requirements\nFlowAnimation is rendered by Manim, so it needs the manim extra and its system libraries. The first render of a flow takes a few seconds; later renders come from a cache on disk (see Cache and speed).",
+    "crumbs": [
+      "Content",
+      "FlowAnimation"
+    ]
+  },
+  {
+    "objectID": "en/content/graph.html",
+    "href": "en/content/graph.html",
+    "title": "Graph",
+    "section": "",
+    "text": "This page covers Graph, the element for diagrams written as text.",
+    "crumbs": [
+      "Content",
+      "Graph"
+    ]
+  },
+  {
+    "objectID": "en/content/graph.html#example",
+    "href": "en/content/graph.html#example",
+    "title": "Graph",
+    "section": "Example",
+    "text": "Example\nfrom banners import Graph, Section\n\nSection(\n    title=\"Graph\",\n    content=[Graph(\"graph LR\\n  A[Raw data] --&gt; B[Validate]\\n  B --&gt; C[Train]\\n  B --&gt; D[Report]\")],\n)\n\nGraph(diagram) takes Mermaid source and draws it with marimo’s Mermaid support. Any Mermaid diagram type works: flowcharts (graph LR, graph TD), sequence diagrams, state diagrams and others.",
+    "crumbs": [
+      "Content",
+      "Graph"
+    ]
+  },
+  {
+    "objectID": "en/content/graph.html#multi-line-diagrams",
+    "href": "en/content/graph.html#multi-line-diagrams",
+    "title": "Graph",
+    "section": "Multi-line diagrams",
+    "text": "Multi-line diagrams\nA triple-quoted string keeps the diagram readable:\nfrom banners import Graph\n\nGraph(\"\"\"\ngraph TD\n    A[Ingest] --&gt; B{Valid?}\n    B -- yes --&gt; C[Load]\n    B -- no --&gt; D[Quarantine]\n\"\"\")\nbanners adds a neutral Mermaid theme unless the diagram sets its own with a %%{init: …}%% line.",
+    "crumbs": [
+      "Content",
+      "Graph"
+    ]
+  },
+  {
+    "objectID": "en/content/graph.html#graph-or-animatedgraph",
+    "href": "en/content/graph.html#graph-or-animatedgraph",
+    "title": "Graph",
+    "section": "Graph or AnimatedGraph",
+    "text": "Graph or AnimatedGraph\nGraph is static and supports every Mermaid feature. For a flowchart that the audience explores by clicking on its nodes, use AnimatedGraph.",
+    "crumbs": [
+      "Content",
+      "Graph"
+    ]
+  },
+  {
+    "objectID": "en/content/image.html",
+    "href": "en/content/image.html",
+    "title": "Image",
+    "section": "",
+    "text": "This page covers Image, the element for pictures inside a slide.",
+    "crumbs": [
+      "Content",
+      "Image"
+    ]
+  },
+  {
+    "objectID": "en/content/image.html#example",
+    "href": "en/content/image.html#example",
+    "title": "Image",
+    "section": "Example",
+    "text": "Example\nfrom banners import Image, Section, Text\n\nSection(\n    title=\"Image\",\n    content=[\n        Image(\"https://commons.wikimedia.org/wiki/Special:FilePath/The_Earth_seen_from_Apollo_17.jpg?width=1600\"),\n        Text(\"A path, a URL or raw bytes.\"),\n    ],\n)\n\nAn image followed by text takes the visual-and-text layout: the picture on the left, the explanation on the right.",
+    "crumbs": [
+      "Content",
+      "Image"
+    ]
+  },
+  {
+    "objectID": "en/content/image.html#sources",
+    "href": "en/content/image.html#sources",
+    "title": "Image",
+    "section": "Sources",
+    "text": "Sources\n\n\n\n\n\n\n\n\nSource\nExample\nNotes\n\n\n\n\nFile path\nImage(\"img/architecture.png\")\nRelative to where marimo runs.\n\n\nBytes\nImage(Path(\"img/architecture.png\").read_bytes())\nTravels with the notebook output; useful when the deck is exported.\n\n\nURL\nImage(\"https://…/photo.jpg\")\nLoaded from the web.",
+    "crumbs": [
+      "Content",
+      "Image"
+    ]
+  },
+  {
+    "objectID": "en/content/image.html#options",
+    "href": "en/content/image.html#options",
+    "title": "Image",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument\nDefault\nMeaning\n\n\n\n\nsrc\n—\nThe picture: a path, bytes or a URL.\n\n\nwidth\n\"100%\"\nCSS width, such as \"80%\" or \"400px\".\n\n\nalt\n\"\"\nText read by screen readers and shown if the picture fails to load.\n\n\n\nFor a photo that fills half of the slide, the image= argument of Section gives a cleaner result than an Image in the content.",
+    "crumbs": [
+      "Content",
+      "Image"
+    ]
+  },
+  {
+    "objectID": "en/slides/closing.html",
+    "href": "en/slides/closing.html",
+    "title": "Closing",
+    "section": "",
+    "text": "This page covers the Closing slide and its row of figures.",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "en/slides/closing.html#a-closing-message",
+    "href": "en/slides/closing.html#a-closing-message",
+    "title": "Closing",
+    "section": "A closing message",
+    "text": "A closing message\nfrom banners import Closing\n\nClosing(title=\"One framework for all models.\", subtitle=\"Questions welcome.\")\n\nKeep the title short and conclusive: it is the sentence the audience leaves with. The team comes from configure(team=...).",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "en/slides/closing.html#key-figures",
+    "href": "en/slides/closing.html#key-figures",
+    "title": "Closing",
+    "section": "Key figures",
+    "text": "Key figures\nstats adds a row of figures above the title. Each figure is a tuple of a value, a label and a caption:\nfrom banners import Closing\n\nClosing(\n    title=\"One framework for all models.\",\n    stats=[\n        (\"100%\", \"Traceability\", \"End to end\"),\n        (\"3×\", \"Faster releases\", \"Since January\"),\n        (\"1\", \"Shared codebase\", \"Everyone contributes\"),\n    ],\n)\n\nTwo to four figures read best, with short values.",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "en/slides/closing.html#a-logo-only",
+    "href": "en/slides/closing.html#a-logo-only",
+    "title": "Closing",
+    "section": "A logo only",
+    "text": "A logo only\nClosing(title=\"\") shows the template’s logo, centered, and the team. It needs a template with a logo; see Your organization’s template.",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "en/slides/closing.html#options",
+    "href": "en/slides/closing.html#options",
+    "title": "Closing",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument\nDefault\nMeaning\n\n\n\n\ntitle\n—\nFinal message; \"\" shows the centered logo.\n\n\nsubtitle\n\"\"\nSupport sentence under the title.\n\n\nstats\nNone\nList of (value, label, caption) shown above the title.\n\n\nteam\nconfigure(team=...)\nTeam line.\n\n\npalette\nthe deck’s palette\nColors for this slide only.\n\n\nbackground\nconfigure(background=...)\nBackground of the canvas.",
+    "crumbs": [
+      "Slides",
+      "Closing"
+    ]
+  },
+  {
+    "objectID": "en/slides/intro.html",
+    "href": "en/slides/intro.html",
+    "title": "Intro",
+    "section": "",
+    "text": "This page covers the Intro slide, usually the second or third slide of a talk, where the problem or the context is set.",
+    "crumbs": [
+      "Slides",
+      "Intro"
+    ]
+  },
+  {
+    "objectID": "en/slides/intro.html#example",
+    "href": "en/slides/intro.html#example",
+    "title": "Intro",
+    "section": "Example",
+    "text": "Example\nfrom banners import Intro, Text\n\nIntro(\n    title=\"Why we're here\",\n    tag=\"Context\",\n    summary=\"Models ran on servers with a confirmed shutdown date.\",\n    content=[Text(\"**Risk** — No fallback.\"), Text(\"**Process** — Manual and undocumented.\")],\n    footer=\"Source: platform team, 2026.\",\n)\n\nThe title takes the left column in large type. On the right, summary states the one idea the audience must remember, in bold, and each element of content becomes a column under it.",
+    "crumbs": [
+      "Slides",
+      "Intro"
+    ]
+  },
+  {
+    "objectID": "en/slides/intro.html#options",
+    "href": "en/slides/intro.html#options",
+    "title": "Intro",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument\nDefault\nMeaning\n\n\n\n\ntitle\n—\nHeading, shown large on the left.\n\n\nsubtitle\n\"\"\nSupport sentence under the title.\n\n\ntag\n\"\"\nShort label under the title when there is no subtitle, such as \"Context\".\n\n\nsummary\n\"\"\nKey sentence in bold above the content; markdown works.\n\n\ncontent\nNone\nElements shown side by side on the right.\n\n\nfooter\n\"\"\nNote at the bottom right, such as a source.\n\n\nteam\nconfigure(team=...)\nTeam line.\n\n\npalette\nthe deck’s palette\nColors for this slide only.\n\n\nbackground\nconfigure(background=...)\nBackground of the canvas.",
+    "crumbs": [
+      "Slides",
+      "Intro"
+    ]
+  },
+  {
+    "objectID": "en/examples.html",
+    "href": "en/examples.html",
+    "title": "Examples",
+    "section": "",
+    "text": "The repository has two example decks in the example/ folder. Clone it to run them:",
+    "crumbs": [
+      "Examples"
+    ]
+  },
+  {
+    "objectID": "en/examples.html#showcase",
+    "href": "en/examples.html#showcase",
+    "title": "Examples",
+    "section": "Showcase",
+    "text": "Showcase\nexample/showcase.py walks through every feature, one slide at a time, with the code of each slide next to it.\n\n\n\n\n\n\nSlide types and palettes\n\n\n\n\n\n\n\n\n\nContent\n\n\n\n\n\n\n\n\n\nBackgrounds\n\n\n\n\n\nuv run marimo edit example/showcase.py",
+    "crumbs": [
+      "Examples"
+    ]
+  },
+  {
+    "objectID": "en/examples.html#electromagnetic-waves",
+    "href": "en/examples.html#electromagnetic-waves",
+    "title": "Examples",
+    "section": "Electromagnetic waves",
+    "text": "Electromagnetic waves\nexample/ondas_electromagneticas.py is a complete talk: Maxwell’s equations, an animated step-by-step derivation of the wave equation, and a plot of the resulting wave. It needs the manim extra and LaTeX.\n\n\n\nThe derivation, one step per click.\n\n\nuv run marimo edit example/ondas_electromagneticas.py",
+    "crumbs": [
+      "Examples"
+    ]
+  },
+  {
+    "objectID": "en/whats-new.html",
+    "href": "en/whats-new.html",
+    "title": "What’s new",
+    "section": "",
+    "text": "The full list of changes is in the GitHub releases.",
+    "crumbs": [
+      "What's new"
+    ]
+  },
+  {
+    "objectID": "en/whats-new.html#section",
+    "href": "en/whats-new.html#section",
+    "title": "What’s new",
+    "section": "0.6",
+    "text": "0.6\n\nAnimations follow the slide palette: Manim and FlowAnimation render on palette.panel, and FlowAnimation and PipelineScene color their nodes with the palette.\nShorter, direct motion: 30 frames per second and one 0.25-second step per click.\nmatplotlib figures on a slide take the palette colors and a transparent background.\nThe player shows larger controls above the animation.\n\nUpgrading. 0.6 needs Python 3.11 or newer and manim 0.21 or newer. Projects that stay on Python 3.10 can keep 0.5.1:\npip install \"marimo-banners&lt;0.6\"",
+    "crumbs": [
+      "What's new"
+    ]
+  },
+  {
+    "objectID": "en/whats-new.html#section-1",
+    "href": "en/whats-new.html#section-1",
+    "title": "What’s new",
+    "section": "0.5",
+    "text": "0.5\n0.5 introduced the current model: every slide is drawn by a Template on a 16:9 canvas, with colors in a Palette and typography in a Theme. The fluid “editorial” style of 0.3 and 0.4 was removed, along with these parameters, which now raise an error:\n\n\n\n\n\n\n\nRemoved\nReplacement\n\n\n\n\ncontent_kind= on slides\nNone: text renders as body text.\n\n\nicon= on slides and in configure()\nTemplate(mark=...) for the corner mark, logo_on_light / logo_on_dark for logos.\n\n\nPalette(start=..., mid=..., end=...), Palette.gradient, text_*\nPalette(primary=..., dark=..., closing_bg=...).\n\n\nSectionPalette, Palette.to_section_palette()\nPalette, for every slide type.\n\n\nTemplate(primary=..., font=..., ...)\nTemplate(palette=Palette(...), theme=Theme(...)).",
+    "crumbs": [
+      "What's new"
+    ]
+  },
+  {
+    "objectID": "en/look/backgrounds.html",
+    "href": "en/look/backgrounds.html",
+    "title": "Backgrounds",
+    "section": "",
+    "text": "This page covers the three kinds of background, how the text color adapts to them, and how to set a background for one slide or for the whole deck.",
+    "crumbs": [
+      "Look and feel",
+      "Backgrounds"
+    ]
+  },
+  {
+    "objectID": "en/look/backgrounds.html#three-kinds",
+    "href": "en/look/backgrounds.html#three-kinds",
+    "title": "Backgrounds",
+    "section": "Three kinds",
+    "text": "Three kinds\nBackground has one constructor per kind:\n\n\n\n\n\n\n\nConstructor\nPaints\n\n\n\n\nBackground.color(c)\nOne CSS color.\n\n\nBackground.gradient(start, end, mid=None, angle=135)\nA linear gradient of two or three colors, at an angle in degrees.\n\n\nBackground.image(src, overlay=\"rgba(0,0,0,0.55)\")\nA photo from a URL, a file path or bytes, under a dark overlay.\n\n\n\nfrom banners import Background, Section, Text\n\nSection(\n    title=\"Solid color\",\n    content=[Text(\"The text turns white on a dark color.\")],\n    background=Background.color(\"#0f172a\"),\n)\nfrom banners import Background, Section, Text\n\nSection(\n    title=\"Gradient\",\n    content=[Text(\"Two or three stops at any angle.\")],\n    background=Background.gradient(\"#1e3a5f\", \"#6d28d9\", angle=135),\n)\n# fragment: downloads the photo when the background is created.\nfrom banners import Background, Section, Text\n\nSection(\n    title=\"Photo\",\n    content=[Text(\"A dark overlay keeps the text readable.\")],\n    background=Background.image(\n        \"https://commons.wikimedia.org/wiki/Special:FilePath/\"\n        \"Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg?width=1600\"\n    ),\n)\n\n\n\n\n\n\nColor\n\n\n\n\n\n\n\nGradient\n\n\n\n\n\n\n\nPhoto",
+    "crumbs": [
+      "Look and feel",
+      "Backgrounds"
+    ]
+  },
+  {
+    "objectID": "en/look/backgrounds.html#the-text-adapts",
+    "href": "en/look/backgrounds.html#the-text-adapts",
+    "title": "Backgrounds",
+    "section": "The text adapts",
+    "text": "The text adapts\nbanners reads the first color of the background and measures how light it is. On a dark background the text and subtitles turn white; on a light one they stay dark. That is why a dark gradient needs no change to the palette. The title keeps the palette’s primary color unless it would be hard to read.\nFor a photo, the overlay decides: the default dark overlay makes the text white. overlay=None removes it; banners then cannot measure the photo, so the text keeps the palette colors, and a dark photo may need a palette with light text.",
+    "crumbs": [
+      "Look and feel",
+      "Backgrounds"
+    ]
+  },
+  {
+    "objectID": "en/look/backgrounds.html#one-slide-or-the-whole-deck",
+    "href": "en/look/backgrounds.html#one-slide-or-the-whole-deck",
+    "title": "Backgrounds",
+    "section": "One slide or the whole deck",
+    "text": "One slide or the whole deck\nbackground= on a slide paints that slide. configure(background=...) paints every slide that does not set its own:\nfrom banners import Background, configure\n\nconfigure(background=Background.gradient(\"#0f172a\", \"#1e3a5f\"))\nA photo given by URL is downloaded once, when the background is created, and embedded in the slides. The download checks the server’s certificate; a failed download raises an error instead of producing a blank slide.",
+    "crumbs": [
+      "Look and feel",
+      "Backgrounds"
+    ]
+  },
+  {
+    "objectID": "en/look/templates.html",
+    "href": "en/look/templates.html",
+    "title": "Templates",
+    "section": "",
+    "text": "This page covers what a template is, the six templates that come with banners, and the options that a template of your own can set.",
+    "crumbs": [
+      "Look and feel",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "en/look/templates.html#one-line-changes-the-whole-deck",
+    "href": "en/look/templates.html#one-line-changes-the-whole-deck",
+    "title": "Templates",
+    "section": "One line changes the whole deck",
+    "text": "One line changes the whole deck\nA template draws every slide of the deck. The slides only hold their content (titles, text, plots); the template decides where each piece goes and which colors and fonts it uses. That is why one call changes the look of a whole presentation:\nfrom banners import EXECUTIVE, configure\n\nconfigure(template=EXECUTIVE)\nEvery slide created after this call uses EXECUTIVE. Without a call to configure(template=...), banners uses Template(), the default template.",
+    "crumbs": [
+      "Look and feel",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "en/look/templates.html#the-built-in-templates",
+    "href": "en/look/templates.html#the-built-in-templates",
+    "title": "Templates",
+    "section": "The built-in templates",
+    "text": "The built-in templates\nThe same slide drawn with each template:\n\n\n\n\n\n\nTemplate() — the default: light slides, orange titles.\n\n\n\n\n\n\n\nEXECUTIVE — white, black serif titles, chart mark.\n\n\n\n\n\n\n\n\n\nINSTITUTIONAL — navy and pale blue, serif titles.\n\n\n\n\n\n\n\nCOSMOS — dark slides, cyan, violet and pink, space photos.\n\n\n\n\n\n\n\n\n\nVIBRANT — white, a four-color bar and a different color per section.\n\n\n\n\n\n\n\nTERRA — warm sand background, forest green, landscape photos.\n\n\n\n\n\nAll of them are importable from banners:\nfrom banners import COSMOS, EXECUTIVE, INSTITUTIONAL, TERRA, VIBRANT, Template",
+    "crumbs": [
+      "Look and feel",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "en/look/templates.html#what-a-template-is-made-of",
+    "href": "en/look/templates.html#what-a-template-is-made-of",
+    "title": "Templates",
+    "section": "What a template is made of",
+    "text": "What a template is made of\nA Template combines three things:\n\nLayouts: where the title, the content, the logo and the bottom bar go on each kind of slide. They are built into banners; the Layouts page shows how a slide picks one.\nA Palette: the colors, by role (title, text, background, bar…). See Palettes.\nA Theme: fonts, title weight, icon stroke and a size multiplier. See Themes.\n\nOn top of those, a template can carry logos, pictures and a few switches:\n\n\n\n\n\n\n\nOption\nWhat it does\n\n\n\n\nlogo_on_dark, logo_on_light\nLogo drawn on dark slides (cover, closing) and on light ones. A URL, a file path or raw bytes.\n\n\nmark\nSmall symbol in the top-right corner of content slides: an image or an icon name such as \"chart\".\n\n\ncover_image, divider_image\nPhoto used by every cover, or every divider, unless the slide sets its own.\n\n\ndivider_icon\nLarge icon on dividers without a photo.\n\n\nclosing_image\nPicture next to the closing title.\n\n\nbar, bar_split\nDraw the two-color bar along the bottom edge, and how much of it is the primary color.\n\n\nauto_contrast\nReplace a title color that would be hard to read on its background. Turn it off to keep exact brand colors.\n\n\n\nImages given as URLs are loaded by the browser when the slide is shown; paths and bytes are embedded in the slide.",
+    "crumbs": [
+      "Look and feel",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "en/look/templates.html#a-template-of-your-own",
+    "href": "en/look/templates.html#a-template-of-your-own",
+    "title": "Templates",
+    "section": "A template of your own",
+    "text": "A template of your own\nA template is a plain Python object, so a deck can define its own in a notebook cell and use it with configure():\nfrom banners import Palette, Template, Theme, configure\n\nours = Template(\n    palette=Palette(primary=\"#0f766e\", secondary=\"#f59e0b\"),\n    theme=Theme(heading_font=\"Georgia, serif\"),\n    mark=\"chart\",\n)\nconfigure(template=ours, team=\"Data Office\", date=\"2026\")\nYour organization’s template builds a complete one, with logos.",
+    "crumbs": [
+      "Look and feel",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "en/look/templates.html#changing-only-the-colors-or-the-fonts",
+    "href": "en/look/templates.html#changing-only-the-colors-or-the-fonts",
+    "title": "Templates",
+    "section": "Changing only the colors or the fonts",
+    "text": "Changing only the colors or the fonts\nTo keep a template’s layouts and change only its colors or fonts, pass a palette or a theme to configure() instead of building a new template:\nfrom banners import BLUE, COSMOS, configure\n\nconfigure(template=COSMOS, palette=BLUE)\nThe palette given to configure() replaces the template’s palette as a whole. The next pages explain palettes and themes in detail.",
+    "crumbs": [
+      "Look and feel",
+      "Templates"
+    ]
+  },
+  {
+    "objectID": "en/howto/cache.html",
+    "href": "en/howto/cache.html",
+    "title": "Cache and speed",
+    "section": "",
+    "text": "This guide covers the render cache of Manim and FlowAnimation and the settings that keep a deck quick to open.",
+    "crumbs": [
+      "How-to guides",
+      "Cache and speed"
+    ]
+  },
+  {
+    "objectID": "en/howto/cache.html#where-the-cache-lives",
+    "href": "en/howto/cache.html#where-the-cache-lives",
+    "title": "Cache and speed",
+    "section": "Where the cache lives",
+    "text": "Where the cache lives\nThe first time a cell with an animation runs, Manim renders it, which takes from one to a few seconds. banners stores the result in\n~/.cache/banners/manim/\nand later runs read it from there at once, also after restarting marimo.",
+    "crumbs": [
+      "How-to guides",
+      "Cache and speed"
+    ]
+  },
+  {
+    "objectID": "en/howto/cache.html#when-an-animation-is-rendered-again",
+    "href": "en/howto/cache.html#when-an-animation-is-rendered-again",
+    "title": "Cache and speed",
+    "section": "When an animation is rendered again",
+    "text": "When an animation is rendered again\nThe cache key includes everything that changes the picture:\n\nthe source code of the scene (for a scene defined in a notebook cell, its compiled code), so editing the scene renders it again;\nquality, format and interactive;\nfor FlowAnimation, the nodes, the edges and the direction;\nthe palette of the slide, so the same scene on a slide with another palette is a different render.\n\nCode outside the scene that the scene reads at run time, such as a global variable or a data file, is not part of the key. After changing it, clear the cache.",
+    "crumbs": [
+      "How-to guides",
+      "Cache and speed"
+    ]
+  },
+  {
+    "objectID": "en/howto/cache.html#clear-the-cache",
+    "href": "en/howto/cache.html#clear-the-cache",
+    "title": "Cache and speed",
+    "section": "Clear the cache",
+    "text": "Clear the cache\nDeleting the folder is safe; animations are rendered again when needed:\nrm -rf ~/.cache/banners/manim",
+    "crumbs": [
+      "How-to guides",
+      "Cache and speed"
+    ]
+  },
+  {
+    "objectID": "en/howto/cache.html#keep-a-deck-fast",
+    "href": "en/howto/cache.html#keep-a-deck-fast",
+    "title": "Cache and speed",
+    "section": "Keep a deck fast",
+    "text": "Keep a deck fast\n\nWork in quality=\"low\" and switch to \"medium\" or \"high\" for the final version only.\nPrefer interactive=True or format=\"mp4\" to long GIFs. A GIF stores every frame as an image: a few seconds at high quality can weigh tens of megabytes and exceed marimo’s output limit, which then shows “Your output is too large” instead of the animation. MP4 is a fraction of that size.\nRender once before the talk, so every animation comes from the cache during the presentation.",
+    "crumbs": [
+      "How-to guides",
+      "Cache and speed"
+    ]
+  },
+  {
+    "objectID": "en/howto/manim-scene.html",
+    "href": "en/howto/manim-scene.html",
+    "title": "A click-through Manim scene",
+    "section": "",
+    "text": "This guide writes a Manim scene for a talk: steps that follow the speaker, short and direct motion, and colors that match the slide.",
+    "crumbs": [
+      "How-to guides",
+      "A click-through Manim scene"
+    ]
+  },
+  {
+    "objectID": "en/howto/manim-scene.html#one-step-per-idea",
+    "href": "en/howto/manim-scene.html#one-step-per-idea",
+    "title": "A click-through Manim scene",
+    "section": "One step per idea",
+    "text": "One step per idea\nself.next_section() starts a new step. With Manim(..., interactive=True), each step waits for a click, so the speaker decides when the next idea appears:\nfrom banners import BLUE, Manim, Section\nfrom manim import DOWN, RIGHT, Arrow, FadeIn, GrowArrow, RoundedRectangle, Scene, VGroup, rate_functions\nfrom manim import Text as MText\n\nclass Pipeline(Scene):\n    def construct(self):\n        names = [\"Ingest\", \"Clean\", \"Train\"]\n        boxes = VGroup(*[\n            VGroup(\n                RoundedRectangle(width=2.4, height=1, corner_radius=0.12,\n                                 color=BLUE.primary, fill_opacity=0.15),\n                MText(name, font_size=26, color=BLUE.text),\n            )\n            for name in names\n        ]).arrange(RIGHT, buff=1.2)\n        for i, box in enumerate(boxes):\n            self.next_section(f\"step_{i}\")\n            parts = [FadeIn(box, shift=RIGHT * 0.15)]\n            if i:\n                parts.append(GrowArrow(Arrow(boxes[i - 1].get_right(), box.get_left(),\n                                             buff=0.1, color=BLUE.muted)))\n            self.play(*parts, run_time=0.25, rate_func=rate_functions.ease_out_cubic)\n\nSection(title=\"Our pipeline\", content=[Manim(Pipeline, interactive=True)], palette=BLUE)",
+    "crumbs": [
+      "How-to guides",
+      "A click-through Manim scene"
+    ]
+  },
+  {
+    "objectID": "en/howto/manim-scene.html#rules-that-make-a-scene-present-well",
+    "href": "en/howto/manim-scene.html#rules-that-make-a-scene-present-well",
+    "title": "A click-through Manim scene",
+    "section": "Rules that make a scene present well",
+    "text": "Rules that make a scene present well\n\nOne change per click. Each step shows one new idea; the audience reads it while the speaker talks.\nShort steps. Between 0.2 and 0.4 seconds per step, with an ease-out curve (rate_functions.ease_out_cubic): the motion starts fast and settles. Long animations make the audience wait for the slide.\nNo pause at the end. A step ends when its motion ends; a trailing self.wait() only delays the next click.\nNo decoration. Every element on screen is part of the explanation.\nThe slide’s colors. Do not set self.camera.background_color: banners draws the scene on the slide’s panel color. Take the colors of shapes and text from the palette, as BLUE.primary and BLUE.text above.",
+    "crumbs": [
+      "How-to guides",
+      "A click-through Manim scene"
+    ]
+  },
+  {
+    "objectID": "en/howto/manim-scene.html#names-that-clash-with-banners",
+    "href": "en/howto/manim-scene.html#names-that-clash-with-banners",
+    "title": "A click-through Manim scene",
+    "section": "Names that clash with banners",
+    "text": "Names that clash with banners\nbanners and Manim both export Text, and Manim’s color constants (such as BLUE) share names with the banners palettes. Import Manim’s under another name, as from manim import Text as MText above, so a marimo notebook does not see two definitions of the same name.",
+    "crumbs": [
+      "How-to guides",
+      "A click-through Manim scene"
+    ]
+  },
+  {
+    "objectID": "en/howto/manim-scene.html#scenes-that-follow-any-palette",
+    "href": "en/howto/manim-scene.html#scenes-that-follow-any-palette",
+    "title": "A click-through Manim scene",
+    "section": "Scenes that follow any palette",
+    "text": "Scenes that follow any palette\nA function that takes palette and returns a Scene class receives the slide’s palette from banners:\nfrom banners import Manim, Section\nfrom manim import Circle, Create, Scene\n\ndef Dot(palette):\n    class _Dot(Scene):\n        def construct(self):\n            self.play(Create(Circle(color=palette.primary)), run_time=0.3)\n    return _Dot\n\nSection(title=\"Follows the slide\", content=[Manim(Dot)])\nbanners.scenes.PipelineScene is built this way.",
+    "crumbs": [
+      "How-to guides",
+      "A click-through Manim scene"
+    ]
+  }
+]
