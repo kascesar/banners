@@ -198,7 +198,7 @@ slide text sized in `rem`/`px`; content elements importing `banners.config`.
 
 ---
 
-## [ ] M7 — Professional manim animations and player
+## [ ] M7 — Professional manim animations, player, and palette-aware plots
 
 **Needs a brainstorming pass before planning**: César wants the manim
 transitions "completely renewed to a much more professional style"; what
@@ -216,6 +216,15 @@ What exists today and is in scope:
 - Colors come from the active M6 palette when one is configured; with no
   configuration, `Manim` and `FlowAnimation` keep working in a plain cell with
   their own defaults (content elements must not require `banners.config`).
+- Plots follow the palette (decided with César): today a matplotlib `Plot` does
+  not know which panel it lands on, so each user picks readable colors by hand.
+  The template restyles the figure when it places it on a slide, because only
+  the template knows `palette.panel`: axes, ticks, labels and legend take a color
+  readable on the panel, and only lines and patches that use matplotlib's
+  automatic cycle colors (`C0`, `C1`, …) are recolored with the palette
+  (`primary`, `secondary`, then `section_colors` if any). Colors the user set by
+  hand are kept, and a `Plot` in a plain cell renders exactly as today. `Plot`
+  itself still does not read `banners.config`.
 
 **Acceptance criteria (provisional)**
 - `make check` → green; `uv run pytest -m manim` → green on César's machine.
@@ -223,6 +232,10 @@ What exists today and is in scope:
 - `FlowAnimation` and `PipelineScene` take their colors from the active palette,
   and render with defaults when no palette is configured (unit test without manim
   for the color resolution).
+- A matplotlib figure placed on a slide gets panel-readable axes and text, its
+  automatic-color lines take the palette colors, a hand-set line color is
+  unchanged, and the same `Plot` rendered without a slide is unchanged (unit
+  tests with matplotlib, no manim).
 - César reviews `test/08_manim.py`, `test/09_flow_animation.py` and
   `example/showcase.py` in marimo slide mode.
 
