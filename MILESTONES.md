@@ -118,7 +118,7 @@ Verified on 2026-11-23: the Trusted Publisher is registered on PyPI and the `v0.
 
 ---
 
-## [ ] M6 — One rendering model: Template = Palette + Theme + layouts
+## [x] M6 — One rendering model: Template = Palette + Theme + layouts
 
 banners exists to present. Today it has two rendering modes that look and size
 text differently: the fluid editorial style (sizes in `rem`, so text stays at
@@ -193,6 +193,11 @@ slide text sized in `rem`/`px`; content elements importing `banners.config`.
 - César reviews a private artifact gallery that renders every preset × layout,
   with and without a user palette, and presents one existing deck full screen in
   marimo slide mode to confirm text size.
+
+Verified on 2026-11-24: César reviewed the gallery (electromagnetic-waves demo,
+eight layouts per template) and presented `example/ondas_electromagneticas.py`
+full screen; the text reads well. The Python release itself (tag `v0.5.0`) is
+left to César.
 
 ---
 
@@ -293,6 +298,9 @@ Unplanned items found while working. Promote to a milestone when relevant.
   invalid or spoofed certificates. It affects `icon=` and `Background.image(url)`.
 - `Cover` and `Closing` accept `content=` and `footer=`, but the template layouts do not draw
   them, so the values are silently ignored. Either draw them or remove the parameters.
+- `Closing` stats values use a fixed `font-weight:700` instead of `Theme.title_weight`.
+- `test/01_intro.py` and `example/showcase.py` prose still describes the removed `icon`
+  parameter and the `start`/`mid`/`end` palette (M8 rewrites the notebook texts).
 - A local `make publish` would put `.claude/settings.local.json` in the sdist: hatch only
   reads the project `.gitignore`, not the user's global git ignore file. The CI release
   builds from a clean checkout and is not affected. Fix: an `exclude` rule in `pyproject.toml`.
@@ -309,3 +317,4 @@ Unplanned items found while working. Promote to a milestone when relevant.
 | 2026-11-23 | M4 | `milestone/m4-notebook-smoke` | Smoke test `tests/test_notebooks.py` that runs the 12 notebooks (4 with the `manim` marker, 4 xfail for errors recorded in the Backlog). |
 | 2026-11-23 | M5 | `milestone/m5-release` | Workflow `release.yml` that publishes to PyPI with Trusted Publishing when a `v*` tag is pushed (TestPyPI if the tag contains `rc`) and fails if the tag does not match the version; release steps in `CLAUDE.md`. |
 | 2026-11-23 | — | `design/editorial` | Editorial redesign of the slides (César's patch) plus visual fixes: icons without overlap, contrast on dark backgrounds, `Intro` summary size; docstrings, README with "Upgrading from 0.2" and version 0.3.0. |
+| 2026-11-24 | M6 | `milestone/m6-palette-theme-template` | One rendering model on the 16:9 canvas: `Template` = `Palette` (colors by role) + `Theme` (fonts, title weight, icon stroke, scale) + layouts; palette precedence slide > configure > template; editorial style, `content_kind`, `icon=` and `SectionPalette` removed; version 0.5.0. |
